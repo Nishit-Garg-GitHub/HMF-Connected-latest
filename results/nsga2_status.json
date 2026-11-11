@@ -1,0 +1,5 @@
+{
+  "status": "blocked",
+  "reason": "Multi-output regression did not beat baseline on all four targets.",
+  "required_gate": "MAE must beat median baseline for Conversion, Yield, FE and Selectivity."
+}

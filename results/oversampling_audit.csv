@@ -1,0 +1,37 @@
+k,fold,sampler,status,before,after,n_before,n_after,validation_rows,reason
+3,1,ROS,ok,"{""0"": 92, ""1"": 3, ""2"": 8}","{""0"": 92, ""1"": 92, ""2"": 92}",103.0,276.0,51,
+3,1,SMOTE,ok,"{""0"": 92, ""1"": 3, ""2"": 8}","{""0"": 92, ""1"": 92, ""2"": 92}",103.0,276.0,51,
+3,1,ADASYN,ok,"{""0"": 92, ""1"": 3, ""2"": 8}","{""0"": 92, ""1"": 91, ""2"": 92}",103.0,275.0,51,
+3,2,ROS,ok,"{""0"": 91, ""1"": 4, ""2"": 6}","{""0"": 91, ""1"": 91, ""2"": 91}",101.0,273.0,53,
+3,2,SMOTE,ok,"{""0"": 91, ""1"": 4, ""2"": 6}","{""0"": 91, ""1"": 91, ""2"": 91}",101.0,273.0,53,
+3,2,ADASYN,ok,"{""0"": 91, ""1"": 4, ""2"": 6}","{""0"": 91, ""1"": 92, ""2"": 90}",101.0,273.0,53,
+3,3,ROS,ok,"{""0"": 93, ""1"": 3, ""2"": 8}","{""0"": 93, ""1"": 93, ""2"": 93}",104.0,279.0,50,
+3,3,SMOTE,ok,"{""0"": 93, ""1"": 3, ""2"": 8}","{""0"": 93, ""1"": 93, ""2"": 93}",104.0,279.0,50,
+3,3,ADASYN,ok,"{""0"": 93, ""1"": 3, ""2"": 8}","{""0"": 93, ""1"": 92, ""2"": 92}",104.0,277.0,50,
+4,1,ROS,ok,"{""0"": 91, ""1"": 2, ""2"": 2, ""3"": 7}","{""0"": 91, ""1"": 91, ""2"": 91, ""3"": 91}",102.0,364.0,52,
+4,1,SMOTE,infeasible,"{""0"": 91, ""1"": 2, ""2"": 2, ""3"": 7}",{},,,52,"Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2"
+4,1,ADASYN,infeasible,"{""0"": 91, ""1"": 2, ""2"": 2, ""3"": 7}",{},,,52,"Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2"
+4,2,ROS,ok,"{""0"": 91, ""1"": 2, ""2"": 4, ""3"": 6}","{""0"": 91, ""1"": 91, ""2"": 91, ""3"": 91}",103.0,364.0,51,
+4,2,SMOTE,infeasible,"{""0"": 91, ""1"": 2, ""2"": 4, ""3"": 6}",{},,,51,"Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2"
+4,2,ADASYN,infeasible,"{""0"": 91, ""1"": 2, ""2"": 4, ""3"": 6}",{},,,51,"Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2"
+4,3,ROS,ok,"{""0"": 92, ""1"": 2, ""2"": 2, ""3"": 7}","{""0"": 92, ""1"": 92, ""2"": 92, ""3"": 92}",103.0,368.0,51,
+4,3,SMOTE,infeasible,"{""0"": 92, ""1"": 2, ""2"": 2, ""3"": 7}",{},,,51,"Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2"
+4,3,ADASYN,infeasible,"{""0"": 92, ""1"": 2, ""2"": 2, ""3"": 7}",{},,,51,"Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2"
+5,1,ROS,ok,"{""0"": 11, ""1"": 5, ""2"": 1, ""3"": 2, ""4"": 83}","{""0"": 83, ""1"": 83, ""2"": 83, ""3"": 83, ""4"": 83}",102.0,415.0,52,
+5,1,SMOTE,infeasible,"{""0"": 11, ""1"": 5, ""2"": 1, ""3"": 2, ""4"": 83}",{},,,52,"Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 1, n_samples = 1"
+5,1,ADASYN,infeasible,"{""0"": 11, ""1"": 5, ""2"": 1, ""3"": 2, ""4"": 83}",{},,,52,"Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 1, n_samples = 1"
+5,2,ROS,ok,"{""0"": 12, ""1"": 5, ""2"": 1, ""3"": 2, ""4"": 83}","{""0"": 83, ""1"": 83, ""2"": 83, ""3"": 83, ""4"": 83}",103.0,415.0,51,
+5,2,SMOTE,infeasible,"{""0"": 12, ""1"": 5, ""2"": 1, ""3"": 2, ""4"": 83}",{},,,51,"Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 1, n_samples = 1"
+5,2,ADASYN,infeasible,"{""0"": 12, ""1"": 5, ""2"": 1, ""3"": 2, ""4"": 83}",{},,,51,"Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 1, n_samples = 1"
+5,3,ROS,ok,"{""0"": 11, ""1"": 4, ""2"": 2, ""3"": 4, ""4"": 82}","{""0"": 82, ""1"": 82, ""2"": 82, ""3"": 82, ""4"": 82}",103.0,410.0,51,
+5,3,SMOTE,infeasible,"{""0"": 11, ""1"": 4, ""2"": 2, ""3"": 4, ""4"": 82}",{},,,51,"Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2"
+5,3,ADASYN,infeasible,"{""0"": 11, ""1"": 4, ""2"": 2, ""3"": 4, ""4"": 82}",{},,,51,"Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2"
+6,1,ROS,ok,"{""0"": 85, ""1"": 1, ""2"": 2, ""3"": 4, ""4"": 9, ""5"": 1}","{""0"": 85, ""1"": 85, ""2"": 85, ""3"": 85, ""4"": 85, ""5"": 85}",102.0,510.0,52,
+6,1,SMOTE,infeasible,"{""0"": 85, ""1"": 1, ""2"": 2, ""3"": 4, ""4"": 9, ""5"": 1}",{},,,52,"Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 1, n_samples = 1"
+6,1,ADASYN,infeasible,"{""0"": 85, ""1"": 1, ""2"": 2, ""3"": 4, ""4"": 9, ""5"": 1}",{},,,52,"Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 1, n_samples = 1"
+6,2,ROS,ok,"{""0"": 85, ""1"": 1, ""2"": 2, ""3"": 4, ""4"": 10}","{""0"": 85, ""1"": 85, ""2"": 85, ""3"": 85, ""4"": 85}",102.0,425.0,52,
+6,2,SMOTE,infeasible,"{""0"": 85, ""1"": 1, ""2"": 2, ""3"": 4, ""4"": 10}",{},,,52,"Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 1, n_samples = 1"
+6,2,ADASYN,infeasible,"{""0"": 85, ""1"": 1, ""2"": 2, ""3"": 4, ""4"": 10}",{},,,52,"Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 1, n_samples = 1"
+6,3,ROS,ok,"{""0"": 84, ""1"": 2, ""2"": 4, ""3"": 4, ""4"": 9, ""5"": 1}","{""0"": 84, ""1"": 84, ""2"": 84, ""3"": 84, ""4"": 84, ""5"": 84}",104.0,504.0,50,
+6,3,SMOTE,infeasible,"{""0"": 84, ""1"": 2, ""2"": 4, ""3"": 4, ""4"": 9, ""5"": 1}",{},,,50,"Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2"
+6,3,ADASYN,infeasible,"{""0"": 84, ""1"": 2, ""2"": 4, ""3"": 4, ""4"": 9, ""5"": 1}",{},,,50,"Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2"

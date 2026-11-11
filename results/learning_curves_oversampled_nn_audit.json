@@ -1,0 +1,33 @@
+{
+  "K_values": [
+    3,
+    4,
+    5,
+    6
+  ],
+  "samplers": [
+    "ROS",
+    "ADASYN",
+    "SMOTE"
+  ],
+  "training_fractions": [
+    0.2,
+    0.3,
+    0.4,
+    0.5,
+    0.6,
+    0.7,
+    0.8,
+    0.9,
+    1.0
+  ],
+  "repeats": 5,
+  "total_fold_fraction_sampler_rows": 540,
+  "completed_points": 228,
+  "infeasible_points": 312,
+  "infeasibility_reasons": {
+    "ADASYN requires at least 2 training observations per class; minimum class count is 1.": 156,
+    "SMOTE requires at least 2 training observations per class; minimum class count is 1.": 156
+  },
+  "methodology": "Publication-grouped outer split; fold-local imputation, variance filtering, scaling and training-only ROS/ADASYN/SMOTE. Training and validation scores are calculated on original, non-resampled observations."
+}

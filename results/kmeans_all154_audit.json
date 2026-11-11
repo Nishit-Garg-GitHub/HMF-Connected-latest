@@ -1,0 +1,24 @@
+{
+  "experiment": "all_154_median_imputed_kmeans",
+  "total_records": 154,
+  "fully_observed_records": 102,
+  "records_with_imputed_outcomes": 52,
+  "imputation_method": "median",
+  "imputation_medians": {
+    "Conversion_pct": 99.9,
+    "Yield_pct": 95.9
+  },
+  "k_values": [
+    3,
+    4,
+    5,
+    6
+  ],
+  "label_files": [
+    "kmeans_labels_K3.csv",
+    "kmeans_labels_K4.csv",
+    "kmeans_labels_K5.csv",
+    "kmeans_labels_K6.csv"
+  ],
+  "warning": "Clusters for records with imputed outcomes are exploratory pseudo-labels, not measured performance classes."
+}

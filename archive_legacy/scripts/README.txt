@@ -1,0 +1,1 @@
+Place the old standalone root-level Python scripts here after backing them up. They are retained for reference only and are not part of the canonical run workflow. Do not put the official scripts/ folder here.

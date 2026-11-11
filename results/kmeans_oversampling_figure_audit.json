@@ -1,0 +1,22 @@
+{
+  "figure": "KMeans_After_Oversampling_K3_to_K6",
+  "k_values": [
+    3,
+    4,
+    5,
+    6
+  ],
+  "samplers": [
+    "ADASYN",
+    "SMOTE"
+  ],
+  "measured_records_only": true,
+  "n_records_with_measured_conversion_and_yield": 102,
+  "synthetic_points_generated": 791,
+  "coordinate_space": [
+    "Conversion_pct",
+    "Yield_pct"
+  ],
+  "scaling": "StandardScaler used only for neighbour-distance calculations; synthetic coordinates inverse-transformed for plotting.",
+  "interpretation": "Exploratory visualization. K-means classes are defined from the same conversion/yield performance space; this is not an independent prediction or validation result. Stage 04 remains fold-local."
+}

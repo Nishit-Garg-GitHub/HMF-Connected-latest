@@ -1,0 +1,69 @@
+{
+  "model": "RandomForest",
+  "sampler": "ROS",
+  "k_values": [
+    3,
+    5
+  ],
+  "split": "publication-grouped 80/20 holdout; ROS fitted on training papers only",
+  "background_rows_requested": 40,
+  "explanation_rows_requested": 100,
+  "kernel_shap_nsamples": 100,
+  "interpretation": "Associational feature contributions; not causal effects.",
+  "runs": {
+    "3": {
+      "train_records": 118,
+      "test_records": 36,
+      "train_publications": 79,
+      "test_publications": 20,
+      "train_class_counts_before_smote": {
+        "0": 105,
+        "1": 4,
+        "2": 9
+      },
+      "class_counts_after_ros": {
+        "0": 105,
+        "1": 105,
+        "2": 105
+      },
+      "background_rows": 40,
+      "explained_rows": 36,
+      "beeswarm_class": 0,
+      "shap_value_shape": [
+        36,
+        41,
+        3
+      ],
+      "ros_strategy": "not majority"
+    },
+    "5": {
+      "train_records": 120,
+      "test_records": 34,
+      "train_publications": 79,
+      "test_publications": 20,
+      "train_class_counts_before_smote": {
+        "0": 16,
+        "1": 4,
+        "2": 1,
+        "3": 2,
+        "4": 97
+      },
+      "class_counts_after_ros": {
+        "0": 97,
+        "1": 97,
+        "2": 97,
+        "3": 97,
+        "4": 97
+      },
+      "background_rows": 40,
+      "explained_rows": 34,
+      "beeswarm_class": 4,
+      "shap_value_shape": [
+        34,
+        41,
+        5
+      ],
+      "ros_strategy": "not majority"
+    }
+  }
+}

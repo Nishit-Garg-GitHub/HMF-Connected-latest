@@ -1,0 +1,112 @@
+{
+  "source": "D:\\HMF_Connected_Fast_Pipeline\\results\\classification_kmeans_fold_scores.csv",
+  "valid_fold_rows_used": 120,
+  "summary_rows": 20,
+  "display_grid_rows": 36,
+  "K_values_displayed": [
+    3,
+    4,
+    5
+  ],
+  "models": [
+    "DecisionTree",
+    "SVM",
+    "RandomForest",
+    "NeuralNetwork"
+  ],
+  "oversampling_methods": [
+    "ROS",
+    "ADASYN",
+    "SMOTE"
+  ],
+  "metrics": [
+    "accuracy",
+    "precision_macro",
+    "recall_macro",
+    "macro_f1"
+  ],
+  "missing_combinations": [
+    {
+      "k": 4,
+      "sampler": "ADASYN",
+      "model": "DecisionTree"
+    },
+    {
+      "k": 4,
+      "sampler": "ADASYN",
+      "model": "SVM"
+    },
+    {
+      "k": 4,
+      "sampler": "ADASYN",
+      "model": "RandomForest"
+    },
+    {
+      "k": 4,
+      "sampler": "ADASYN",
+      "model": "NeuralNetwork"
+    },
+    {
+      "k": 4,
+      "sampler": "SMOTE",
+      "model": "DecisionTree"
+    },
+    {
+      "k": 4,
+      "sampler": "SMOTE",
+      "model": "SVM"
+    },
+    {
+      "k": 4,
+      "sampler": "SMOTE",
+      "model": "RandomForest"
+    },
+    {
+      "k": 4,
+      "sampler": "SMOTE",
+      "model": "NeuralNetwork"
+    },
+    {
+      "k": 5,
+      "sampler": "ADASYN",
+      "model": "DecisionTree"
+    },
+    {
+      "k": 5,
+      "sampler": "ADASYN",
+      "model": "SVM"
+    },
+    {
+      "k": 5,
+      "sampler": "ADASYN",
+      "model": "RandomForest"
+    },
+    {
+      "k": 5,
+      "sampler": "ADASYN",
+      "model": "NeuralNetwork"
+    },
+    {
+      "k": 5,
+      "sampler": "SMOTE",
+      "model": "DecisionTree"
+    },
+    {
+      "k": 5,
+      "sampler": "SMOTE",
+      "model": "SVM"
+    },
+    {
+      "k": 5,
+      "sampler": "SMOTE",
+      "model": "RandomForest"
+    },
+    {
+      "k": 5,
+      "sampler": "SMOTE",
+      "model": "NeuralNetwork"
+    }
+  ],
+  "metric_definition": "Arithmetic mean of successful held-out fold scores; error bars show standard deviation across successful folds.",
+  "caveat": "K-means labels are descriptive classes. These figures evaluate classification of those labels, not direct prediction of measured FDCA yield or causal catalyst performance. N/A means no valid fold estimate and is not a zero score."
+}

@@ -1,0 +1,541 @@
+K,model,sampler,repeat,training_fraction,training_records,validation_records,training_publications,validation_publications,training_macro_f1,validation_macro_f1,training_accuracy,validation_accuracy,resampled_records,minimum_training_class_count,status,reason
+3,NeuralNetwork,ROS,1,0.2,25,31,23,20,1.0,0.5811320754716981,1.0,0.8709677419354839,66.0,1.0,completed,
+3,NeuralNetwork,ADASYN,1,0.2,25,31,23,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,SMOTE,1,0.2,25,31,23,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,ROS,1,0.3,37,31,35,20,1.0,0.7477987421383648,1.0,0.9032258064516129,99.0,1.0,completed,
+3,NeuralNetwork,ADASYN,1,0.3,37,31,35,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,SMOTE,1,0.3,37,31,35,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,ROS,1,0.4,49,31,47,20,1.0,0.7521367521367521,1.0,0.8709677419354839,135.0,1.0,completed,
+3,NeuralNetwork,ADASYN,1,0.4,49,31,47,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,SMOTE,1,0.4,49,31,47,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,ROS,1,0.5,63,31,54,20,0.9600644122383253,0.48809523809523814,0.9841269841269841,0.9032258064516129,174.0,1.0,completed,
+3,NeuralNetwork,ADASYN,1,0.5,63,31,54,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,SMOTE,1,0.5,63,31,54,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,ROS,1,0.6,75,31,60,20,1.0,0.39712488769092547,1.0,0.8064516129032258,204.0,3.0,completed,
+3,NeuralNetwork,ADASYN,1,0.6,75,31,60,20,1.0,0.6352201257861635,1.0,0.8387096774193549,203.0,3.0,completed,
+3,NeuralNetwork,SMOTE,1,0.6,75,31,60,20,1.0,0.6352201257861635,1.0,0.8387096774193549,204.0,3.0,completed,
+3,NeuralNetwork,ROS,1,0.7,87,31,66,20,1.0,0.6031746031746031,1.0,0.7741935483870968,237.0,3.0,completed,
+3,NeuralNetwork,ADASYN,1,0.7,87,31,66,20,1.0,0.42264150943396234,1.0,0.7741935483870968,238.0,3.0,completed,
+3,NeuralNetwork,SMOTE,1,0.7,87,31,66,20,1.0,0.4696969696969697,1.0,0.8387096774193549,237.0,3.0,completed,
+3,NeuralNetwork,ROS,1,0.8,99,31,72,20,0.9724967769660507,0.407843137254902,0.98989898989899,0.7096774193548387,270.0,3.0,completed,
+3,NeuralNetwork,ADASYN,1,0.8,99,31,72,20,0.9724967769660507,0.407843137254902,0.98989898989899,0.7096774193548387,270.0,3.0,completed,
+3,NeuralNetwork,SMOTE,1,0.8,99,31,72,20,0.9724967769660507,0.407843137254902,0.98989898989899,0.7096774193548387,270.0,3.0,completed,
+3,NeuralNetwork,ROS,1,0.9,111,31,76,20,0.9807640929735505,0.7811320754716982,0.990990990990991,0.9032258064516129,297.0,3.0,completed,
+3,NeuralNetwork,ADASYN,1,0.9,111,31,76,20,0.9807640929735505,0.7521367521367521,0.990990990990991,0.8709677419354839,296.0,3.0,completed,
+3,NeuralNetwork,SMOTE,1,0.9,111,31,76,20,0.9807640929735505,0.7811320754716982,0.990990990990991,0.9032258064516129,297.0,3.0,completed,
+3,NeuralNetwork,ROS,1,1.0,123,31,79,20,0.9809478447249345,0.4761904761904762,0.991869918699187,0.8709677419354839,333.0,3.0,completed,
+3,NeuralNetwork,ADASYN,1,1.0,123,31,79,20,0.9809478447249345,0.43636363636363634,0.991869918699187,0.8387096774193549,336.0,3.0,completed,
+3,NeuralNetwork,SMOTE,1,1.0,123,31,79,20,0.9809478447249345,0.4761904761904762,0.991869918699187,0.8709677419354839,333.0,3.0,completed,
+3,NeuralNetwork,ROS,2,0.2,25,31,23,20,1.0,0.40041928721174,1.0,0.7741935483870968,66.0,1.0,completed,
+3,NeuralNetwork,ADASYN,2,0.2,25,31,23,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,SMOTE,2,0.2,25,31,23,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,ROS,2,0.3,37,31,35,20,1.0,0.30409356725146197,1.0,0.8387096774193549,99.0,1.0,completed,
+3,NeuralNetwork,ADASYN,2,0.3,37,31,35,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,SMOTE,2,0.3,37,31,35,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,ROS,2,0.4,49,31,47,20,1.0,0.5380116959064327,1.0,0.9032258064516129,135.0,1.0,completed,
+3,NeuralNetwork,ADASYN,2,0.4,49,31,47,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,SMOTE,2,0.4,49,31,47,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,ROS,2,0.5,63,31,54,20,1.0,0.2909090909090909,1.0,0.7741935483870968,174.0,1.0,completed,
+3,NeuralNetwork,ADASYN,2,0.5,63,31,54,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,SMOTE,2,0.5,63,31,54,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,ROS,2,0.6,75,31,60,20,1.0,0.4761904761904762,1.0,0.8709677419354839,207.0,1.0,completed,
+3,NeuralNetwork,ADASYN,2,0.6,75,31,60,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,SMOTE,2,0.6,75,31,60,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,ROS,2,0.7,87,31,66,20,0.9675738274464388,0.8098765432098766,0.9885057471264368,0.9354838709677419,237.0,3.0,completed,
+3,NeuralNetwork,ADASYN,2,0.7,87,31,66,20,0.9675738274464388,0.5726495726495726,0.9885057471264368,0.8064516129032258,238.0,3.0,completed,
+3,NeuralNetwork,SMOTE,2,0.7,87,31,66,20,0.9675738274464388,0.657796451914099,0.9885057471264368,0.8387096774193549,237.0,3.0,completed,
+3,NeuralNetwork,ROS,2,0.8,99,31,72,20,0.9724967769660507,0.6965811965811967,0.98989898989899,0.8709677419354839,270.0,3.0,completed,
+3,NeuralNetwork,ADASYN,2,0.8,99,31,72,20,0.9724967769660507,0.657796451914099,0.98989898989899,0.8387096774193549,271.0,3.0,completed,
+3,NeuralNetwork,SMOTE,2,0.8,99,31,72,20,0.9724967769660507,0.5857142857142857,0.98989898989899,0.7741935483870968,270.0,3.0,completed,
+3,NeuralNetwork,ROS,2,0.9,111,31,76,20,0.9807640929735505,0.4761904761904762,0.990990990990991,0.8709677419354839,297.0,3.0,completed,
+3,NeuralNetwork,ADASYN,2,0.9,111,31,76,20,0.9807640929735505,0.7076923076923077,0.990990990990991,0.8709677419354839,296.0,3.0,completed,
+3,NeuralNetwork,SMOTE,2,0.9,111,31,76,20,0.9807640929735505,0.7811320754716982,0.990990990990991,0.9032258064516129,297.0,3.0,completed,
+3,NeuralNetwork,ROS,2,1.0,123,31,79,20,0.9809478447249345,0.7811320754716982,0.991869918699187,0.9032258064516129,333.0,3.0,completed,
+3,NeuralNetwork,ADASYN,2,1.0,123,31,79,20,0.9809478447249345,0.7811320754716982,0.991869918699187,0.9032258064516129,336.0,3.0,completed,
+3,NeuralNetwork,SMOTE,2,1.0,123,31,79,20,0.9809478447249345,0.7811320754716982,0.991869918699187,0.9032258064516129,333.0,3.0,completed,
+3,NeuralNetwork,ROS,3,0.2,25,31,23,20,1.0,0.3845462713387242,1.0,0.7741935483870968,63.0,1.0,completed,
+3,NeuralNetwork,ADASYN,3,0.2,25,31,23,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,SMOTE,3,0.2,25,31,23,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,ROS,3,0.3,37,31,35,20,1.0,0.6931216931216931,1.0,0.7741935483870968,99.0,1.0,completed,
+3,NeuralNetwork,ADASYN,3,0.3,37,31,35,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,SMOTE,3,0.3,37,31,35,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,ROS,3,0.4,49,31,47,20,1.0,0.2976190476190476,1.0,0.8064516129032258,135.0,1.0,completed,
+3,NeuralNetwork,ADASYN,3,0.4,49,31,47,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,SMOTE,3,0.4,49,31,47,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,ROS,3,0.5,63,31,54,20,1.0,0.504941599281222,1.0,0.8709677419354839,165.0,3.0,completed,
+3,NeuralNetwork,ADASYN,3,0.5,63,31,54,20,1.0,0.6895424836601306,1.0,0.8387096774193549,165.0,3.0,completed,
+3,NeuralNetwork,SMOTE,3,0.5,63,31,54,20,1.0,0.7203907203907204,1.0,0.8709677419354839,165.0,3.0,completed,
+3,NeuralNetwork,ROS,3,0.6,75,31,60,20,0.9671907040328093,0.5115303983228512,0.9866666666666667,0.7741935483870968,201.0,3.0,completed,
+3,NeuralNetwork,ADASYN,3,0.6,75,31,60,20,0.9671907040328093,0.5115303983228512,0.9866666666666667,0.7741935483870968,202.0,3.0,completed,
+3,NeuralNetwork,SMOTE,3,0.6,75,31,60,20,0.9604938271604938,0.5115303983228512,0.9866666666666667,0.7741935483870968,201.0,3.0,completed,
+3,NeuralNetwork,ROS,3,0.7,87,31,66,20,0.9722084367245657,0.5317460317460317,0.9885057471264368,0.8709677419354839,234.0,3.0,completed,
+3,NeuralNetwork,ADASYN,3,0.7,87,31,66,20,0.9722084367245657,0.6419753086419754,0.9885057471264368,0.8709677419354839,235.0,3.0,completed,
+3,NeuralNetwork,SMOTE,3,0.7,87,31,66,20,0.9675738274464388,0.7477987421383648,0.9885057471264368,0.9032258064516129,234.0,3.0,completed,
+3,NeuralNetwork,ROS,3,0.8,99,31,72,20,0.9724967769660507,0.4761904761904762,0.98989898989899,0.8709677419354839,270.0,3.0,completed,
+3,NeuralNetwork,ADASYN,3,0.8,99,31,72,20,0.9724967769660507,0.4761904761904762,0.98989898989899,0.8709677419354839,270.0,3.0,completed,
+3,NeuralNetwork,SMOTE,3,0.8,99,31,72,20,0.9724967769660507,0.4761904761904762,0.98989898989899,0.8709677419354839,270.0,3.0,completed,
+3,NeuralNetwork,ROS,3,0.9,111,31,76,20,0.9807640929735505,0.7076923076923077,0.990990990990991,0.8709677419354839,297.0,3.0,completed,
+3,NeuralNetwork,ADASYN,3,0.9,111,31,76,20,0.9807640929735505,0.7521367521367521,0.990990990990991,0.8709677419354839,296.0,3.0,completed,
+3,NeuralNetwork,SMOTE,3,0.9,111,31,76,20,0.9807640929735505,0.7292250233426704,0.990990990990991,0.8387096774193549,297.0,3.0,completed,
+3,NeuralNetwork,ROS,3,1.0,123,31,79,20,0.9809478447249345,0.7811320754716982,0.991869918699187,0.9032258064516129,333.0,3.0,completed,
+3,NeuralNetwork,ADASYN,3,1.0,123,31,79,20,0.9809478447249345,0.7811320754716982,0.991869918699187,0.9032258064516129,336.0,3.0,completed,
+3,NeuralNetwork,SMOTE,3,1.0,123,31,79,20,0.9809478447249345,0.7521367521367521,0.991869918699187,0.8709677419354839,333.0,3.0,completed,
+3,NeuralNetwork,ROS,4,0.2,25,31,23,20,1.0,0.7521367521367521,1.0,0.8709677419354839,66.0,1.0,completed,
+3,NeuralNetwork,ADASYN,4,0.2,25,31,23,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,SMOTE,4,0.2,25,31,23,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,ROS,4,0.3,37,31,35,20,1.0,0.3103448275862069,1.0,0.8709677419354839,105.0,1.0,completed,
+3,NeuralNetwork,ADASYN,4,0.3,37,31,35,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,SMOTE,4,0.3,37,31,35,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,ROS,4,0.4,49,31,47,20,1.0,0.6484848484848484,1.0,0.9032258064516129,135.0,1.0,completed,
+3,NeuralNetwork,ADASYN,4,0.4,49,31,47,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,SMOTE,4,0.4,49,31,47,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,ROS,4,0.5,63,31,54,20,1.0,0.3103448275862069,1.0,0.8709677419354839,177.0,1.0,completed,
+3,NeuralNetwork,ADASYN,4,0.5,63,31,54,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,SMOTE,4,0.5,63,31,54,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,ROS,4,0.6,75,31,60,20,0.9285024154589371,0.3747276688453159,0.9733333333333334,0.7741935483870968,210.0,1.0,completed,
+3,NeuralNetwork,ADASYN,4,0.6,75,31,60,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,SMOTE,4,0.6,75,31,60,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,ROS,4,0.7,87,31,66,20,0.9675738274464388,0.44880174291939,0.9885057471264368,0.8064516129032258,237.0,3.0,completed,
+3,NeuralNetwork,ADASYN,4,0.7,87,31,66,20,0.9675738274464388,0.6123321123321123,0.9885057471264368,0.8064516129032258,238.0,3.0,completed,
+3,NeuralNetwork,SMOTE,4,0.7,87,31,66,20,0.9675738274464388,0.6123321123321123,0.9885057471264368,0.8064516129032258,237.0,3.0,completed,
+3,NeuralNetwork,ROS,4,0.8,99,31,72,20,0.9724967769660507,0.4559748427672956,0.98989898989899,0.7741935483870968,270.0,3.0,completed,
+3,NeuralNetwork,ADASYN,4,0.8,99,31,72,20,0.9724967769660507,0.4696969696969697,0.98989898989899,0.8387096774193549,270.0,3.0,completed,
+3,NeuralNetwork,SMOTE,4,0.8,99,31,72,20,0.9724967769660507,0.46296296296296297,0.98989898989899,0.8064516129032258,270.0,3.0,completed,
+3,NeuralNetwork,ROS,4,0.9,111,31,76,20,0.9807640929735505,0.6171428571428571,0.990990990990991,0.8064516129032258,297.0,3.0,completed,
+3,NeuralNetwork,ADASYN,4,0.9,111,31,76,20,0.9807640929735505,0.5555555555555556,0.990990990990991,0.7419354838709677,296.0,3.0,completed,
+3,NeuralNetwork,SMOTE,4,0.9,111,31,76,20,0.9807640929735505,0.5634920634920634,0.990990990990991,0.7419354838709677,297.0,3.0,completed,
+3,NeuralNetwork,ROS,4,1.0,123,31,79,20,0.9809478447249345,0.5380116959064327,0.991869918699187,0.9032258064516129,333.0,3.0,completed,
+3,NeuralNetwork,ADASYN,4,1.0,123,31,79,20,0.9809478447249345,0.43636363636363634,0.991869918699187,0.8387096774193549,336.0,3.0,completed,
+3,NeuralNetwork,SMOTE,4,1.0,123,31,79,20,0.9809478447249345,0.43636363636363634,0.991869918699187,0.8387096774193549,333.0,3.0,completed,
+3,NeuralNetwork,ROS,5,0.2,25,31,23,20,1.0,0.49236298292902064,1.0,0.8387096774193549,69.0,1.0,completed,
+3,NeuralNetwork,ADASYN,5,0.2,25,31,23,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,SMOTE,5,0.2,25,31,23,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,ROS,5,0.3,37,31,35,20,1.0,0.8828282828282829,1.0,0.967741935483871,102.0,1.0,completed,
+3,NeuralNetwork,ADASYN,5,0.3,37,31,35,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,SMOTE,5,0.3,37,31,35,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,ROS,5,0.4,49,31,47,20,1.0,0.2976190476190476,1.0,0.8064516129032258,135.0,1.0,completed,
+3,NeuralNetwork,ADASYN,5,0.4,49,31,47,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,SMOTE,5,0.4,49,31,47,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,ROS,5,0.5,63,31,54,20,1.0,0.6547619047619048,1.0,0.9354838709677419,174.0,1.0,completed,
+3,NeuralNetwork,ADASYN,5,0.5,63,31,54,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,SMOTE,5,0.5,63,31,54,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+3,NeuralNetwork,ROS,5,0.6,75,31,60,20,0.9718144450968879,0.4352201257861636,0.9866666666666667,0.8064516129032258,198.0,3.0,completed,
+3,NeuralNetwork,ADASYN,5,0.6,75,31,60,20,0.9718144450968879,0.6419753086419754,0.9866666666666667,0.8709677419354839,199.0,3.0,completed,
+3,NeuralNetwork,SMOTE,5,0.6,75,31,60,20,0.9718144450968879,0.4296296296296296,0.9866666666666667,0.8064516129032258,198.0,3.0,completed,
+3,NeuralNetwork,ROS,5,0.7,87,31,66,20,0.9722084367245657,0.4296296296296296,0.9885057471264368,0.8064516129032258,234.0,3.0,completed,
+3,NeuralNetwork,ADASYN,5,0.7,87,31,66,20,0.9722084367245657,0.44871794871794873,0.9885057471264368,0.7419354838709677,235.0,3.0,completed,
+3,NeuralNetwork,SMOTE,5,0.7,87,31,66,20,0.9722084367245657,0.44871794871794873,0.9885057471264368,0.7419354838709677,234.0,3.0,completed,
+3,NeuralNetwork,ROS,5,0.8,99,31,72,20,0.9724967769660507,0.4761904761904762,0.98989898989899,0.8709677419354839,270.0,3.0,completed,
+3,NeuralNetwork,ADASYN,5,0.8,99,31,72,20,0.9724967769660507,0.42264150943396234,0.98989898989899,0.7741935483870968,270.0,3.0,completed,
+3,NeuralNetwork,SMOTE,5,0.8,99,31,72,20,0.9724967769660507,0.42264150943396234,0.98989898989899,0.7741935483870968,270.0,3.0,completed,
+3,NeuralNetwork,ROS,5,0.9,111,31,76,20,0.9807640929735505,0.8828282828282829,0.990990990990991,0.967741935483871,297.0,3.0,completed,
+3,NeuralNetwork,ADASYN,5,0.9,111,31,76,20,0.9807640929735505,0.7076923076923077,0.990990990990991,0.8709677419354839,296.0,3.0,completed,
+3,NeuralNetwork,SMOTE,5,0.9,111,31,76,20,0.9807640929735505,0.7076923076923077,0.990990990990991,0.8709677419354839,297.0,3.0,completed,
+3,NeuralNetwork,ROS,5,1.0,123,31,79,20,0.9809478447249345,0.48181818181818176,0.991869918699187,0.8709677419354839,333.0,3.0,completed,
+3,NeuralNetwork,ADASYN,5,1.0,123,31,79,20,0.9809478447249345,0.5876543209876544,0.991869918699187,0.9032258064516129,334.0,3.0,completed,
+3,NeuralNetwork,SMOTE,5,1.0,123,31,79,20,0.9809478447249345,0.8209876543209876,0.991869918699187,0.9354838709677419,333.0,3.0,completed,
+4,NeuralNetwork,ROS,1,0.2,25,31,22,20,1.0,0.22727272727272727,1.0,0.8064516129032258,84.0,1.0,completed,
+4,NeuralNetwork,ADASYN,1,0.2,25,31,22,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,1,0.2,25,31,22,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,1,0.3,37,31,34,20,0.946031746031746,0.22727272727272727,0.972972972972973,0.8064516129032258,128.0,1.0,completed,
+4,NeuralNetwork,ADASYN,1,0.3,37,31,34,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,1,0.3,37,31,34,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,1,0.4,49,31,46,20,1.0,0.22727272727272727,1.0,0.8064516129032258,172.0,1.0,completed,
+4,NeuralNetwork,ADASYN,1,0.4,49,31,46,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,1,0.4,49,31,46,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,1,0.5,62,31,54,20,1.0,0.22807017543859648,1.0,0.8387096774193549,224.0,1.0,completed,
+4,NeuralNetwork,ADASYN,1,0.5,62,31,54,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,1,0.5,62,31,54,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,1,0.6,74,31,60,20,1.0,0.2222222222222222,1.0,0.7741935483870968,272.0,1.0,completed,
+4,NeuralNetwork,ADASYN,1,0.6,74,31,60,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,1,0.6,74,31,60,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,1,0.7,86,31,66,20,0.9467948717948718,0.22727272727272727,0.9767441860465116,0.8064516129032258,316.0,1.0,completed,
+4,NeuralNetwork,ADASYN,1,0.7,86,31,66,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,1,0.7,86,31,66,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,1,0.8,99,31,72,20,0.9614767255216693,0.22321428571428573,0.9797979797979798,0.8064516129032258,360.0,1.0,completed,
+4,NeuralNetwork,ADASYN,1,0.8,99,31,72,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,1,0.8,99,31,72,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,1,0.9,111,31,76,20,0.9604395604395605,0.21818181818181817,0.972972972972973,0.7741935483870968,396.0,1.0,completed,
+4,NeuralNetwork,ADASYN,1,0.9,111,31,76,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,1,0.9,111,31,76,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,1,1.0,123,31,79,20,0.9727272727272728,0.21818181818181817,0.983739837398374,0.7741935483870968,444.0,1.0,completed,
+4,NeuralNetwork,ADASYN,1,1.0,123,31,79,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,1,1.0,123,31,79,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,2,0.2,25,31,22,20,0.9435897435897436,0.22807017543859648,0.96,0.8387096774193549,80.0,1.0,completed,
+4,NeuralNetwork,ADASYN,2,0.2,25,31,22,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,2,0.2,25,31,22,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,2,0.3,37,31,34,20,0.946031746031746,0.23214285714285715,0.972972972972973,0.8387096774193549,128.0,1.0,completed,
+4,NeuralNetwork,ADASYN,2,0.3,37,31,34,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,2,0.3,37,31,34,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,2,0.4,49,31,46,20,1.0,0.3564814814814815,1.0,0.8387096774193549,172.0,1.0,completed,
+4,NeuralNetwork,ADASYN,2,0.4,49,31,46,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,2,0.4,49,31,46,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,2,0.5,62,31,54,20,1.0,0.21296296296296297,1.0,0.7419354838709677,224.0,1.0,completed,
+4,NeuralNetwork,ADASYN,2,0.5,62,31,54,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,2,0.5,62,31,54,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,2,0.6,74,31,60,20,0.970342522974102,0.22321428571428573,0.9864864864864865,0.8064516129032258,268.0,1.0,completed,
+4,NeuralNetwork,ADASYN,2,0.6,74,31,60,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,2,0.6,74,31,60,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,2,0.7,86,31,66,20,0.9550865800865801,0.22321428571428573,0.9767441860465116,0.8064516129032258,312.0,1.0,completed,
+4,NeuralNetwork,ADASYN,2,0.7,86,31,66,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,2,0.7,86,31,66,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,2,0.8,99,31,72,20,0.9614767255216693,0.21818181818181817,0.9797979797979798,0.7741935483870968,360.0,1.0,completed,
+4,NeuralNetwork,ADASYN,2,0.8,99,31,72,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,2,0.8,99,31,72,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,2,0.9,111,31,76,20,0.9724489795918367,0.21818181818181817,0.9819819819819819,0.7741935483870968,396.0,1.0,completed,
+4,NeuralNetwork,ADASYN,2,0.9,111,31,76,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,2,0.9,111,31,76,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,2,1.0,123,31,79,20,0.9608610567514677,0.22321428571428573,0.975609756097561,0.8064516129032258,444.0,1.0,completed,
+4,NeuralNetwork,ADASYN,2,1.0,123,31,79,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,2,1.0,123,31,79,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,3,0.2,25,31,22,20,0.9105691056910569,0.22807017543859648,0.96,0.8387096774193549,84.0,1.0,completed,
+4,NeuralNetwork,ADASYN,3,0.2,25,31,22,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,3,0.2,25,31,22,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,3,0.3,37,31,35,20,1.0,0.22727272727272727,1.0,0.8064516129032258,132.0,1.0,completed,
+4,NeuralNetwork,ADASYN,3,0.3,37,31,35,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,3,0.3,37,31,35,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,3,0.4,49,31,46,20,1.0,0.2222222222222222,1.0,0.7741935483870968,172.0,1.0,completed,
+4,NeuralNetwork,ADASYN,3,0.4,49,31,46,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,3,0.4,49,31,46,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,3,0.5,62,31,54,20,0.9620334620334621,0.22807017543859648,0.9838709677419355,0.8387096774193549,224.0,1.0,completed,
+4,NeuralNetwork,ADASYN,3,0.5,62,31,54,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,3,0.5,62,31,54,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,3,0.6,74,31,60,20,0.970342522974102,0.47641509433962265,0.9864864864864865,0.8387096774193549,268.0,1.0,completed,
+4,NeuralNetwork,ADASYN,3,0.6,74,31,60,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,3,0.6,74,31,60,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,3,0.7,86,31,66,20,0.9609962406015038,0.22727272727272727,0.9767441860465116,0.8064516129032258,308.0,1.0,completed,
+4,NeuralNetwork,ADASYN,3,0.7,86,31,66,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,3,0.7,86,31,66,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,3,0.8,99,31,72,20,0.9614767255216693,0.22807017543859648,0.9797979797979798,0.8387096774193549,360.0,1.0,completed,
+4,NeuralNetwork,ADASYN,3,0.8,99,31,72,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,3,0.8,99,31,72,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,3,0.9,111,31,76,20,0.9724489795918367,0.21818181818181817,0.9819819819819819,0.7741935483870968,396.0,1.0,completed,
+4,NeuralNetwork,ADASYN,3,0.9,111,31,76,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,3,0.9,111,31,76,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,3,1.0,123,31,79,20,0.9727272727272728,0.21818181818181817,0.983739837398374,0.7741935483870968,444.0,1.0,completed,
+4,NeuralNetwork,ADASYN,3,1.0,123,31,79,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,3,1.0,123,31,79,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,4,0.2,25,31,22,20,0.9105691056910569,0.22727272727272727,0.96,0.8064516129032258,84.0,1.0,completed,
+4,NeuralNetwork,ADASYN,4,0.2,25,31,22,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,4,0.2,25,31,22,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,4,0.3,37,31,34,20,0.946031746031746,0.22321428571428573,0.972972972972973,0.8064516129032258,128.0,1.0,completed,
+4,NeuralNetwork,ADASYN,4,0.3,37,31,34,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,4,0.3,37,31,34,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,4,0.4,49,31,46,20,0.9471264367816092,0.22321428571428573,0.9795918367346939,0.8064516129032258,176.0,1.0,completed,
+4,NeuralNetwork,ADASYN,4,0.4,49,31,46,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,4,0.4,49,31,46,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,4,0.5,62,31,54,20,0.9453703703703704,0.22321428571428573,0.967741935483871,0.8064516129032258,220.0,1.0,completed,
+4,NeuralNetwork,ADASYN,4,0.5,62,31,54,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,4,0.5,62,31,54,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,4,0.6,74,31,60,20,0.9753643303261624,0.22321428571428573,0.9864864864864865,0.8064516129032258,264.0,1.0,completed,
+4,NeuralNetwork,ADASYN,4,0.6,74,31,60,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,4,0.6,74,31,60,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,4,0.7,86,31,66,20,0.9450331125827816,0.21818181818181817,0.9651162790697675,0.7741935483870968,308.0,1.0,completed,
+4,NeuralNetwork,ADASYN,4,0.7,86,31,66,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,4,0.7,86,31,66,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,4,0.8,99,31,72,20,0.9515966386554622,0.22727272727272727,0.9696969696969697,0.8064516129032258,356.0,1.0,completed,
+4,NeuralNetwork,ADASYN,4,0.8,99,31,72,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,4,0.8,99,31,72,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,4,0.9,111,31,76,20,0.9724489795918367,0.2222222222222222,0.9819819819819819,0.7741935483870968,396.0,1.0,completed,
+4,NeuralNetwork,ADASYN,4,0.9,111,31,76,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,4,0.9,111,31,76,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,4,1.0,123,31,79,20,0.9727272727272728,0.22321428571428573,0.983739837398374,0.8064516129032258,444.0,1.0,completed,
+4,NeuralNetwork,ADASYN,4,1.0,123,31,79,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,4,1.0,123,31,79,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,5,0.2,25,31,23,20,1.0,0.22321428571428573,1.0,0.8064516129032258,84.0,1.0,completed,
+4,NeuralNetwork,ADASYN,5,0.2,25,31,23,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,5,0.2,25,31,23,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,5,0.3,37,31,34,20,0.9601873536299766,0.2222222222222222,0.972972972972973,0.7741935483870968,124.0,1.0,completed,
+4,NeuralNetwork,ADASYN,5,0.3,37,31,34,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,5,0.3,37,31,34,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,5,0.4,49,31,46,20,1.0,0.22727272727272727,1.0,0.8064516129032258,172.0,1.0,completed,
+4,NeuralNetwork,ADASYN,5,0.4,49,31,46,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,5,0.4,49,31,46,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,5,0.5,62,31,54,20,0.9536163522012578,0.22727272727272727,0.967741935483871,0.8064516129032258,216.0,1.0,completed,
+4,NeuralNetwork,ADASYN,5,0.5,62,31,54,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,5,0.5,62,31,54,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,5,0.6,74,31,60,20,1.0,0.22321428571428573,1.0,0.8064516129032258,272.0,1.0,completed,
+4,NeuralNetwork,ADASYN,5,0.6,74,31,60,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,5,0.6,74,31,60,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,5,0.7,86,31,66,20,0.9550865800865801,0.21818181818181817,0.9767441860465116,0.7741935483870968,312.0,1.0,completed,
+4,NeuralNetwork,ADASYN,5,0.7,86,31,66,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,5,0.7,86,31,66,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,5,0.8,99,31,72,20,0.9515966386554622,0.23214285714285715,0.9696969696969697,0.8387096774193549,356.0,1.0,completed,
+4,NeuralNetwork,ADASYN,5,0.8,99,31,72,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,5,0.8,99,31,72,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,5,0.9,111,31,76,20,0.9724489795918367,0.21818181818181817,0.9819819819819819,0.7741935483870968,396.0,1.0,completed,
+4,NeuralNetwork,ADASYN,5,0.9,111,31,76,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,5,0.9,111,31,76,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,ROS,5,1.0,123,31,79,20,0.9727272727272728,0.21818181818181817,0.983739837398374,0.7741935483870968,444.0,1.0,completed,
+4,NeuralNetwork,ADASYN,5,1.0,123,31,79,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+4,NeuralNetwork,SMOTE,5,1.0,123,31,79,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,1,0.2,25,31,22,20,0.9047619047619048,0.27391304347826084,0.96,0.7419354838709677,85.0,1.0,completed,
+5,NeuralNetwork,ADASYN,1,0.2,25,31,22,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,1,0.2,25,31,22,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,1,0.3,37,31,34,20,1.0,0.2204081632653061,1.0,0.6774193548387096,145.0,1.0,completed,
+5,NeuralNetwork,ADASYN,1,0.3,37,31,34,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,1,0.3,37,31,34,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,1,0.4,49,31,45,20,1.0,0.24181184668989547,1.0,0.6129032258064516,195.0,1.0,completed,
+5,NeuralNetwork,ADASYN,1,0.4,49,31,45,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,1,0.4,49,31,45,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,1,0.5,62,31,53,20,1.0,0.28181818181818186,1.0,0.7096774193548387,255.0,1.0,completed,
+5,NeuralNetwork,ADASYN,1,0.5,62,31,53,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,1,0.5,62,31,53,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,1,0.6,74,31,59,20,1.0,0.26363636363636367,1.0,0.6774193548387096,315.0,1.0,completed,
+5,NeuralNetwork,ADASYN,1,0.6,74,31,59,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,1,0.6,74,31,59,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,1,0.7,86,31,65,20,0.9499897225077081,0.21608391608391608,0.9767441860465116,0.6129032258064516,350.0,1.0,completed,
+5,NeuralNetwork,ADASYN,1,0.7,86,31,65,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,1,0.7,86,31,65,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,1,0.8,98,31,71,20,0.9491591756864184,0.24190476190476193,0.9693877551020408,0.6129032258064516,400.0,1.0,completed,
+5,NeuralNetwork,ADASYN,1,0.8,98,31,71,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,1,0.8,98,31,71,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,1,0.9,112,31,76,20,0.9437298584839569,0.30476190476190473,0.9642857142857143,0.7741935483870968,465.0,1.0,completed,
+5,NeuralNetwork,ADASYN,1,0.9,112,31,76,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,1,0.9,112,31,76,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,1,1.0,123,31,79,20,0.9586351865955827,0.19286821705426357,0.975609756097561,0.5483870967741935,510.0,1.0,completed,
+5,NeuralNetwork,ADASYN,1,1.0,123,31,79,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,1,1.0,123,31,79,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,2,0.2,25,31,22,20,1.0,0.20277777777777778,1.0,0.6451612903225806,95.0,1.0,completed,
+5,NeuralNetwork,ADASYN,2,0.2,25,31,22,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,2,0.2,25,31,22,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,2,0.3,37,31,34,20,1.0,0.1911111111111111,1.0,0.5806451612903226,145.0,1.0,completed,
+5,NeuralNetwork,ADASYN,2,0.3,37,31,34,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,2,0.3,37,31,34,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,2,0.4,49,31,46,20,1.0,0.2511111111111111,1.0,0.6451612903225806,195.0,1.0,completed,
+5,NeuralNetwork,ADASYN,2,0.4,49,31,46,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,2,0.4,49,31,46,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,2,0.5,62,31,53,20,1.0,0.24341880341880345,1.0,0.6451612903225806,255.0,1.0,completed,
+5,NeuralNetwork,ADASYN,2,0.5,62,31,53,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,2,0.5,62,31,53,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,2,0.6,74,31,59,20,0.9878207916485428,0.23813953488372092,0.9864864864864865,0.6451612903225806,305.0,1.0,completed,
+5,NeuralNetwork,ADASYN,2,0.6,74,31,59,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,2,0.6,74,31,59,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,2,0.7,86,31,65,20,0.9399585921325052,0.2229965156794425,0.9651162790697675,0.6129032258064516,350.0,1.0,completed,
+5,NeuralNetwork,ADASYN,2,0.7,86,31,65,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,2,0.7,86,31,65,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,2,0.8,98,31,71,20,0.9583380979607394,0.20966183574879227,0.9795918367346939,0.6451612903225806,400.0,1.0,completed,
+5,NeuralNetwork,ADASYN,2,0.8,98,31,71,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,2,0.8,98,31,71,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,2,0.9,112,31,76,20,0.9583931623931624,0.27430830039525694,0.9732142857142857,0.7096774193548387,455.0,1.0,completed,
+5,NeuralNetwork,ADASYN,2,0.9,112,31,76,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,2,0.9,112,31,76,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,2,1.0,123,31,79,20,0.9586351865955827,0.28888888888888886,0.975609756097561,0.7096774193548387,510.0,1.0,completed,
+5,NeuralNetwork,ADASYN,2,1.0,123,31,79,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,2,1.0,123,31,79,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,3,0.2,25,31,22,20,1.0,0.1702127659574468,1.0,0.6451612903225806,95.0,1.0,completed,
+5,NeuralNetwork,ADASYN,3,0.2,25,31,22,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,3,0.2,25,31,22,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,3,0.3,37,31,33,20,0.9680387409200968,0.21714285714285717,0.972972972972973,0.6774193548387096,150.0,1.0,completed,
+5,NeuralNetwork,ADASYN,3,0.3,37,31,33,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,3,0.3,37,31,33,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,3,0.4,49,31,46,20,1.0,0.28181818181818186,1.0,0.7096774193548387,195.0,1.0,completed,
+5,NeuralNetwork,ADASYN,3,0.4,49,31,46,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,3,0.4,49,31,46,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,3,0.5,62,31,53,20,0.9466666666666667,0.24341880341880345,0.9838709677419355,0.6451612903225806,245.0,1.0,completed,
+5,NeuralNetwork,ADASYN,3,0.5,62,31,53,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,3,0.5,62,31,53,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,3,0.6,74,31,59,20,0.956043956043956,0.25652173913043474,0.9864864864864865,0.6774193548387096,305.0,1.0,completed,
+5,NeuralNetwork,ADASYN,3,0.6,74,31,59,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,3,0.6,74,31,59,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,3,0.7,86,31,65,20,0.9517868992321545,0.24685314685314683,0.9767441860465116,0.6451612903225806,345.0,1.0,completed,
+5,NeuralNetwork,ADASYN,3,0.7,86,31,65,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,3,0.7,86,31,65,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,3,0.8,98,31,71,20,0.9491591756864184,0.24685314685314683,0.9693877551020408,0.6451612903225806,400.0,1.0,completed,
+5,NeuralNetwork,ADASYN,3,0.8,98,31,71,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,3,0.8,98,31,71,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,3,0.9,112,31,76,20,0.9437298584839569,0.2010733452593918,0.9642857142857143,0.5483870967741935,465.0,1.0,completed,
+5,NeuralNetwork,ADASYN,3,0.9,112,31,76,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,3,0.9,112,31,76,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,3,1.0,123,31,79,20,0.9586351865955827,0.27391304347826084,0.975609756097561,0.7096774193548387,510.0,1.0,completed,
+5,NeuralNetwork,ADASYN,3,1.0,123,31,79,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,3,1.0,123,31,79,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,4,0.2,25,31,22,20,1.0,0.24230769230769234,1.0,0.5806451612903226,90.0,1.0,completed,
+5,NeuralNetwork,ADASYN,4,0.2,25,31,22,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,4,0.2,25,31,22,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,4,0.3,37,31,34,20,1.0,0.2866666666666667,1.0,0.7419354838709677,145.0,1.0,completed,
+5,NeuralNetwork,ADASYN,4,0.3,37,31,34,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,4,0.3,37,31,34,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,4,0.4,49,31,46,20,0.9179487179487179,0.23652173913043478,0.9795918367346939,0.6451612903225806,190.0,1.0,completed,
+5,NeuralNetwork,ADASYN,4,0.4,49,31,46,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,4,0.4,49,31,46,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,4,0.5,62,31,53,20,0.9846864686468647,0.24341880341880345,0.9838709677419355,0.6451612903225806,255.0,1.0,completed,
+5,NeuralNetwork,ADASYN,4,0.5,62,31,53,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,4,0.5,62,31,53,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,4,0.6,74,31,59,20,1.0,0.17714285714285713,1.0,0.4838709677419355,310.0,1.0,completed,
+5,NeuralNetwork,ADASYN,4,0.6,74,31,59,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,4,0.6,74,31,59,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,4,0.7,86,31,65,20,0.9868747498999599,0.26561264822134384,0.9883720930232558,0.6774193548387096,370.0,1.0,completed,
+5,NeuralNetwork,ADASYN,4,0.7,86,31,65,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,4,0.7,86,31,65,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,4,0.8,98,31,71,20,0.9583380979607394,0.22591876208897482,0.9795918367346939,0.6451612903225806,400.0,1.0,completed,
+5,NeuralNetwork,ADASYN,4,0.8,98,31,71,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,4,0.8,98,31,71,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,4,0.9,112,31,76,20,0.9504941985388913,0.23833333333333334,0.9642857142857143,0.6774193548387096,455.0,1.0,completed,
+5,NeuralNetwork,ADASYN,4,0.9,112,31,76,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,4,0.9,112,31,76,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,4,1.0,123,31,79,20,0.9586351865955827,0.41855072463768117,0.975609756097561,0.7419354838709677,510.0,1.0,completed,
+5,NeuralNetwork,ADASYN,4,1.0,123,31,79,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,4,1.0,123,31,79,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,5,0.2,25,31,21,20,0.9111111111111111,0.24545454545454545,0.96,0.6129032258064516,80.0,1.0,completed,
+5,NeuralNetwork,ADASYN,5,0.2,25,31,21,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,5,0.2,25,31,21,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,5,0.3,37,31,34,20,1.0,0.24567627494456765,1.0,0.5483870967741935,145.0,1.0,completed,
+5,NeuralNetwork,ADASYN,5,0.3,37,31,34,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,5,0.3,37,31,34,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,5,0.4,49,31,46,20,1.0,0.20833333333333331,1.0,0.5483870967741935,195.0,1.0,completed,
+5,NeuralNetwork,ADASYN,5,0.4,49,31,46,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,5,0.4,49,31,46,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,5,0.5,62,31,53,20,1.0,0.25652173913043474,1.0,0.6774193548387096,255.0,1.0,completed,
+5,NeuralNetwork,ADASYN,5,0.5,62,31,53,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,5,0.5,62,31,53,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,5,0.6,74,31,59,20,0.9382905982905984,0.2523076923076923,0.972972972972973,0.6774193548387096,295.0,1.0,completed,
+5,NeuralNetwork,ADASYN,5,0.6,74,31,59,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,5,0.6,74,31,59,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,5,0.7,86,31,65,20,0.967251461988304,0.19763593380614658,0.9883720930232558,0.6129032258064516,345.0,1.0,completed,
+5,NeuralNetwork,ADASYN,5,0.7,86,31,65,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,5,0.7,86,31,65,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,5,0.8,98,31,71,20,0.9535040431266847,0.2071736011477762,0.9795918367346939,0.5483870967741935,400.0,1.0,completed,
+5,NeuralNetwork,ADASYN,5,0.8,98,31,71,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,5,0.8,98,31,71,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,5,0.9,112,31,76,20,0.9583931623931624,0.2511111111111111,0.9732142857142857,0.6451612903225806,455.0,1.0,completed,
+5,NeuralNetwork,ADASYN,5,0.9,112,31,76,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,5,0.9,112,31,76,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,ROS,5,1.0,123,31,79,20,0.9586351865955827,0.3,0.975609756097561,0.7419354838709677,510.0,1.0,completed,
+5,NeuralNetwork,ADASYN,5,1.0,123,31,79,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+5,NeuralNetwork,SMOTE,5,1.0,123,31,79,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,1,0.2,24,33,20,20,1.0,0.10638297872340426,1.0,0.45454545454545453,102.0,1.0,completed,
+6,NeuralNetwork,ADASYN,1,0.2,24,33,20,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,1,0.2,24,33,20,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,1,0.3,36,33,32,20,1.0,0.20666666666666667,1.0,0.696969696969697,174.0,1.0,completed,
+6,NeuralNetwork,ADASYN,1,0.3,36,33,32,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,1,0.3,36,33,32,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,1,0.4,48,33,44,20,1.0,0.15432098765432098,1.0,0.7575757575757576,228.0,1.0,completed,
+6,NeuralNetwork,ADASYN,1,0.4,48,33,44,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,1,0.4,48,33,44,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,1,0.5,60,33,53,20,0.9649122807017544,0.14285714285714285,0.9833333333333333,0.7272727272727273,288.0,1.0,completed,
+6,NeuralNetwork,ADASYN,1,0.5,60,33,53,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,1,0.5,60,33,53,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,1,0.6,74,33,60,20,0.9747899159663866,0.1891025641025641,0.9864864864864865,0.7272727272727273,360.0,1.0,completed,
+6,NeuralNetwork,ADASYN,1,0.6,74,33,60,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,1,0.6,74,33,60,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,1,0.7,86,33,66,20,0.975024975024975,0.19753086419753085,0.9883720930232558,0.7272727272727273,432.0,1.0,completed,
+6,NeuralNetwork,ADASYN,1,0.7,86,33,66,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,1,0.7,86,33,66,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,1,0.8,98,33,72,20,0.9751679813029507,0.20503144654088054,0.9897959183673469,0.696969696969697,492.0,1.0,completed,
+6,NeuralNetwork,ADASYN,1,0.8,98,33,72,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,1,0.8,98,33,72,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,1,0.9,110,33,76,20,0.9664423740510696,0.19753086419753085,0.9818181818181818,0.7272727272727273,558.0,1.0,completed,
+6,NeuralNetwork,ADASYN,1,0.9,110,33,76,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,1,0.9,110,33,76,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,1,1.0,121,33,79,20,0.967873644507308,0.13939393939393938,0.9834710743801653,0.696969696969697,612.0,1.0,completed,
+6,NeuralNetwork,ADASYN,1,1.0,121,33,79,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,1,1.0,121,33,79,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,2,0.2,24,33,20,20,1.0,0.13999999999999999,1.0,0.6363636363636364,102.0,1.0,completed,
+6,NeuralNetwork,ADASYN,2,0.2,24,33,20,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,2,0.2,24,33,20,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,2,0.3,36,33,32,20,1.0,0.3355555555555556,1.0,0.7575757575757576,162.0,1.0,completed,
+6,NeuralNetwork,ADASYN,2,0.3,36,33,32,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,2,0.3,36,33,32,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,2,0.4,48,33,44,20,1.0,0.22712418300653595,1.0,0.696969696969697,222.0,1.0,completed,
+6,NeuralNetwork,ADASYN,2,0.4,48,33,44,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,2,0.4,48,33,44,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,2,0.5,60,33,53,20,1.0,0.1509433962264151,1.0,0.7272727272727273,294.0,1.0,completed,
+6,NeuralNetwork,ADASYN,2,0.5,60,33,53,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,2,0.5,60,33,53,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,2,0.6,74,33,60,20,0.9652892561983472,0.36601307189542487,0.9864864864864865,0.7575757575757576,366.0,1.0,completed,
+6,NeuralNetwork,ADASYN,2,0.6,74,33,60,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,2,0.6,74,33,60,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,2,0.7,86,33,66,20,0.9750084430935496,0.14285714285714285,0.9883720930232558,0.7272727272727273,426.0,1.0,completed,
+6,NeuralNetwork,ADASYN,2,0.7,86,33,66,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,2,0.7,86,33,66,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,2,0.8,98,33,72,20,0.9751679813029507,0.20246913580246914,0.9897959183673469,0.696969696969697,492.0,1.0,completed,
+6,NeuralNetwork,ADASYN,2,0.8,98,33,72,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,2,0.8,98,33,72,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,2,0.9,110,33,76,20,0.9676719576719576,0.19392033542976939,0.9818181818181818,0.696969696969697,546.0,1.0,completed,
+6,NeuralNetwork,ADASYN,2,0.9,110,33,76,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,2,0.9,110,33,76,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,2,1.0,121,33,79,20,0.967873644507308,0.13939393939393938,0.9834710743801653,0.696969696969697,612.0,1.0,completed,
+6,NeuralNetwork,ADASYN,2,1.0,121,33,79,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,2,1.0,121,33,79,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,3,0.2,24,33,20,20,1.0,0.14666666666666667,1.0,0.6666666666666666,108.0,1.0,completed,
+6,NeuralNetwork,ADASYN,3,0.2,24,33,20,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,3,0.2,24,33,20,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,3,0.3,36,33,32,20,1.0,0.2141025641025641,1.0,0.7272727272727273,162.0,1.0,completed,
+6,NeuralNetwork,ADASYN,3,0.3,36,33,32,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,3,0.3,36,33,32,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,3,0.4,48,33,44,20,1.0,0.15151515151515152,1.0,0.7575757575757576,222.0,1.0,completed,
+6,NeuralNetwork,ADASYN,3,0.4,48,33,44,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,3,0.4,48,33,44,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,3,0.5,60,33,53,20,1.0,0.2549019607843137,1.0,0.7272727272727273,288.0,1.0,completed,
+6,NeuralNetwork,ADASYN,3,0.5,60,33,53,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,3,0.5,60,33,53,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,3,0.6,74,33,60,20,0.9652421652421652,0.208641975308642,0.9864864864864865,0.7272727272727273,354.0,1.0,completed,
+6,NeuralNetwork,ADASYN,3,0.6,74,33,60,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,3,0.6,74,33,60,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,3,0.7,86,33,66,20,0.9749914354230901,0.19753086419753085,0.9883720930232558,0.7272727272727273,420.0,1.0,completed,
+6,NeuralNetwork,ADASYN,3,0.7,86,33,66,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,3,0.7,86,33,66,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,3,0.8,98,33,72,20,0.9751679813029507,0.19392033542976939,0.9897959183673469,0.696969696969697,492.0,1.0,completed,
+6,NeuralNetwork,ADASYN,3,0.8,98,33,72,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,3,0.8,98,33,72,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,3,0.9,110,33,76,20,0.9676719576719576,0.208641975308642,0.9818181818181818,0.7272727272727273,546.0,1.0,completed,
+6,NeuralNetwork,ADASYN,3,0.9,110,33,76,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,3,0.9,110,33,76,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,3,1.0,121,33,79,20,0.967873644507308,0.13580246913580246,0.9834710743801653,0.6666666666666666,612.0,1.0,completed,
+6,NeuralNetwork,ADASYN,3,1.0,121,33,79,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,3,1.0,121,33,79,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,4,0.2,24,33,20,20,1.0,0.20601851851851852,1.0,0.6363636363636364,90.0,1.0,completed,
+6,NeuralNetwork,ADASYN,4,0.2,24,33,20,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,4,0.2,24,33,20,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,4,0.3,36,33,32,20,1.0,0.13333333333333333,1.0,0.6060606060606061,162.0,1.0,completed,
+6,NeuralNetwork,ADASYN,4,0.3,36,33,32,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,4,0.3,36,33,32,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,4,0.4,48,33,44,20,1.0,0.13071895424836602,1.0,0.6060606060606061,222.0,1.0,completed,
+6,NeuralNetwork,ADASYN,4,0.4,48,33,44,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,4,0.4,48,33,44,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,4,0.5,60,33,53,20,1.0,0.1419753086419753,1.0,0.696969696969697,294.0,1.0,completed,
+6,NeuralNetwork,ADASYN,4,0.5,60,33,53,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,4,0.5,60,33,53,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,4,0.6,74,33,60,20,1.0,0.14285714285714285,1.0,0.7272727272727273,354.0,1.0,completed,
+6,NeuralNetwork,ADASYN,4,0.6,74,33,60,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,4,0.6,74,33,60,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,4,0.7,86,33,66,20,0.9749914354230901,0.20606060606060606,0.9883720930232558,0.7272727272727273,420.0,1.0,completed,
+6,NeuralNetwork,ADASYN,4,0.7,86,33,66,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,4,0.7,86,33,66,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,4,0.8,98,33,72,20,0.9751679813029507,0.208641975308642,0.9897959183673469,0.7272727272727273,492.0,1.0,completed,
+6,NeuralNetwork,ADASYN,4,0.8,98,33,72,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,4,0.8,98,33,72,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,4,0.9,110,33,76,20,0.9676719576719576,0.19392033542976939,0.9818181818181818,0.696969696969697,546.0,1.0,completed,
+6,NeuralNetwork,ADASYN,4,0.9,110,33,76,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,4,0.9,110,33,76,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,4,1.0,121,33,79,20,0.967873644507308,0.19392033542976939,0.9834710743801653,0.696969696969697,612.0,1.0,completed,
+6,NeuralNetwork,ADASYN,4,1.0,121,33,79,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,4,1.0,121,33,79,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,5,0.2,24,33,20,20,1.0,0.1372549019607843,1.0,0.6363636363636364,96.0,1.0,completed,
+6,NeuralNetwork,ADASYN,5,0.2,24,33,20,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,5,0.2,24,33,20,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,5,0.3,36,33,32,20,1.0,0.14379084967320263,1.0,0.6666666666666666,156.0,1.0,completed,
+6,NeuralNetwork,ADASYN,5,0.3,36,33,32,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,5,0.3,36,33,32,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,5,0.4,48,33,44,20,1.0,0.1488095238095238,1.0,0.7575757575757576,234.0,1.0,completed,
+6,NeuralNetwork,ADASYN,5,0.4,48,33,44,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,5,0.4,48,33,44,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,5,0.5,60,33,53,20,1.0,0.14285714285714285,1.0,0.7272727272727273,294.0,1.0,completed,
+6,NeuralNetwork,ADASYN,5,0.5,60,33,53,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,5,0.5,60,33,53,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,5,0.6,74,33,60,20,1.0,0.14285714285714285,1.0,0.7272727272727273,372.0,1.0,completed,
+6,NeuralNetwork,ADASYN,5,0.6,74,33,60,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,5,0.6,74,33,60,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,5,0.7,86,33,66,20,1.0,0.19392033542976939,1.0,0.696969696969697,432.0,1.0,completed,
+6,NeuralNetwork,ADASYN,5,0.7,86,33,66,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,5,0.7,86,33,66,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,5,0.8,98,33,72,20,0.9751679813029507,0.19753086419753085,0.9897959183673469,0.7272727272727273,492.0,1.0,completed,
+6,NeuralNetwork,ADASYN,5,0.8,98,33,72,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,5,0.8,98,33,72,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,5,0.9,110,33,76,20,0.9676719576719576,0.19017094017094016,0.9818181818181818,0.6666666666666666,546.0,1.0,completed,
+6,NeuralNetwork,ADASYN,5,0.9,110,33,76,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,5,0.9,110,33,76,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,ROS,5,1.0,121,33,79,20,0.967873644507308,0.20299145299145296,0.9834710743801653,0.7272727272727273,612.0,1.0,completed,
+6,NeuralNetwork,ADASYN,5,1.0,121,33,79,20,,,,,,,infeasible,ADASYN requires at least 2 training observations per class; minimum class count is 1.
+6,NeuralNetwork,SMOTE,5,1.0,121,33,79,20,,,,,,,infeasible,SMOTE requires at least 2 training observations per class; minimum class count is 1.

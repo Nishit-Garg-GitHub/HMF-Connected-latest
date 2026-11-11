@@ -1,0 +1,10 @@
+{
+  "target_kind": "binary_high_performance_90",
+  "k": null,
+  "model": "DecisionTree",
+  "sampler": "SMOTE",
+  "macro_f1_mean": 0.6285509398934352,
+  "macro_f1_sd": 0.10508014776482197,
+  "n_valid_folds": 6,
+  "status": "screening_candidate"
+}
