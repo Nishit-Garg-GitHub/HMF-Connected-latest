@@ -286,6 +286,8 @@ def extract_temperature(value):
     if pd.isna(value):
         return np.nan
     text = str(value).lower()
+    # Drop "± 2" style uncertainties so "23 ± 2 °C" parses as 23 °C.
+    text = re.sub(r"(?:±|\+/-)\s*\d+(?:\.\d+)?", "", text)
     # Explicit temperature, e.g. 25 °C, 55°C
     match = re.search(
         r"(-?\d+(?:\.\d+)?)\s*°?\s*c",
@@ -423,100 +425,179 @@ df["Alkaline_Electrolyte"] = (
     .astype(int)
 )
 # ============================================================
-# 17. CATALYST FEATURES
+# 17. CATALYST FEATURES (ANODE / WORKING ELECTRODE ONLY)
 # ============================================================
-catalyst_text = (
-    df["Catalysts"]
-    .fillna("")
-    .astype(str)
-    .str.lower()
+# The "Catalysts" field describes the whole cell, e.g.
+# "Anode: Ni3N@C on Ni foam. Cathode: Pt foil". HMF is oxidised at the
+# anode, so counter/reference electrodes (very often Pt, graphite or
+# Ag/AgCl) must not be counted as the catalyst. Element symbols are matched
+# case-sensitively on chemical formulas (Ni3S2, CoNiP, VN, Co9S8), with
+# element names as a fallback (nickel foam, platinum gauze).
+
+ANODE_SPLIT = re.compile(
+    r"(?:\bcathode\b|\bcatholyte\b|counter[- ]electrode|\bcounter\b|"
+    r"reference[- ]electrode|\breference\b)",
+    flags=re.IGNORECASE,
 )
-# ------------------------------------------------------------
-# Metal / element indicators
-# ------------------------------------------------------------
+
+
+def anode_text(value):
+    """Return the anode/working-electrode part of a catalyst description."""
+    if pd.isna(value):
+        return ""
+    text = str(value)
+    # "Cathode: X ... Anode: Y" ordering is rare but handled.
+    anode_match = re.search(r"(?:anode|working electrode)[^:]*:", text, re.I)
+    if anode_match:
+        text = text[anode_match.end():]
+    return ANODE_SPLIT.split(text, maxsplit=1)[0]
+
+
+df["Catalyst_Anode_Text"] = df["Catalysts"].apply(anode_text)
+anode_raw = df["Catalyst_Anode_Text"].fillna("").astype(str)
+catalyst_text = anode_raw.str.lower()
+
+# Symbol: capitalised symbol not followed by a lower-case letter, so "Co" in
+# "Co3O4" matches but "Co" in "Commercial" does not.
 catalyst_elements = {
-    "Ni":
-        r"\bni\b|niooh|ni\(oh\)2|nico|nife|nifo|nifep",
-    "Co":
-        r"\bco\b|coooh|co3o4|co\(oh\)2|nico",
-    "Fe":
-        r"\bfe\b|feooh|fe2o3|fe3o4|nife",
-    "Cu":
-        r"\bcu\b|cuo|cu2o|cu\(oh\)2",
-    "Pt":
-        r"\bpt\b|pt/c",
-    "Pd":
-        r"\bpd\b|pd/c",
-    "Au":
-        r"\bau\b|au/c",
-    "Ru":
-        r"\bru\b|ruo2",
-    "Ir":
-        r"\bir\b|iro2",
-    "Mn":
-        r"\bmn\b|mno2|mno",
-    "Mo":
-        r"\bmo\b|moo",
-    "W":
-        r"\bw\b|wo3",
-    "Ce":
-        r"\bce\b|ceo2",
-    "Zn":
-        r"\bzn\b|zno",
-    "Ag":
-        r"\bag\b"
+    "Ni": (r"Ni(?![a-z])", r"nickel"),
+    "Co": (r"Co(?![a-z])", r"cobalt"),
+    "Fe": (r"Fe(?![a-z])", r"\biron\b"),
+    "Cu": (r"Cu(?![a-z])", r"copper"),
+    "Pt": (r"Pt(?![a-z])", r"platin"),
+    "Pd": (r"Pd(?![a-z])", r"palladium"),
+    "Au": (r"Au(?![a-z])", r"\bgold\b"),
+    "Ru": (r"Ru(?![a-z])", r"ruthenium"),
+    "Ir": (r"Ir(?![a-z])", r"iridium"),
+    "Rh": (r"Rh(?![a-z])", r"rhodium"),
+    "Mn": (r"Mn(?![a-z])", r"manganese"),
+    "Mo": (r"Mo(?![a-z])", r"molybden"),
+    "W": (r"(?<![A-Z])W(?![a-z])", r"tungsten"),
+    "V": (r"(?<![A-Z])V(?![a-z])", r"vanadium"),
+    "Bi": (r"Bi(?![a-z])", r"bismuth"),
+    "Ce": (r"Ce(?![a-z])", r"cerium"),
+    "Zn": (r"Zn(?![a-z])", r"\bzinc\b"),
+    "Ag": (r"Ag(?![a-z])", r"\bsilver\b"),
 }
-for element, pattern in catalyst_elements.items():
+
+for element, (symbol, name) in catalyst_elements.items():
     df[f"Catalyst_{element}"] = (
-        catalyst_text
-        .str.contains(
-            pattern,
-            regex=True,
-            na=False
-        )
-        .astype(int)
-    )
+        anode_raw.str.contains(symbol, regex=True, na=False)
+        | catalyst_text.str.contains(name, regex=True, na=False)
+    ).astype(int)
+
+TRANSITION = ["Ni", "Co", "Fe", "Cu", "Mn", "Mo", "W", "V", "Zn"]
+NOBLE = ["Pt", "Pd", "Au", "Ru", "Ir", "Rh", "Ag"]
+df["Catalyst_N_Elements"] = df[
+    [f"Catalyst_{e}" for e in catalyst_elements]
+].sum(axis=1)
+df["Catalyst_Noble_Metal"] = df[[f"Catalyst_{e}" for e in NOBLE]].max(axis=1)
+df["Catalyst_Bimetallic"] = (
+    df[[f"Catalyst_{e}" for e in TRANSITION]].sum(axis=1) >= 2
+).astype(int)
+
 # ============================================================
-# 18. CATALYST FAMILY FEATURES
+# 18. CATALYST FAMILY AND SUBSTRATE FEATURES
 # ============================================================
+# Each family is (case-sensitive formula pattern, lower-case word pattern).
+# A non-metal symbol counts only when it directly follows the lower-case
+# letter of a metal symbol, a stoichiometric digit/subscript, "x", ")" or "-"
+# (Ni3S2, CoNiP, CuxS, Ni₂P, Co-P). This keeps "NF" (nickel foam), "CFP"
+# (carbon fibre paper), "FTO" and "DES" from being read as N, P, O or S.
+FORMULA_PREFIX = r"(?<=[a-z0-9x\)\-\u2080-\u2089])"
 catalyst_families = {
     "Catalyst_Oxide":
-        r"oxide|nio|co3o4|iro2|ruo2|zno|ceo2|feo",
+        (FORMULA_PREFIX + r"(?<!H\d)(?<!H)O[\d\u2080-\u2089x]*(?![a-zA-Z\(H])|[VWT]i?O\d",
+         r"oxide(?!.*hydr)|\bnio\b"),
     "Catalyst_Hydroxide":
-        r"hydroxide|\(oh\)2",
+        (r"\(OH\)\d|OH(?![a-z])(?<!OOH)", r"hydroxide"),
     "Catalyst_Oxyhydroxide":
-        r"oxyhydroxide|ooh",
+        (r"OOH", r"oxyhydroxide"),
     "Catalyst_LDH":
-        r"\bldh\b|layered double hydroxide",
+        (r"LDH", r"layered double hydroxide"),
     "Catalyst_Phosphide":
-        r"phosphide",
+        (FORMULA_PREFIX + r"P[\d\u2080-\u2089]*(?![a-zA-Z])|_P\b", r"phosph"),
     "Catalyst_Nitride":
-        r"nitride",
+        (r"(?<=[A-Za-z0-9\)])N[\d\u2080-\u2089]*(?![a-zA-Z])", r"nitride"),
     "Catalyst_Sulfide":
-        r"sulfide|sulphide",
+        (FORMULA_PREFIX + r"S(?:x|[\d\u2080-\u2089])*(?![a-zA-Z])", r"sulfide|sulphide"),
     "Catalyst_Selenide":
-        r"selenide",
+        (r"Se(?![a-z])", r"selenide"),
+    "Catalyst_Boride":
+        (FORMULA_PREFIX + r"B(?:x|\d)*(?![a-zA-Z])", r"boride"),
     "Catalyst_MOF":
-        r"\bmof\b|metal[- ]organic framework",
+        (r"MOF", r"metal[- ]organic framework"),
     "Catalyst_Carbon":
-        r"carbon|graphene|cnt|carbon nanotube",
+        (r"@C\b|/C\b|NC\b|CNT", r"carbon|graphit|graphene|nanotube"),
     "Catalyst_SingleAtom":
-        r"single atom|single-atom",
+        (r"-SA\b|SA/", r"single[- ]atom"),
     "Catalyst_Nanoparticle":
-        r"nanoparticle|nano",
+        (r"NPs?\b", r"nano"),
     "Catalyst_Metal":
-        r"metallic"
+        (r"$^", r"metallic|\bbulk\b|\bfoil\b|\bwire\b|plain"),
+    # Electrode substrate / architecture descriptors.
+    "Catalyst_Foam_Substrate":
+        (r"\bNF\b|\bCF\b|\bNiF\b", r"foam"),
+    "Catalyst_Conductive_Glass":
+        (r"FTO|ITO|BDD", r"glass"),
 }
-for feature, pattern in catalyst_families.items():
+
+for feature, (formula, words) in catalyst_families.items():
     df[feature] = (
-        catalyst_text
-        .str.contains(
-            pattern,
-            regex=True,
-            na=False
-        )
-        .astype(int)
+        anode_raw.str.contains(formula, regex=True, na=False)
+        | catalyst_text.str.contains(words, regex=True, na=False)
+    ).astype(int)
+
+# Counter electrode (cathode) descriptors belong to the cell-configuration
+# input group: a Pt counter in a divided cell differs from a bifunctional
+# two-electrode electrolyser with the same material on both sides.
+def counter_electrode_text(value):
+    if pd.isna(value):
+        return ""
+    match = re.search(r"(?:cathode|counter[- ]electrode|\bcounter\b)[^:]*:?(.*)",
+                      str(value), flags=re.IGNORECASE)
+    return match.group(1) if match else ""
+
+
+counter_raw = df["Catalysts"].apply(counter_electrode_text)
+df["Counter_Electrode_Reported"] = (counter_raw.str.strip().str.len() > 0).astype(int)
+df["Counter_Electrode_Pt"] = counter_raw.str.contains(
+    r"Pt(?![a-z])|platin", case=False, regex=True, na=False).astype(int)
+df["Counter_Electrode_Carbon"] = counter_raw.str.contains(
+    r"carbon|graphite", case=False, regex=True, na=False).astype(int)
+df["Counter_Electrode_Ni"] = counter_raw.str.contains(
+    r"Ni(?![a-z])|nickel", regex=True, na=False).astype(int)
+
+# Electrolyte pH: explicit "pH = 13" first, otherwise inferred from a
+# hydroxide concentration (pH = 14 + log10[OH-]); neutral salts -> 7.
+def extract_electrolyte_ph(value):
+    if pd.isna(value):
+        return np.nan
+    text = str(value)
+    explicit = re.search(r"pH\s*(?:=|~|of|maintained at)?\s*(\d+(?:\.\d+)?)", text, re.I)
+    if explicit:
+        return float(explicit.group(1))
+    hydroxide = re.search(
+        r"(\d+(?:\.\d+)?)\s*(mM|M)\s*(?:KOH|NaOH|LiOH|CsOH|RbOH)", text, re.I
     )
+    if hydroxide:
+        conc = float(hydroxide.group(1))
+        if hydroxide.group(2).lower() == "mm":
+            conc /= 1000
+        return float(np.clip(14 + np.log10(max(conc, 1e-4)), 7, 14.7))
+    if re.search(r"H2SO4|HClO4|HNO3|\bHCl\b", text):
+        return 1.0
+    if re.search(r"HCO3", text):
+        return 8.3
+    if re.search(r"borate", text, re.I):
+        return 9.2
+    if re.search(r"SO4|ClO4|NO3|Cl\b|phosphate buffer", text, re.I):
+        return 7.0
+    return np.nan
+
+
+df["Electrolyte_pH"] = df["Electrolyte"].apply(extract_electrolyte_ph)
+
 # ============================================================
 # 19. CELL TYPE FEATURES
 # ============================================================
@@ -662,6 +743,7 @@ ml_features = [
     # ELECTROLYTE
     # --------------------------------------------------------
     "Electrolyte_Concentration_M",
+    "Electrolyte_pH",
     "Alkaline_Electrolyte",
     # --------------------------------------------------------
     # CELL
@@ -670,6 +752,10 @@ ml_features = [
     "Undivided_Cell",
     "Flow_Cell",
     "Three_Electrode",
+    "Counter_Electrode_Reported",
+    "Counter_Electrode_Pt",
+    "Counter_Electrode_Carbon",
+    "Counter_Electrode_Ni",
     # --------------------------------------------------------
     # CATALYST ELEMENTS
     # --------------------------------------------------------
@@ -688,6 +774,12 @@ ml_features = [
     "Catalyst_Ce",
     "Catalyst_Zn",
     "Catalyst_Ag",
+    "Catalyst_Rh",
+    "Catalyst_V",
+    "Catalyst_Bi",
+    "Catalyst_N_Elements",
+    "Catalyst_Noble_Metal",
+    "Catalyst_Bimetallic",
     # --------------------------------------------------------
     # CATALYST FAMILIES
     # --------------------------------------------------------
@@ -699,11 +791,14 @@ ml_features = [
     "Catalyst_Nitride",
     "Catalyst_Sulfide",
     "Catalyst_Selenide",
+    "Catalyst_Boride",
     "Catalyst_MOF",
     "Catalyst_Carbon",
     "Catalyst_SingleAtom",
     "Catalyst_Nanoparticle",
-    "Catalyst_Metal"
+    "Catalyst_Metal",
+    "Catalyst_Foam_Substrate",
+    "Catalyst_Conductive_Glass",
 ]
 # Keep only columns that exist
 ml_features = [

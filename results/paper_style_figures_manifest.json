@@ -1,7 +1,7 @@
 {
   "source": "/Users/ayushgoyal/Documents/GitHub/HMF-Connected-latest/results/classification_kmeans_fold_scores.csv",
-  "valid_fold_rows_used": 2732,
-  "summary_rows": 28,
+  "valid_fold_rows_used": 3416,
+  "summary_rows": 32,
   "display_grid_rows": 36,
   "K_values_displayed": [
     3,
@@ -44,26 +44,6 @@
     {
       "k": 5,
       "sampler": "ADASYN",
-      "model": "NeuralNetwork"
-    },
-    {
-      "k": 5,
-      "sampler": "SMOTE",
-      "model": "DecisionTree"
-    },
-    {
-      "k": 5,
-      "sampler": "SMOTE",
-      "model": "SVM"
-    },
-    {
-      "k": 5,
-      "sampler": "SMOTE",
-      "model": "RandomForest"
-    },
-    {
-      "k": 5,
-      "sampler": "SMOTE",
       "model": "NeuralNetwork"
     }
   ],

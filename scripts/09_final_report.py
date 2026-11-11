@@ -135,14 +135,19 @@ def balancing_section() -> list[str]:
 def learning_shap_section() -> list[str]:
     """Report generalisation and interpretation artifacts."""
     lines = ["## 5. Learning curves and generalisation"]
-    curve_path = RESULTS_DIR / "learning_curve_selected_model.csv"
+    curve_path = RESULTS_DIR / "learning_curves_summary.csv"
     if curve_path.exists():
         curve = pd.read_csv(curve_path)
-        if "test_macro_f1" in curve:
-            valid = curve.dropna(subset=["test_macro_f1"])
-            mean_score = valid.test_macro_f1.mean() if len(valid) else float("nan")
-            lines.append(f"- Valid paper-holdout learning-curve points: **{len(valid)}**.")
-            lines.append(f"- Mean unseen-paper macro-F1 across curve points: **{mean_score:.3f}**.")
+        if {"K", "model", "training_fraction", "mean_validation_macro_f1"}.issubset(curve.columns):
+            full = curve[curve["training_fraction"] == curve["training_fraction"].max()]
+            lines.append("- Unseen-paper macro-F1 at the full training fraction "
+                         "(stage 05, publication-grouped holdouts):")
+            lines.append("")
+            lines.append("| K | Model | Validation macro-F1 | Training macro-F1 |")
+            lines.append("|---|---|---|---|")
+            for row in full.sort_values(["K", "model"]).itertuples():
+                lines.append(f"| {row.K} | {row.model} | {row.mean_validation_macro_f1:.3f} "
+                             f"| {row.mean_training_macro_f1:.3f} |")
     else:
         lines.append("- Learning curve not generated.")
     lines.extend(["", "## 6. SHAP / feature importance"])

@@ -1,5 +1,33 @@
 {
   "stages": {
+    "02_kmeans": {
+      "status": "completed",
+      "details": {
+        "experiment": "all_154_median_imputed_kmeans",
+        "total_records": 154,
+        "fully_observed_records": 102,
+        "records_with_imputed_outcomes": 52,
+        "imputation_method": "median",
+        "imputation_medians": {
+          "Conversion_pct": 99.9,
+          "Yield_pct": 95.9
+        },
+        "k_values": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "label_files": [
+          "kmeans_labels_K3.csv",
+          "kmeans_labels_K4.csv",
+          "kmeans_labels_K5.csv",
+          "kmeans_labels_K6.csv"
+        ],
+        "warning": "Clusters for records with imputed outcomes are exploratory pseudo-labels, not measured performance classes."
+      },
+      "pid": 28950
+    },
     "03_oversampling": {
       "status": "completed",
       "details": {
@@ -17,7 +45,7 @@
         "feasible": 18,
         "infeasible": 18
       },
-      "pid": 25275
+      "pid": 28969
     },
     "04_model_evaluation": {
       "status": "completed",
@@ -25,29 +53,30 @@
         "best_candidate": {
           "target_kind": "binary_high_performance_90",
           "k": null,
-          "model": "RandomForest",
-          "sampler": "ROS",
-          "macro_f1_mean": 0.5863667179576847,
-          "macro_f1_sd": 0.04027814497763899,
-          "macro_f1_ci95_lo": 0.5697407168608059,
-          "macro_f1_ci95_hi": 0.6029927190545635,
+          "model": "NeuralNetwork",
+          "sampler": "SMOTE",
+          "macro_f1_mean": 0.7306760875189986,
+          "macro_f1_sd": 0.03300612061408009,
+          "macro_f1_ci95_lo": 0.7170518305469344,
+          "macro_f1_ci95_hi": 0.7443003444910627,
           "n_valid_repeats": 25,
           "status": "screening_candidate",
           "dummy_macro_f1_mean": 0.47999905969779716,
           "dummy_macro_f1_sd": 0.04746187176070721,
-          "permutation_p_value": 0.5544554455445545
+          "permutation_p_value": 0.46534653465346537
         },
-        "elapsed_seconds": 395.36,
-        "kmeans_repeat_rows": 2000,
-        "kmeans_fold_rows": 10000,
-        "binary_repeat_rows": 500,
-        "binary_fold_rows": 2500,
+        "elapsed_seconds": 131.8,
+        "kmeans_repeat_rows": 2400,
+        "kmeans_fold_rows": 12000,
+        "binary_repeat_rows": 600,
+        "binary_fold_rows": 3000,
         "models": [
           "DecisionTree",
           "SVM",
           "RandomForest",
           "NeuralNetwork",
-          "GradientBoosting"
+          "GradientBoosting",
+          "ExtraTrees"
         ],
         "samplers": [
           "none",
@@ -57,9 +86,9 @@
         ],
         "note": "K-means classes are descriptive; binary >=90% is a secondary screening target.",
         "fold_diagnostics": "Per-fold metrics in classification_*_fold_scores.csv. Official pooled OOF in classification_*_repeat_scores.csv.",
-        "feature_selection": "Fold-local zero-variance filtering only; no univariate outcome-driven feature ranking."
+        "feature_selection": "Fold-local median imputation with missing-value indicators and zero-variance filtering only; no univariate outcome-driven feature ranking."
       },
-      "pid": 25287
+      "pid": 30001
     },
     "05_learning_curves": {
       "status": "completed",
@@ -90,10 +119,10 @@
         "total_feature_records": 154,
         "independent_publications": 99,
         "valid_points": 1080,
-        "mean_validation_accuracy": 0.753136200716846,
-        "mean_validation_macro_f1": 0.2982556321880072
+        "mean_validation_accuracy": 0.7508064516129034,
+        "mean_validation_macro_f1": 0.3365462288103133
       },
-      "pid": 25408
+      "pid": 30225
     },
     "06_shap_analysis": {
       "status": "completed",
@@ -101,171 +130,25 @@
         "candidate": {
           "target_kind": "binary_high_performance_90",
           "k": null,
-          "model": "RandomForest",
-          "sampler": "ROS",
-          "macro_f1_mean": 0.5863667179576847,
-          "macro_f1_sd": 0.04027814497763899,
-          "macro_f1_ci95_lo": 0.5697407168608059,
-          "macro_f1_ci95_hi": 0.6029927190545635,
+          "model": "NeuralNetwork",
+          "sampler": "SMOTE",
+          "macro_f1_mean": 0.7306760875189986,
+          "macro_f1_sd": 0.03300612061408009,
+          "macro_f1_ci95_lo": 0.7170518305469344,
+          "macro_f1_ci95_hi": 0.7443003444910627,
           "n_valid_repeats": 25,
           "status": "screening_candidate",
           "dummy_macro_f1_mean": 0.47999905969779716,
           "dummy_macro_f1_sd": 0.04746187176070721,
-          "permutation_p_value": 0.5544554455445545
+          "permutation_p_value": 0.46534653465346537
         },
-        "method": "shap_tree_explainer",
+        "method": "shap_kernel_explainer",
         "train_papers": 67,
         "heldout_papers": 17,
         "explained_rows": 23,
         "interpretation": "Associational feature importance; not causal evidence."
       },
-      "pid": 25453
-    },
-    "07_regression": {
-      "status": "completed",
-      "details": {
-        "passed": true,
-        "target_checks": {
-          "Conversion_pct": {
-            "mae_beats_baseline": true,
-            "mean_model_mae": 6.274141822377902,
-            "mean_baseline_mae": 7.068849879465268,
-            "mean_model_r2": -2.0672915235420644,
-            "folds_won": 24,
-            "folds_evaluated": 30,
-            "wins_majority_of_folds": true
-          },
-          "Yield_pct": {
-            "mae_beats_baseline": true,
-            "mean_model_mae": 12.35340506423347,
-            "mean_baseline_mae": 13.190927424152294,
-            "mean_model_r2": -0.037526641233198446,
-            "folds_won": 24,
-            "folds_evaluated": 30,
-            "wins_majority_of_folds": true
-          },
-          "FE_pct": {
-            "mae_beats_baseline": true,
-            "mean_model_mae": 8.948136738390255,
-            "mean_baseline_mae": 9.949328600021637,
-            "mean_model_r2": -0.23250839385319808,
-            "folds_won": 27,
-            "folds_evaluated": 30,
-            "wins_majority_of_folds": true
-          },
-          "Selectivity_pct": {
-            "mae_beats_baseline": true,
-            "mean_model_mae": 10.355389625019852,
-            "mean_baseline_mae": 12.365336585580822,
-            "mean_model_r2": -0.01926538219461533,
-            "folds_won": 29,
-            "folds_evaluated": 30,
-            "wins_majority_of_folds": true
-          }
-        },
-        "per_target_model_paths": {
-          "Conversion_pct": "results/regressor_Conversion_pct.joblib",
-          "Yield_pct": "results/regressor_Yield_pct.joblib",
-          "FE_pct": "results/regressor_FE_pct.joblib",
-          "Selectivity_pct": "results/regressor_Selectivity_pct.joblib"
-        },
-        "features": [
-          "HMF_Concentration_mM",
-          "Potential_vs_RHE_V",
-          "Potential_vs_RHE",
-          "Temperature_C",
-          "TEMPO_binary",
-          "Electrolyte_Concentration_M",
-          "Alkaline_Electrolyte",
-          "Divided_Cell",
-          "Undivided_Cell",
-          "Flow_Cell",
-          "Three_Electrode",
-          "Catalyst_Ni",
-          "Catalyst_Co",
-          "Catalyst_Fe",
-          "Catalyst_Cu",
-          "Catalyst_Pt",
-          "Catalyst_Pd",
-          "Catalyst_Au",
-          "Catalyst_Ru",
-          "Catalyst_Ir",
-          "Catalyst_Mn",
-          "Catalyst_Mo",
-          "Catalyst_W",
-          "Catalyst_Ce",
-          "Catalyst_Ag",
-          "Catalyst_Oxide",
-          "Catalyst_Hydroxide",
-          "Catalyst_Oxyhydroxide",
-          "Catalyst_LDH",
-          "Catalyst_MOF",
-          "Catalyst_Carbon",
-          "Catalyst_Nanoparticle",
-          "Electrolyte_Electrolyte_Cation_K",
-          "Electrolyte_Electrolyte_Cation_Li",
-          "Electrolyte_Electrolyte_Cation_Na",
-          "Electrolyte_Electrolyte_Cation_nan",
-          "Electrolyte_Electrolyte_Anion_ClO4",
-          "Electrolyte_Electrolyte_Anion_HCO3",
-          "Electrolyte_Electrolyte_Anion_OH",
-          "Electrolyte_Electrolyte_Anion_SO4",
-          "Electrolyte_Electrolyte_Anion_nan"
-        ],
-        "targets": [
-          "Conversion_pct",
-          "Yield_pct",
-          "FE_pct",
-          "Selectivity_pct"
-        ],
-        "model": "Per-target ExtraTreesRegressor with SelectKBest (primary)",
-        "validation": "Repeated publication-grouped GroupKFold (10 repeats x 3 folds); MAE must beat median baseline and win a majority of folds for every target.",
-        "joint_model_path": "results/multioutput_regressor.joblib",
-        "warning": "A passing internal gate is not experimental validation; confirm candidates in the laboratory."
-      },
-      "pid": 25626
-    },
-    "08_nsga2": {
-      "status": "completed",
-      "details": {
-        "n_pareto_candidates": 48
-      },
-      "pid": 25627
-    },
-    "09_final_report": {
-      "status": "completed",
-      "details": {
-        "report": "results/FINAL_RESEARCH_REPORT.md"
-      },
-      "pid": 25638
-    },
-    "02_kmeans": {
-      "status": "completed",
-      "details": {
-        "experiment": "all_154_median_imputed_kmeans",
-        "total_records": 154,
-        "fully_observed_records": 102,
-        "records_with_imputed_outcomes": 52,
-        "imputation_method": "median",
-        "imputation_medians": {
-          "Conversion_pct": 99.9,
-          "Yield_pct": 95.9
-        },
-        "k_values": [
-          3,
-          4,
-          5,
-          6
-        ],
-        "label_files": [
-          "kmeans_labels_K3.csv",
-          "kmeans_labels_K4.csv",
-          "kmeans_labels_K5.csv",
-          "kmeans_labels_K6.csv"
-        ],
-        "warning": "Clusters for records with imputed outcomes are exploratory pseudo-labels, not measured performance classes."
-      },
-      "pid": 25256
+      "pid": 30269
     },
     "06_shap_analysis_paper_nn_smote": {
       "status": "completed",
@@ -296,7 +179,7 @@
             "beeswarm_class": 0,
             "shap_value_shape": [
               36,
-              41,
+              61,
               3
             ],
             "ros_strategy": "not majority"
@@ -325,14 +208,223 @@
             "beeswarm_class": 4,
             "shap_value_shape": [
               34,
-              41,
+              61,
               5
             ],
             "ros_strategy": "not majority"
           }
         }
       },
-      "pid": 25453
+      "pid": 29315
+    },
+    "07_regression": {
+      "status": "completed",
+      "details": {
+        "passed": true,
+        "target_checks": {
+          "Conversion_pct": {
+            "mae_beats_baseline": true,
+            "mean_model_mae": 6.406741543751247,
+            "mean_baseline_mae": 7.068849879465268,
+            "mean_model_r2": -1.7325811298659402,
+            "folds_won": 23,
+            "folds_evaluated": 30,
+            "wins_majority_of_folds": true
+          },
+          "Yield_pct": {
+            "mae_beats_baseline": true,
+            "mean_model_mae": 11.863919390384309,
+            "mean_baseline_mae": 13.190927424152294,
+            "mean_model_r2": 0.044075895894395284,
+            "folds_won": 25,
+            "folds_evaluated": 30,
+            "wins_majority_of_folds": true
+          },
+          "FE_pct": {
+            "mae_beats_baseline": true,
+            "mean_model_mae": 8.60037075845578,
+            "mean_baseline_mae": 9.949328600021637,
+            "mean_model_r2": -0.06555448196811367,
+            "folds_won": 27,
+            "folds_evaluated": 30,
+            "wins_majority_of_folds": true
+          },
+          "Selectivity_pct": {
+            "mae_beats_baseline": true,
+            "mean_model_mae": 9.970054879750165,
+            "mean_baseline_mae": 12.365336585580822,
+            "mean_model_r2": 0.02997716481434619,
+            "folds_won": 29,
+            "folds_evaluated": 30,
+            "wins_majority_of_folds": true
+          }
+        },
+        "per_target_model_paths": {
+          "Conversion_pct": "results/regressor_Conversion_pct.joblib",
+          "Yield_pct": "results/regressor_Yield_pct.joblib",
+          "FE_pct": "results/regressor_FE_pct.joblib",
+          "Selectivity_pct": "results/regressor_Selectivity_pct.joblib"
+        },
+        "features": [
+          "HMF_Concentration_mM",
+          "Potential_vs_RHE_V",
+          "Potential_vs_RHE",
+          "Temperature_C",
+          "TEMPO_binary",
+          "Electrolyte_Concentration_M",
+          "Electrolyte_pH",
+          "Alkaline_Electrolyte",
+          "Divided_Cell",
+          "Undivided_Cell",
+          "Flow_Cell",
+          "Three_Electrode",
+          "Counter_Electrode_Reported",
+          "Counter_Electrode_Pt",
+          "Counter_Electrode_Carbon",
+          "Counter_Electrode_Ni",
+          "Catalyst_Ni",
+          "Catalyst_Co",
+          "Catalyst_Fe",
+          "Catalyst_Cu",
+          "Catalyst_Pt",
+          "Catalyst_Pd",
+          "Catalyst_Au",
+          "Catalyst_Ru",
+          "Catalyst_Ir",
+          "Catalyst_Mn",
+          "Catalyst_Mo",
+          "Catalyst_W",
+          "Catalyst_Ce",
+          "Catalyst_Zn",
+          "Catalyst_Rh",
+          "Catalyst_V",
+          "Catalyst_Bi",
+          "Catalyst_N_Elements",
+          "Catalyst_Noble_Metal",
+          "Catalyst_Bimetallic",
+          "Catalyst_Oxide",
+          "Catalyst_Hydroxide",
+          "Catalyst_Oxyhydroxide",
+          "Catalyst_LDH",
+          "Catalyst_Phosphide",
+          "Catalyst_Nitride",
+          "Catalyst_Sulfide",
+          "Catalyst_Selenide",
+          "Catalyst_Boride",
+          "Catalyst_MOF",
+          "Catalyst_Carbon",
+          "Catalyst_SingleAtom",
+          "Catalyst_Nanoparticle",
+          "Catalyst_Metal",
+          "Catalyst_Foam_Substrate",
+          "Catalyst_Conductive_Glass",
+          "Electrolyte_Electrolyte_Cation_K",
+          "Electrolyte_Electrolyte_Cation_Li",
+          "Electrolyte_Electrolyte_Cation_Na",
+          "Electrolyte_Electrolyte_Cation_nan",
+          "Electrolyte_Electrolyte_Anion_ClO4",
+          "Electrolyte_Electrolyte_Anion_HCO3",
+          "Electrolyte_Electrolyte_Anion_OH",
+          "Electrolyte_Electrolyte_Anion_SO4",
+          "Electrolyte_Electrolyte_Anion_nan"
+        ],
+        "targets": [
+          "Conversion_pct",
+          "Yield_pct",
+          "FE_pct",
+          "Selectivity_pct"
+        ],
+        "model": "Per-target ExtraTreesRegressor with SelectKBest (primary)",
+        "validation": "Repeated publication-grouped GroupKFold (10 repeats x 3 folds); MAE must beat median baseline and win a majority of folds for every target.",
+        "joint_model_path": "results/multioutput_regressor.joblib",
+        "warning": "A passing internal gate is not experimental validation; confirm candidates in the laboratory."
+      },
+      "pid": 30271
+    },
+    "08_nsga2": {
+      "status": "completed",
+      "details": {
+        "n_pareto_candidates": 48
+      },
+      "pid": 30300
+    },
+    "09_final_report": {
+      "status": "completed",
+      "details": {
+        "report": "results/FINAL_RESEARCH_REPORT.md"
+      },
+      "pid": 30310
+    },
+    "06_shap_analysis_paper": {
+      "status": "completed",
+      "details": {
+        "figures": [
+          "/Users/ayushgoyal/Documents/GitHub/HMF-Connected-latest/figures/shap/Figure_12_SHAP_Bar.png",
+          "/Users/ayushgoyal/Documents/GitHub/HMF-Connected-latest/figures/shap/Figure_13_SHAP_Beeswarm.png"
+        ],
+        "audit": "/Users/ayushgoyal/Documents/GitHub/HMF-Connected-latest/results/shap_paper_K3_K5_audit.json",
+        "runs": {
+          "3": {
+            "model": "GradientBoosting",
+            "sampler": "none",
+            "stage04_macro_f1_mean": 0.6255011246064262,
+            "train_records": 118,
+            "test_records": 36,
+            "train_publications": 79,
+            "test_publications": 20,
+            "train_class_counts_before_sampling": {
+              "0": 105,
+              "1": 4,
+              "2": 9
+            },
+            "class_counts_after_sampling": {
+              "0": 105,
+              "1": 4,
+              "2": 9
+            },
+            "background_rows": 40,
+            "explained_rows": 36,
+            "beeswarm_class": 0,
+            "shap_value_shape": [
+              36,
+              61,
+              3
+            ]
+          },
+          "5": {
+            "model": "NeuralNetwork",
+            "sampler": "ROS",
+            "stage04_macro_f1_mean": 0.3209337719416457,
+            "train_records": 120,
+            "test_records": 34,
+            "train_publications": 79,
+            "test_publications": 20,
+            "train_class_counts_before_sampling": {
+              "0": 16,
+              "1": 4,
+              "2": 1,
+              "3": 2,
+              "4": 97
+            },
+            "class_counts_after_sampling": {
+              "0": 97,
+              "1": 97,
+              "2": 97,
+              "3": 97,
+              "4": 97
+            },
+            "background_rows": 40,
+            "explained_rows": 34,
+            "beeswarm_class": 4,
+            "shap_value_shape": [
+              34,
+              61,
+              5
+            ]
+          }
+        }
+      },
+      "pid": 30269
     }
   }
 }

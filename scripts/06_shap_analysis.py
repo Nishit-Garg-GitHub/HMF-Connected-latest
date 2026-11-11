@@ -26,6 +26,7 @@ from imblearn.over_sampling import RandomOverSampler, SMOTE, ADASYN
 
 from common import (
     RESULTS_DIR, FIGURES_DIR, build_feature_matrix, make_classifier,
+    classification_preprocessing_steps,
     paper_groups, read_cleaned, read_processed, save_figure, stage_status,
 )
 
@@ -84,11 +85,7 @@ def sampler_for(name: str):
 
 def make_pipe(candidate: dict, n_features: int = 15):
     """Build the exact selected model family with fold-local preprocessing."""
-    steps = [
-        ("imputer", SimpleImputer(strategy="median", keep_empty_features=True)),
-        ("variance", VarianceThreshold(threshold=0.0)),
-        ("scaler", StandardScaler()),
-    ]
+    steps = classification_preprocessing_steps()
     sampler = sampler_for(candidate["sampler"])
     if sampler is not None:
         steps.append(("sampler", sampler))
@@ -141,9 +138,15 @@ def shap_or_fallback(pipe, X_train, X_test, y_test, feature_names):
         transformed_test = pipe.named_steps["imputer"].transform(X_test)
         transformed_test = pipe.named_steps["variance"].transform(transformed_test)
         transformed_test = pipe.named_steps["scaler"].transform(transformed_test)
-        selected_names = np.asarray(feature_names)[pipe.named_steps["variance"].get_support()]
+        # The imputer appends missing-value indicator columns, so names must
+        # come from the fitted imputer rather than the raw descriptor list.
+        imputed_names = np.asarray(
+            pipe.named_steps["imputer"].get_feature_names_out(feature_names)
+        )
+        selected_names = imputed_names[pipe.named_steps["variance"].get_support()]
         estimator = pipe.named_steps["model"]
-        if model_name in {"DecisionTreeClassifier", "RandomForestClassifier", "GradientBoostingClassifier"}:
+        if model_name in {"DecisionTreeClassifier", "RandomForestClassifier",
+                          "GradientBoostingClassifier", "ExtraTreesClassifier"}:
             explainer = shap.TreeExplainer(estimator)
             values = explainer.shap_values(transformed_test)
             if isinstance(values, list):
@@ -167,11 +170,22 @@ def shap_or_fallback(pipe, X_train, X_test, y_test, feature_names):
             explain = transformed_test[:min(12, len(transformed_test))]
             explainer = shap.KernelExplainer(estimator.predict_proba, background)
             values = explainer.shap_values(explain, nsamples=80)
+            n_features = len(selected_names)
             if isinstance(values, list):
                 matrix = np.mean(np.abs(np.asarray(values)), axis=(0, 1))
             else:
-                array = np.asarray(values)
-                matrix = np.mean(np.abs(array), axis=0)
+                array = np.abs(np.asarray(values))
+                if array.ndim == 3:
+                    # Average over rows and over the class axis, wherever
+                    # SHAP placed it; flattening a (features, classes) matrix
+                    # would interleave classes and mislabel features.
+                    feature_axis = [i for i in (1, 2) if array.shape[i] == n_features]
+                    if not feature_axis:
+                        raise ValueError(f"Unexpected SHAP array shape: {array.shape}")
+                    class_axis = 2 if feature_axis[0] == 1 else 1
+                    matrix = array.mean(axis=(0, class_axis))
+                else:
+                    matrix = array.mean(axis=0)
             method = "shap_kernel_explainer"
         table = pd.DataFrame({
             "feature": selected_names,
@@ -197,7 +211,8 @@ def plot_importance(table: pd.DataFrame, method: str) -> None:
 
 
 
-# Paper-inspired SHAP settings: best Stage 04 multiclass model, Random Forest + ROS.
+# Paper-inspired SHAP settings: for each K, the best Stage 04 model/sampler
+# pair for that K (read from classification_kmeans_summary.csv).
 PAPER_K_VALUES = (3, 5)
 SHAP_BACKGROUND_ROWS = 40
 SHAP_EXPLAIN_ROWS = 100
@@ -205,19 +220,35 @@ SHAP_NSAMPLES = 100
 TOP_SHAP_FEATURES = 10
 
 
-def make_paper_rf_ros_pipe():
-    """Build the Stage 04 winning Random Forest + ROS pipeline.
+MODEL_SHORT = {
+    "DecisionTree": "DT", "SVM": "SVM", "RandomForest": "RF",
+    "NeuralNetwork": "NN", "GradientBoosting": "GB", "ExtraTrees": "ET",
+}
 
-    ROS is fitted only on the training publications. It can handle singleton
-    classes by duplication; it does not create independent observations.
+
+def make_paper_pipe(model_name: str, sampler_name: str):
+    """Build a Stage 04 model/sampler pipeline for the K-specific SHAP panels.
+
+    Any sampler is fitted only on the training publications; ROS duplicates
+    rows, SMOTE/ADASYN interpolate, neither creates independent observations.
     """
-    return ImbPipeline([
-        ("imputer", SimpleImputer(strategy="median", keep_empty_features=True)),
-        ("variance", VarianceThreshold(threshold=0.0)),
-        ("scaler", StandardScaler()),
-        ("sampler", RandomOverSampler(random_state=RANDOM_STATE)),
-        ("model", make_classifier("RandomForest", RANDOM_STATE)),
-    ])
+    steps = classification_preprocessing_steps()
+    sampler = sampler_for(sampler_name)
+    if sampler is not None:
+        steps.append(("sampler", sampler))
+    steps.append(("model", make_classifier(model_name, RANDOM_STATE)))
+    return ImbPipeline(steps)
+
+
+def ranked_kmeans_candidates(k: int) -> list[tuple[str, str, float]]:
+    """Stage 04 (model, sampler, macro-F1) pairs for one K, best first."""
+    path = RESULTS_DIR / "classification_kmeans_summary.csv"
+    if not path.exists():
+        return [("RandomForest", "ROS", float("nan"))]
+    summary = pd.read_csv(path)
+    subset = summary[summary["k"] == k].sort_values("macro_f1_mean", ascending=False)
+    return [(str(r.model), str(r.sampler), float(r.macro_f1_mean))
+            for r in subset.itertuples()] or [("RandomForest", "ROS", float("nan"))]
 
 
 def group_holdout_for_ros(groups: np.ndarray, y: np.ndarray):
@@ -244,7 +275,7 @@ def group_holdout_for_ros(groups: np.ndarray, y: np.ndarray):
     if best is None:
         raise ValueError(
             "No publication-grouped split retains every K-means class in training; "
-            "RF+ROS SHAP cannot be fitted without leakage."
+            "the K-specific SHAP model cannot be fitted without leakage."
         )
     return best
 
@@ -345,8 +376,8 @@ def make_beeswarm_panel(ax, shap_matrix: np.ndarray, feature_values: np.ndarray,
     cbar.set_label("Feature value", fontsize=8)
 
 
-def run_paper_rf_ros_shap(X_all: pd.DataFrame, feature_names: list[str]):
-    """Generate Figure 12/13 for the Stage 04 winner: RF+ROS, K=3 and K=5."""
+def run_paper_shap(X_all: pd.DataFrame, feature_names: list[str]):
+    """Generate Figure 12/13 for the best Stage 04 model at K=3 and K=5."""
     try:
         import shap  # noqa: F401
     except Exception as exc:
@@ -358,11 +389,12 @@ def run_paper_rf_ros_shap(X_all: pd.DataFrame, feature_names: list[str]):
 
     importance_tables = {}
     beeswarm_payload = {}
+    selected = {}
     audit = {
-        "model": "RandomForest",
-        "sampler": "ROS",
+        "selection": "best Stage 04 pooled-OOF macro-F1 for each K "
+                     "(next candidate used if the sampler cannot fit the holdout)",
         "k_values": list(PAPER_K_VALUES),
-        "split": "publication-grouped 80/20 holdout; ROS fitted on training papers only",
+        "split": "publication-grouped 80/20 holdout; sampler fitted on training papers only",
         "background_rows_requested": SHAP_BACKGROUND_ROWS,
         "explanation_rows_requested": SHAP_EXPLAIN_ROWS,
         "kernel_shap_nsamples": SHAP_NSAMPLES,
@@ -390,8 +422,19 @@ def run_paper_rf_ros_shap(X_all: pd.DataFrame, feature_names: list[str]):
         X_train, X_test = X.iloc[train_idx], X.iloc[test_idx]
         y_train, y_test = y[train_idx], y[test_idx]
 
-        pipe = make_paper_rf_ros_pipe()
-        pipe.fit(X_train, y_train)
+        pipe, chosen = None, None
+        for model_name, sampler_name, score in ranked_kmeans_candidates(k):
+            try:
+                candidate_pipe = make_paper_pipe(model_name, sampler_name)
+                candidate_pipe.fit(X_train, y_train)
+            except Exception as exc:  # e.g. SMOTE with too few minority rows
+                print(f"K={k}: {model_name}+{sampler_name} cannot fit holdout ({exc}); trying next.")
+                continue
+            pipe, chosen = candidate_pipe, (model_name, sampler_name, score)
+            break
+        if pipe is None:
+            raise RuntimeError(f"No Stage 04 candidate could be fitted for K={k}.")
+        selected[k] = chosen
 
         # KernelExplainer receives raw input rows and calls the complete fitted
         # pipeline, ensuring the same imputation/scaling/model transformations.
@@ -433,7 +476,7 @@ def run_paper_rf_ros_shap(X_all: pd.DataFrame, feature_names: list[str]):
         }).sort_values("mean_abs_shap", ascending=False).reset_index(drop=True)
         importance_tables[k] = importance
         importance.to_csv(
-            RESULTS_DIR / f"shap_rf_ros_K{k}_feature_importance.csv",
+            RESULTS_DIR / f"shap_paper_K{k}_feature_importance.csv",
             index=False,
         )
 
@@ -456,33 +499,37 @@ def run_paper_rf_ros_shap(X_all: pd.DataFrame, feature_names: list[str]):
             "n_explained": int(len(explain_array)),
         }
 
+        sampler_step = pipe.named_steps.get("sampler")
+        if sampler_step is not None:
+            transformed = pipe.named_steps["scaler"].transform(
+                pipe.named_steps["variance"].transform(
+                    pipe.named_steps["imputer"].transform(X_train)))
+            resampled_y = sampler_step.fit_resample(transformed, y_train)[1]
+        else:
+            resampled_y = y_train
         audit["runs"][str(k)] = {
+            "model": chosen[0],
+            "sampler": chosen[1],
+            "stage04_macro_f1_mean": chosen[2],
             "train_records": int(len(train_idx)),
             "test_records": int(len(test_idx)),
             "train_publications": int(len(np.unique(groups[train_idx]))),
             "test_publications": int(len(np.unique(groups[test_idx]))),
-            "train_class_counts_before_smote": {
+            "train_class_counts_before_sampling": {
                 str(key): int(value)
                 for key, value in pd.Series(y_train).value_counts().sort_index().items()
             },
-            "class_counts_after_ros": {
+            "class_counts_after_sampling": {
                 str(key): int(value)
-                for key, value in pd.Series(pipe.named_steps["sampler"].fit_resample(
-                    pipe.named_steps["scaler"].transform(
-                        pipe.named_steps["variance"].transform(
-                            pipe.named_steps["imputer"].transform(X_train)
-                        )
-                    ), y_train
-                )[1]).value_counts().sort_index().items()
+                for key, value in pd.Series(resampled_y).value_counts().sort_index().items()
             },
             "background_rows": int(background_n),
             "explained_rows": int(len(explain_array)),
             "beeswarm_class": int(beeswarm_payload[k]["class_label"]),
             "shap_value_shape": list(values.shape),
-            "ros_strategy": "not majority",
         }
         print(
-            f"SHAP RF+ROS K={k}: train={len(train_idx)}, "
+            f"SHAP {chosen[0]}+{chosen[1]} K={k}: train={len(train_idx)}, "
             f"held-out={len(test_idx)}, explained={len(explain_array)}"
         )
 
@@ -492,16 +539,20 @@ def run_paper_rf_ros_shap(X_all: pd.DataFrame, feature_names: list[str]):
         top = importance_tables[k].head(TOP_SHAP_FEATURES).sort_values("mean_abs_shap")
         ax.barh(top["feature"], top["mean_abs_shap"])
         ax.set_xlabel("Mean |SHAP value|")
-        ax.set_title(f"K = {k}", fontweight="bold")
+        ax.xaxis.set_major_locator(plt.MaxNLocator(5))
+        ax.ticklabel_format(axis="x", style="sci", scilimits=(-2, 3))
+        model_name, sampler_name, score = selected[k]
+        ax.set_title(f"K = {k}: {MODEL_SHORT.get(model_name, model_name)} + {sampler_name}"
+                     f" (macro-F1 {score:.3f})", fontweight="bold")
         ax.grid(axis="x", alpha=0.2)
     fig.suptitle(
-        "Figure 12. Global SHAP feature importance of Random Forest under ROS",
+        "Figure 12. Global SHAP feature importance of the best Stage 04 model per K",
         fontsize=13, fontweight="bold",
     )
     fig.tight_layout()
-    save_figure(fig, FIGURES_DIR / "shap" / "Figure_12_RF_ROS_SHAP_Bar.png")
+    save_figure(fig, FIGURES_DIR / "shap" / "Figure_12_SHAP_Bar.png")
     fig.savefig(
-        FIGURES_DIR / "shap" / "Figure_12_RF_ROS_SHAP_Bar.pdf",
+        FIGURES_DIR / "shap" / "Figure_12_SHAP_Bar.pdf",
         bbox_inches="tight",
     )
     plt.close(fig)
@@ -513,21 +564,23 @@ def run_paper_rf_ros_shap(X_all: pd.DataFrame, feature_names: list[str]):
         payload = beeswarm_payload[k]
         make_beeswarm_panel(
             ax, payload["values"], payload["features"],
-            feature_names, f"K = {k} (class {payload['class_label']})",
+            feature_names,
+            f"K = {k}: {MODEL_SHORT.get(selected[k][0], selected[k][0])} + {selected[k][1]}"
+            f" (class {payload['class_label']})",
         )
     fig.suptitle(
-        "Figure 13. SHAP beeswarm plots of Random Forest under ROS",
+        "Figure 13. SHAP beeswarm plots of the best Stage 04 model per K",
         fontsize=13, fontweight="bold",
     )
     fig.tight_layout()
-    save_figure(fig, FIGURES_DIR / "shap" / "Figure_13_RF_ROS_SHAP_Beeswarm.png")
+    save_figure(fig, FIGURES_DIR / "shap" / "Figure_13_SHAP_Beeswarm.png")
     fig.savefig(
-        FIGURES_DIR / "shap" / "Figure_13_RF_ROS_SHAP_Beeswarm.pdf",
+        FIGURES_DIR / "shap" / "Figure_13_SHAP_Beeswarm.pdf",
         bbox_inches="tight",
     )
     plt.close(fig)
 
-    (RESULTS_DIR / "shap_rf_ros_K3_K5_audit.json").write_text(
+    (RESULTS_DIR / "shap_paper_K3_K5_audit.json").write_text(
         json.dumps(audit, indent=2), encoding="utf-8"
     )
     return audit
@@ -564,18 +617,19 @@ def main() -> None:
     print(f"Feature interpretation completed using {method}.")
     print(table.head(15).to_string(index=False))
 
-    # Additional paper-inspired analysis: Stage 04 winner, Random Forest + ROS,
-    # evaluated with the K=3 and K=5 cluster labels.
-    paper_audit = run_paper_rf_ros_shap(X_all, feature_names)
-    stage_status("06_shap_analysis_paper_nn_smote", "completed", {
+    # Additional paper-inspired analysis: best Stage 04 model for each of the
+    # K=3 and K=5 cluster label sets.
+    paper_audit = run_paper_shap(X_all, feature_names)
+    stage_status("06_shap_analysis_paper", "completed", {
         "figures": [
-            str(FIGURES_DIR / "shap" / "Figure_12_RF_ROS_SHAP_Bar.png"),
-            str(FIGURES_DIR / "shap" / "Figure_13_RF_ROS_SHAP_Beeswarm.png"),
+            str(FIGURES_DIR / "shap" / "Figure_12_SHAP_Bar.png"),
+            str(FIGURES_DIR / "shap" / "Figure_13_SHAP_Beeswarm.png"),
         ],
-        "audit": str(RESULTS_DIR / "shap_rf_ros_K3_K5_audit.json"),
+        "audit": str(RESULTS_DIR / "shap_paper_K3_K5_audit.json"),
         "runs": paper_audit["runs"],
     })
-    print("Generated Figure 12 and Figure 13 for the Stage 04 winner: RF + ROS, K=3 and K=5.")
+    chosen = ", ".join(f"K={k}: {r['model']}+{r['sampler']}" for k, r in paper_audit["runs"].items())
+    print(f"Generated Figure 12 and Figure 13 for the best Stage 04 model per K ({chosen}).")
 
 
 if __name__ == "__main__":

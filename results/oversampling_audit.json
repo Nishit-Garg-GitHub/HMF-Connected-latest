@@ -172,10 +172,10 @@
     "train_after": {
       "0": 93,
       "1": 92,
-      "2": 92
+      "2": 91
     },
     "n_train_before": 104,
-    "n_train_after": 277,
+    "n_train_after": 276,
     "n_validation_untouched": 50,
     "note": "Resampling restricted to this training fold."
   },

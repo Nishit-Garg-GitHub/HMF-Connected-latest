@@ -8,7 +8,7 @@ This report distinguishes paper-inspired methodology from the results obtained o
 ## 1. Literature dataset and preprocessing
 - Source records: **154**.
 - Publication groups: **99**.
-- Preprocessed descriptors: **53 columns before exclusions**.
+- Preprocessed descriptors: **67 columns before exclusions**.
 - The feature matrix excludes all four measured targets and outcome-derived columns.
 - The agreed experimental input groups are TEMPO, temperature, reactant monomer, HMF concentration, catalyst, electrolyte, potential vs RHE and cell type.
 - Chemical/catalyst/electrolyte descriptors are represented by engineered numerical columns.
@@ -26,28 +26,28 @@ K-means is performed on conversion/yield outcome space for descriptive performan
 ## 3. Classification and sampling comparison
 | target_kind    |   k | model            | sampler   |   macro_f1_mean |   macro_f1_sd |   macro_f1_ci95_lo |   macro_f1_ci95_hi |   accuracy_mean | leakage_flag   |
 |:---------------|----:|:-----------------|:----------|----------------:|--------------:|-------------------:|-------------------:|----------------:|:---------------|
-| kmeans_cluster |   4 | RandomForest     | ADASYN    |        0.477272 |    0.00663432 |           0.474533 |           0.48001  |        0.913333 | False          |
-| kmeans_cluster |   4 | RandomForest     | SMOTE     |        0.470658 |    0.0308826  |           0.457911 |           0.483406 |        0.912    | False          |
-| kmeans_cluster |   4 | SVM              | SMOTE     |        0.457908 |    0.0147503  |           0.451819 |           0.463997 |        0.846    | False          |
-| kmeans_cluster |   4 | SVM              | ADASYN    |        0.457908 |    0.0147503  |           0.451819 |           0.463997 |        0.846    | False          |
-| kmeans_cluster |   4 | GradientBoosting | SMOTE     |        0.437065 |    0.0854659  |           0.401786 |           0.472343 |        0.856667 | False          |
-| kmeans_cluster |   4 | GradientBoosting | ADASYN    |        0.434113 |    0.114076   |           0.387025 |           0.481201 |        0.856    | False          |
-| kmeans_cluster |   3 | GradientBoosting | ROS       |        0.420676 |    0.0694125  |           0.392024 |           0.449328 |        0.851169 | False          |
-| kmeans_cluster |   3 | DecisionTree     | ROS       |        0.409536 |    0.078847   |           0.376989 |           0.442082 |        0.774026 | False          |
-| kmeans_cluster |   3 | DecisionTree     | none      |        0.397042 |    0.0586473  |           0.372833 |           0.42125  |        0.737143 | False          |
-| kmeans_cluster |   3 | NeuralNetwork    | SMOTE     |        0.388868 |    0.0700798  |           0.35994  |           0.417795 |        0.701299 | False          |
-| kmeans_cluster |   3 | RandomForest     | ROS       |        0.378857 |    0.0494832  |           0.358431 |           0.399283 |        0.868571 | False          |
-| kmeans_cluster |   3 | GradientBoosting | ADASYN    |        0.374069 |    0.0677442  |           0.346106 |           0.402033 |        0.847013 | False          |
-| kmeans_cluster |   3 | NeuralNetwork    | ROS       |        0.372932 |    0.0666708  |           0.345411 |           0.400452 |        0.683896 | False          |
-| kmeans_cluster |   3 | GradientBoosting | SMOTE     |        0.371335 |    0.0637667  |           0.345013 |           0.397656 |        0.85039  | False          |
-| kmeans_cluster |   3 | NeuralNetwork    | ADASYN    |        0.366341 |    0.0598105  |           0.341652 |           0.391029 |        0.676623 | False          |
-| kmeans_cluster |   3 | DecisionTree     | SMOTE     |        0.360607 |    0.0350251  |           0.34615  |           0.375065 |        0.830649 | False          |
-| kmeans_cluster |   4 | DecisionTree     | SMOTE     |        0.359681 |    0.144789   |           0.299915 |           0.419447 |        0.824667 | False          |
-| kmeans_cluster |   3 | DecisionTree     | ADASYN    |        0.355462 |    0.0363824  |           0.340445 |           0.37048  |        0.832987 | False          |
-| kmeans_cluster |   4 | DecisionTree     | ADASYN    |        0.341503 |    0.105067   |           0.298133 |           0.384873 |        0.817333 | False          |
-| kmeans_cluster |   3 | NeuralNetwork    | none      |        0.338957 |    0.0473746  |           0.319402 |           0.358513 |        0.786494 | False          |
+| kmeans_cluster |   3 | GradientBoosting | none      |        0.625501 |     0.0595084 |           0.600937 |           0.650065 |        0.905714 | False          |
+| kmeans_cluster |   3 | GradientBoosting | SMOTE     |        0.604259 |     0.080735  |           0.570934 |           0.637585 |        0.905974 | False          |
+| kmeans_cluster |   3 | GradientBoosting | ADASYN    |        0.602803 |     0.0973239 |           0.562629 |           0.642976 |        0.905714 | False          |
+| kmeans_cluster |   3 | GradientBoosting | ROS       |        0.590515 |     0.0434347 |           0.572586 |           0.608443 |        0.875584 | False          |
+| kmeans_cluster |   3 | NeuralNetwork    | ROS       |        0.535104 |     0.0950644 |           0.495863 |           0.574345 |        0.875325 | False          |
+| kmeans_cluster |   3 | NeuralNetwork    | ADASYN    |        0.519645 |     0.0839152 |           0.485007 |           0.554284 |        0.867013 | False          |
+| kmeans_cluster |   3 | DecisionTree     | none      |        0.518887 |     0.0762407 |           0.487416 |           0.550357 |        0.839221 | False          |
+| kmeans_cluster |   3 | NeuralNetwork    | SMOTE     |        0.515372 |     0.0839641 |           0.480713 |           0.550031 |        0.866494 | False          |
+| kmeans_cluster |   3 | DecisionTree     | ROS       |        0.511631 |     0.0789258 |           0.479052 |           0.54421  |        0.847013 | False          |
+| kmeans_cluster |   3 | SVM              | none      |        0.485886 |     0.0927914 |           0.447584 |           0.524188 |        0.872208 | False          |
+| kmeans_cluster |   3 | ExtraTrees       | SMOTE     |        0.484388 |     0.0255426 |           0.473844 |           0.494931 |        0.911169 | False          |
+| kmeans_cluster |   3 | RandomForest     | ROS       |        0.480831 |     0.0905955 |           0.443436 |           0.518227 |        0.898701 | False          |
+| kmeans_cluster |   3 | ExtraTrees       | ADASYN    |        0.478056 |     0.0272057 |           0.466826 |           0.489286 |        0.91013  | False          |
+| kmeans_cluster |   3 | ExtraTrees       | none      |        0.456594 |     0.046887  |           0.43724  |           0.475948 |        0.907273 | False          |
+| kmeans_cluster |   3 | DecisionTree     | ADASYN    |        0.453957 |     0.0654942 |           0.426922 |           0.480992 |        0.88026  | False          |
+| kmeans_cluster |   3 | DecisionTree     | SMOTE     |        0.450015 |     0.05622   |           0.426808 |           0.473221 |        0.878701 | False          |
+| kmeans_cluster |   3 | ExtraTrees       | ROS       |        0.444364 |     0.0407617 |           0.427538 |           0.46119  |        0.903636 | False          |
+| kmeans_cluster |   3 | NeuralNetwork    | none      |        0.438214 |     0.0728097 |           0.40816  |           0.468269 |        0.887013 | False          |
+| kmeans_cluster |   3 | SVM              | SMOTE     |        0.435596 |     0.0987806 |           0.394821 |           0.476371 |        0.888312 | False          |
+| kmeans_cluster |   4 | DecisionTree     | SMOTE     |        0.427478 |     0.0835209 |           0.393003 |           0.461954 |        0.88026  | False          |
 
-Selected screening candidate: **RandomForest + ROS**, K=None, mean macro-F1=0.5863667179576847, 95% CI=[0.570, 0.603], dummy baseline mean macro-F1=0.4800, permutation test p-value=0.5545.
+Selected screening candidate: **NeuralNetwork + SMOTE**, K=None, mean macro-F1=0.7306760875189986, 95% CI=[0.717, 0.744], dummy baseline mean macro-F1=0.4800, permutation test p-value=0.4653.
 Samplers: no sampling, RandomOverSampler (ROS), SMOTE and ADASYN. Sampling occurs inside training folds only. Infeasible sampler/fold combinations are reported rather than silently replaced.
 Evaluation uses pooled out-of-fold predictions per repeat across >=20 publication-grouped repeats before calculating macro-F1.
 Scores above 0.8 are flagged for leakage audit. Predicted performance reflects unseen-paper generalization.
@@ -63,7 +63,7 @@ Scores above 0.8 are flagged for leakage audit. Predicted performance reflects u
 |   3 | ADASYN    | ok         | {"0": 91, "1": 4, "2": 6}                         | {"0": 91, "1": 92, "2": 90}                            | nan                                                                                          |
 |   3 | ROS       | ok         | {"0": 93, "1": 3, "2": 8}                         | {"0": 93, "1": 93, "2": 93}                            | nan                                                                                          |
 |   3 | SMOTE     | ok         | {"0": 93, "1": 3, "2": 8}                         | {"0": 93, "1": 93, "2": 93}                            | nan                                                                                          |
-|   3 | ADASYN    | ok         | {"0": 93, "1": 3, "2": 8}                         | {"0": 93, "1": 92, "2": 92}                            | nan                                                                                          |
+|   3 | ADASYN    | ok         | {"0": 93, "1": 3, "2": 8}                         | {"0": 93, "1": 92, "2": 91}                            | nan                                                                                          |
 |   4 | ROS       | ok         | {"0": 91, "1": 2, "2": 2, "3": 7}                 | {"0": 91, "1": 91, "2": 91, "3": 91}                   | nan                                                                                          |
 |   4 | SMOTE     | infeasible | {"0": 91, "1": 2, "2": 2, "3": 7}                 | {}                                                     | Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2 |
 |   4 | ADASYN    | infeasible | {"0": 91, "1": 2, "2": 2, "3": 7}                 | {}                                                     | Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2 |
@@ -93,42 +93,56 @@ Scores above 0.8 are flagged for leakage audit. Predicted performance reflects u
 |   6 | ADASYN    | infeasible | {"0": 84, "1": 2, "2": 4, "3": 4, "4": 9, "5": 1} | {}                                                     | Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2 |
 
 ## 5. Learning curves and generalisation
-- Valid paper-holdout learning-curve points: **8**.
-- Mean unseen-paper macro-F1 across curve points: **0.620**.
+- Unseen-paper macro-F1 at the full training fraction (stage 05, publication-grouped holdouts):
+
+| K | Model | Validation macro-F1 | Training macro-F1 |
+|---|---|---|---|
+| 3 | DecisionTree | 0.481 | 0.920 |
+| 3 | NeuralNetwork | 0.537 | 0.959 |
+| 3 | RandomForest | 0.470 | 0.939 |
+| 3 | SVM | 0.729 | 0.834 |
+| 4 | DecisionTree | 0.286 | 0.556 |
+| 4 | NeuralNetwork | 0.299 | 0.969 |
+| 4 | RandomForest | 0.228 | 0.959 |
+| 4 | SVM | 0.223 | 0.909 |
+| 5 | DecisionTree | 0.209 | 0.740 |
+| 5 | NeuralNetwork | 0.315 | 0.774 |
+| 5 | RandomForest | 0.231 | 0.874 |
+| 5 | SVM | 0.250 | 0.734 |
 
 ## 6. SHAP / feature importance
 | feature                           |   mean_abs_shap |
 |:----------------------------------|----------------:|
-| Electrolyte_Concentration_M       |       0.0759881 |
-| Potential_vs_RHE_V                |       0.0520102 |
-| Catalyst_Carbon                   |       0.0427714 |
-| Catalyst_Pt                       |       0.0348987 |
-| HMF_Concentration_mM              |       0.0269892 |
-| Catalyst_Nanoparticle             |       0.0232085 |
-| Catalyst_Hydroxide                |       0.0210265 |
-| Three_Electrode                   |       0.0205726 |
-| Catalyst_Co                       |       0.020419  |
-| Catalyst_Oxyhydroxide             |       0.0183596 |
-| Electrolyte_Electrolyte_Cation_Na |       0.0153606 |
-| Potential_vs_RHE                  |       0.0135771 |
+| Catalyst_Conductive_Glass         |       0.0897748 |
+| Catalyst_Cu                       |       0.0636189 |
+| Catalyst_V                        |       0.0576132 |
+| Counter_Electrode_Carbon          |       0.0483421 |
+| Catalyst_Carbon                   |       0.0388169 |
+| missingindicator_Temperature_C    |       0.0359286 |
+| Catalyst_Hydroxide                |       0.0348796 |
+| Electrolyte_Electrolyte_Anion_nan |       0.0274185 |
+| Catalyst_N_Elements               |       0.0254851 |
+| Catalyst_Oxyhydroxide             |       0.0244946 |
+| Catalyst_Nitride                  |       0.023863  |
+| Three_Electrode                   |       0.0232732 |
 Feature importance is associational and should not be interpreted as causal evidence.
 
 ## 7. Multi-output regression
 ### Primary — Per-target regression (SelectKBest + ExtraTrees)
 | target          |   model_r2_mean |   model_r2_sd |   model_mae_mean |   baseline_mae_mean |   model_rmse_mean |
 |:----------------|----------------:|--------------:|-----------------:|--------------------:|------------------:|
-| Conversion_pct  |      -2.06729   |      6.51992  |          6.27414 |             7.06885 |           13.3324 |
-| FE_pct          |      -0.232508  |      0.798494 |          8.94814 |             9.94933 |           15.4255 |
-| Selectivity_pct |      -0.0192654 |      0.593863 |         10.3554  |            12.3653  |           17.334  |
-| Yield_pct       |      -0.0375266 |      0.129254 |         12.3534  |            13.1909  |           20.2965 |
+| Conversion_pct  |      -1.73258   |      4.86348  |          6.40674 |             7.06885 |           13.513  |
+| FE_pct          |      -0.0655545 |      0.484988 |          8.60037 |             9.94933 |           14.9696 |
+| Selectivity_pct |       0.0299772 |      0.405537 |          9.97005 |            12.3653  |           17.2024 |
+| Yield_pct       |       0.0440759 |      0.170476 |         11.8639  |            13.1909  |           19.4966 |
 
 ### Secondary — Joint multi-output regression (complete rows only)
 | target          |   model_r2_mean |   model_r2_sd |   model_mae_mean |   baseline_mae_mean |   model_rmse_mean |
 |:----------------|----------------:|--------------:|-----------------:|--------------------:|------------------:|
-| Conversion_pct  |      -56.8196   |     51.0622   |          3.91726 |             2.07617 |           11.4735 |
-| FE_pct          |       -1.37152  |      1.66131  |          8.68344 |             6.886   |           14.8821 |
-| Selectivity_pct |       -0.379789 |      0.569455 |          5.92782 |             5.3445  |           11.9639 |
-| Yield_pct       |       -0.452306 |      0.694989 |          5.96523 |             5.29133 |           11.9438 |
+| Conversion_pct  |      -3.57886   |     3.19244   |          2.55179 |             2.07617 |           7.67329 |
+| FE_pct          |      -0.375536  |     0.655528  |          7.28042 |             6.886   |          12.4328  |
+| Selectivity_pct |      -0.0213833 |     0.131564  |          5.82484 |             5.3445  |          10.9836  |
+| Yield_pct       |      -0.0489266 |     0.0892687 |          5.74454 |             5.29133 |          11.1053  |
 
 
 Regression validation gate: **PASSED**.

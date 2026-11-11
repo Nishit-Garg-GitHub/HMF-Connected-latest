@@ -44,6 +44,7 @@ from common import (
     FIGURES_DIR,
     build_feature_matrix,
     make_classifier,
+    classification_preprocessing_steps,
     paper_groups,
     read_processed,
     stage_status,
@@ -143,41 +144,15 @@ def load_cluster_labels(k):
 # ============================================================
 
 def make_learning_pipeline(model_name, seed):
+    """Stage-04 model with the shared fold-local preprocessing.
 
-    if model_name == "NeuralNetwork":
-
-        # Disable internal early stopping because very small
-        # classes make its internal validation split unreliable.
-        model = MLPClassifier(
-            hidden_layer_sizes=(32, 16),
-            alpha=0.02,
-            learning_rate_init=0.001,
-            max_iter=1000,
-            early_stopping=False,
-            random_state=seed,
-        )
-
-    else:
-        model = make_classifier(model_name, seed)
-
-    return Pipeline([
-        (
-            "imputer",
-            SimpleImputer(
-                strategy="median",
-                keep_empty_features=True,
-            ),
-        ),
-        (
-            "variance",
-            VarianceThreshold(threshold=0.0),
-        ),
-        (
-            "scaler",
-            StandardScaler(),
-        ),
-        ("model", model),
-    ])
+    The tuned NeuralNetwork in common.make_classifier already disables
+    internal early stopping, so no stage-specific override is needed.
+    """
+    return Pipeline(
+        classification_preprocessing_steps()
+        + [("model", make_classifier(model_name, seed))]
+    )
 
 
 # ============================================================
@@ -796,7 +771,8 @@ def fit_oversampled_nn_scores(X, y, train_idx, test_idx, seed, k, method):
     y_test = y[test_idx]
 
     # Every transform is fitted exclusively on this training subset.
-    imputer = SimpleImputer(strategy="median", keep_empty_features=True)
+    imputer = SimpleImputer(strategy="median", add_indicator=True,
+                            keep_empty_features=True)
     X_train_imp = imputer.fit_transform(X_train)
     X_test_imp = imputer.transform(X_test)
 
@@ -840,15 +816,8 @@ def fit_oversampled_nn_scores(X, y, train_idx, test_idx, seed, k, method):
         X_train_scaled, y_train
     )
 
-    # Keep NN architecture and regularisation aligned with the original Stage 05.
-    model = MLPClassifier(
-        hidden_layer_sizes=(32, 16),
-        alpha=0.02,
-        learning_rate_init=0.001,
-        max_iter=1000,
-        early_stopping=False,
-        random_state=seed,
-    )
+    # Keep the NN identical to the tuned Stage 04 NeuralNetwork.
+    model = make_classifier("NeuralNetwork", seed)
     model.fit(X_resampled, y_resampled)
 
     train_pred = model.predict(X_train_scaled)

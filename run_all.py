@@ -22,7 +22,7 @@ STAGES = [
     ("01_preprocess_data.py", "01 — cleaning and feature engineering"),
     ("02_kmeans.py", "02 — K-means clustering, K=3,4,5,6"),
     ("03_oversampling.py", "03 — ROS, SMOTE and ADASYN fold audit"),
-    ("04_model_evaluation.py", "04 — DT, SVM, RF and NN comparison"),
+    ("04_model_evaluation.py", "04 — DT, SVM, RF, NN, GB and ET comparison"),
     ("05_learning_curves.py", "05 — learning curves and generalisation"),
     ("06_shap_analysis.py", "06 — SHAP / feature importance"),
     ("07_regression.py", "07 — joint four-output regression"),
@@ -114,6 +114,8 @@ def main():
                         "regression_validation_gate.json", "nsga2_*.csv", "nsga2_status.json",
                         "pipeline_manifest.json", "FINAL_RESEARCH_REPORT.md"):
             for path in RESULTS.glob(pattern):
+                if "_BEFORE" in path.name:
+                    continue  # keep frozen pre-optimisation baselines
                 path.unlink(missing_ok=True)
     start_number = int(args.start)
     outcomes = []

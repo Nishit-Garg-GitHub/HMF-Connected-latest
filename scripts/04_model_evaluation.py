@@ -12,10 +12,16 @@ folds are pooled and a single macro-F1 is computed. This is the OFFICIAL
 metric. Per-fold metrics are still saved for paper-style figures only.
 
 25 repeats × 5 publication-grouped folds.
+
+Preprocessing (common.classification_preprocessing_steps) is fitted inside
+each training fold: median imputation with missing-value indicators, a
+zero-variance filter and scaling. Repeats are run in parallel with joblib;
+every fit is seeded, so results are reproducible.
 """
 from __future__ import annotations
 
 import json
+import os
 import time
 import warnings
 from pathlib import Path
@@ -30,6 +36,7 @@ from sklearn.feature_selection import VarianceThreshold
 from sklearn.dummy import DummyClassifier
 from imblearn.pipeline import Pipeline as ImbPipeline
 from imblearn.over_sampling import RandomOverSampler, SMOTE, ADASYN
+from joblib import Parallel, delayed
 
 warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -38,40 +45,60 @@ from common import (
     RESULTS_DIR, FIGURES_DIR, build_feature_matrix, grouped_splits,
     load_cluster_labels, make_classifier, paper_groups, read_cleaned, read_processed,
     save_figure, stage_status, write_json, confidence_interval_95,
+    classification_preprocessing_steps,
 )
 
 K_VALUES = (3, 4, 5, 6)
-MODEL_NAMES = ("DecisionTree", "SVM", "RandomForest", "NeuralNetwork", "GradientBoosting")
+MODEL_NAMES = ("DecisionTree", "SVM", "RandomForest", "NeuralNetwork",
+               "GradientBoosting", "ExtraTrees")
 SAMPLERS = ("none", "ROS", "SMOTE", "ADASYN")
 REPEATS = 25
 FOLDS = 5
 SEED_LIST = list(range(42, 42 + REPEATS))
+N_JOBS = max(1, min(14, (os.cpu_count() or 2) - 1))
+MIN_COMPLETE_SHARE = 0.8
 
 
-def sampler_for(name: str, seed: int):
-    """Create a sampler; k-neighbours are kept small for literature data."""
+def sampler_for(name: str, seed: int, min_class_count: int | None = None):
+    """Create a sampler; k-neighbours are kept small for literature data.
+
+    SMOTE/ADASYN need more minority rows than neighbours. With
+    ``min_class_count`` the neighbour count shrinks to min(2, count - 1) so a
+    class with two training rows can still be interpolated; a singleton class
+    makes the sampler infeasible for that fold (reported, never hidden).
+    """
     if name == "none":
         return None
     if name == "ROS":
         return RandomOverSampler(random_state=seed)
+    neighbours = 2
+    if min_class_count is not None:
+        neighbours = min(2, int(min_class_count) - 1)
+        if neighbours < 1:
+            raise ValueError(
+                f"{name} needs >=2 training rows per class; smallest class has {min_class_count}."
+            )
     if name == "SMOTE":
-        return SMOTE(k_neighbors=2, random_state=seed)
+        return SMOTE(k_neighbors=neighbours, random_state=seed)
     if name == "ADASYN":
-        return ADASYN(n_neighbors=2, random_state=seed)
+        return ADASYN(n_neighbors=neighbours, random_state=seed)
     raise ValueError(name)
 
 
+def min_class_count(y_train) -> int:
+    """Smallest per-class count among classes present in a training fold."""
+    _, counts = np.unique(np.asarray(y_train), return_counts=True)
+    return int(counts.min())
 
-def make_pipeline(model_name: str, sampler_name: str, seed: int, n_features: int = 15):
+
+
+def make_pipeline(model_name: str, sampler_name: str, seed: int, n_features: int = 15,
+                  min_count: int | None = None):
     """Build a fold-local preprocessing/sampling/model pipeline."""
 
-    steps = [
-        ("imputer", SimpleImputer(strategy="median", keep_empty_features=True)),
-        ("variance", VarianceThreshold(threshold=0.0)),
-        ("scaler", StandardScaler()),
-    ]
+    steps = classification_preprocessing_steps()
 
-    sampler = sampler_for(sampler_name, seed)
+    sampler = sampler_for(sampler_name, seed, min_count)
 
     if sampler is not None:
         steps.append(("sampler", sampler))
@@ -105,36 +132,41 @@ def dummy_baseline_repeat(y, groups, seed, n_splits):
 # Permutation test (shuffle labels within papers)
 # ---------------------------------------------------------------------------
 
+def _permuted_repeat_f1(X, y, groups, model_name, sampler_name, perm_i):
+    """One label-permuted repeat (labels shuffled within each paper)."""
+    rng = np.random.default_rng(42 + perm_i)
+    y_perm = y.copy()
+    for paper in np.unique(groups):
+        mask = groups == paper
+        y_perm[mask] = rng.permutation(y_perm[mask])
+    try:
+        folds = grouped_splits(y_perm, groups, 42 + perm_i, n_splits=FOLDS)
+    except ValueError:
+        return np.nan
+    all_true, all_pred = [], []
+    for train_idx, test_idx in folds:
+        try:
+            pipe = make_pipeline(model_name, sampler_name, 42 + perm_i,
+                                 min_count=min_class_count(y_perm[train_idx]))
+            pipe.fit(X.iloc[train_idx], y_perm[train_idx])
+            all_pred.extend(pipe.predict(X.iloc[test_idx]))
+            all_true.extend(y_perm[test_idx])
+        except Exception:
+            pass
+    if not all_true:
+        return np.nan
+    return f1_score(all_true, all_pred, average="macro", zero_division=0)
+
+
 def permutation_test_by_paper(X, y, groups, model_name, sampler_name,
                                observed_f1, n_permutations=100):
     """Shuffle labels within paper groups; compute p-value."""
-    rng = np.random.default_rng(42)
-    unique_papers = np.unique(groups)
-    count_ge = 0
-    for perm_i in range(n_permutations):
-        y_perm = y.copy()
-        for paper in unique_papers:
-            mask = groups == paper
-            y_perm[mask] = rng.permutation(y_perm[mask])
-        # Run one repeat with permuted labels, seed=42+perm_i
-        try:
-            folds = grouped_splits(y_perm, groups, 42 + perm_i, n_splits=FOLDS)
-        except ValueError:
-            continue
-        all_true, all_pred = [], []
-        for train_idx, test_idx in folds:
-            try:
-                pipe = make_pipeline(model_name, sampler_name, 42 + perm_i)
-                pipe.fit(X.iloc[train_idx], y_perm[train_idx])
-                pred = pipe.predict(X.iloc[test_idx])
-                all_true.extend(y_perm[test_idx])
-                all_pred.extend(pred)
-            except Exception:
-                pass
-        if all_true:
-            perm_f1 = f1_score(all_true, all_pred, average="macro", zero_division=0)
-            if perm_f1 >= observed_f1:
-                count_ge += 1
+    scores = Parallel(n_jobs=N_JOBS)(
+        delayed(_permuted_repeat_f1)(X, y, groups, model_name, sampler_name, i)
+        for i in range(n_permutations)
+    )
+    scores = np.asarray(scores, dtype=float)
+    count_ge = int(np.sum(scores[np.isfinite(scores)] >= observed_f1))
     return (count_ge + 1) / (n_permutations + 1)
 
 
@@ -166,7 +198,8 @@ def evaluate_fold(X: pd.DataFrame, y: np.ndarray, train_idx: np.ndarray,
         "n_test": int(len(test_idx)), "status": "ok",
     }
     try:
-        pipe = make_pipeline(model_name, sampler_name, seed, X.shape[1])
+        pipe = make_pipeline(model_name, sampler_name, seed, X.shape[1],
+                             min_count=min_class_count(y[train_idx]))
         pipe.fit(X.iloc[train_idx], y[train_idx])
         prediction = pipe.predict(X.iloc[test_idx])
         record["y_true"] = y[test_idx]
@@ -246,11 +279,16 @@ def evaluate_repeat(X, y, groups, seed, k, model_name, sampler_name):
             },
             fold_records,
         )
+    folds_ok = sum(1 for r in fold_records if r["status"] == "ok")
+    # A repeat only counts when every fold produced predictions. Otherwise the
+    # pooled score would describe a subset of records (often the easy ones)
+    # and could not be compared with complete repeats.
+    repeat_status = "ok" if folds_ok == len(fold_records) else "partial"
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         repeat_record = {
             "k": k, "seed": seed, "model": model_name, "sampler": sampler_name,
-            "status": "ok",
+            "status": repeat_status,
             "pooled_macro_f1": float(f1_score(all_true, all_pred, average="macro", zero_division=0)),
             "pooled_weighted_f1": float(f1_score(all_true, all_pred, average="weighted", zero_division=0)),
             "pooled_accuracy": float(accuracy_score(all_true, all_pred)),
@@ -258,7 +296,7 @@ def evaluate_repeat(X, y, groups, seed, k, model_name, sampler_name):
             "pooled_recall_macro": float(recall_score(all_true, all_pred, average="macro", zero_division=0)),
             "pooled_balanced_accuracy": float(balanced_accuracy_score(all_true, all_pred)),
             "n_pooled_samples": len(all_true),
-            "folds_ok": sum(1 for r in fold_records if r["status"] == "ok"),
+            "folds_ok": folds_ok,
             "folds_total": len(fold_records),
         }
     return repeat_record, fold_records
@@ -284,15 +322,18 @@ def run_k(k: int, X_all: pd.DataFrame, groups_all: np.ndarray) -> tuple[list[dic
     groups = groups_all[row_ids]
     repeat_output: list[dict] = []
     fold_output: list[dict] = []
-    for seed in SEED_LIST[:REPEATS]:
-        print(f"K={k} | repeat seed={seed} | {len(MODEL_NAMES)} models x {len(SAMPLERS)} samplers", flush=True)
-        for model_name in MODEL_NAMES:
-            for sampler_name in SAMPLERS:
-                repeat_record, fold_records = evaluate_repeat(X, y, groups, seed, k, model_name, sampler_name)
-                repeat_output.append(repeat_record)
-                # Convert fold records to metric dicts for paper figures
-                for fr in fold_records:
-                    fold_output.append(_fold_record_to_metrics(fr))
+    print(f"K={k} | {REPEATS} repeats x {len(MODEL_NAMES)} models x {len(SAMPLERS)} samplers "
+          f"| n_jobs={N_JOBS}", flush=True)
+    jobs = [(seed, m, s) for seed in SEED_LIST[:REPEATS] for m in MODEL_NAMES for s in SAMPLERS]
+    outputs = Parallel(n_jobs=N_JOBS)(
+        delayed(evaluate_repeat)(X, y, groups, seed, k, model_name, sampler_name)
+        for seed, model_name, sampler_name in jobs
+    )
+    for repeat_record, fold_records in outputs:
+        repeat_output.append(repeat_record)
+        # Convert fold records to metric dicts for paper figures
+        for fr in fold_records:
+            fold_output.append(_fold_record_to_metrics(fr))
     return repeat_output, fold_output
 
 
@@ -325,17 +366,20 @@ def run_binary_high_performance(X_all: pd.DataFrame, groups_all: np.ndarray) -> 
     repeat_output: list[dict] = []
     fold_output: list[dict] = []
     print(f"Binary >=90% FDCA screen: {len(y)} records; class counts={np.bincount(y).tolist()}", flush=True)
-    for seed in SEED_LIST[:REPEATS]:
-        print(f"Binary screen | repeat seed={seed} | {len(MODEL_NAMES)} models x {len(SAMPLERS)} samplers", flush=True)
-        for model_name in MODEL_NAMES:
-            for sampler_name in SAMPLERS:
-                repeat_record, fold_records = evaluate_repeat(X, y, groups, seed, 0, model_name, sampler_name)
-                repeat_record["target_kind"] = "binary_high_performance_90"
-                repeat_output.append(repeat_record)
-                for fr in fold_records:
-                    metric_dict = _fold_record_to_metrics(fr)
-                    metric_dict["target_kind"] = "binary_high_performance_90"
-                    fold_output.append(metric_dict)
+    print(f"Binary screen | {REPEATS} repeats x {len(MODEL_NAMES)} models x {len(SAMPLERS)} samplers",
+          flush=True)
+    jobs = [(seed, m, s) for seed in SEED_LIST[:REPEATS] for m in MODEL_NAMES for s in SAMPLERS]
+    outputs = Parallel(n_jobs=N_JOBS)(
+        delayed(evaluate_repeat)(X, y, groups, seed, 0, model_name, sampler_name)
+        for seed, model_name, sampler_name in jobs
+    )
+    for repeat_record, fold_records in outputs:
+        repeat_record["target_kind"] = "binary_high_performance_90"
+        repeat_output.append(repeat_record)
+        for fr in fold_records:
+            metric_dict = _fold_record_to_metrics(fr)
+            metric_dict["target_kind"] = "binary_high_performance_90"
+            fold_output.append(metric_dict)
     return repeat_output, fold_output
 
 
@@ -384,10 +428,15 @@ def summarise(results: list[dict] | pd.DataFrame) -> pd.DataFrame:
     if valid.empty:
         return pd.DataFrame()
 
+    attempted = df.groupby(["k", "model", "sampler"]).size()
     rows = []
     for (k, model, sampler), group in valid.groupby(["k", "model", "sampler"]):
         f1_values = group["pooled_macro_f1"].dropna().to_numpy()
         if len(f1_values) == 0:
+            continue
+        # Rank only combinations whose folds were feasible in >=80% of
+        # repeats; otherwise the mean reflects a lucky subset of splits.
+        if len(f1_values) < MIN_COMPLETE_SHARE * attempted[(k, model, sampler)]:
             continue
         mean, sd, ci_lo, ci_hi = confidence_interval_95(f1_values)
 
@@ -428,26 +477,48 @@ def _summarise_fold_level(fold_results: pd.DataFrame) -> pd.DataFrame:
     return summary.sort_values("macro_f1_mean", ascending=False)
 
 
-def plot_model_comparison(summary: pd.DataFrame) -> None:
-    """Create a K-specific comparison figure for the four sampling methods."""
-    if summary.empty:
-        return
+def _plot_sampler_bars(subset: pd.DataFrame, title: str, path: Path) -> None:
+    """Grouped bars of official pooled-OOF macro-F1 (mean ± SD over repeats)."""
+    pivot = subset.pivot(index="model", columns="sampler", values="macro_f1_mean")
+    errors = subset.pivot(index="model", columns="sampler", values="macro_f1_sd")
+    pivot = pivot.reindex(index=MODEL_NAMES, columns=SAMPLERS)
+    errors = errors.reindex(index=MODEL_NAMES, columns=SAMPLERS).fillna(0.0)
+    fig, ax = plt.subplots(figsize=(11, 5.5))
+    pivot.plot(kind="bar", ax=ax, width=0.82, yerr=errors, capsize=2,
+               error_kw={"elinewidth": 0.8})
+    for container in ax.containers:
+        if hasattr(container, "datavalues"):
+            ax.bar_label(container, fmt="%.2f", fontsize=6.5, padding=2, rotation=90)
+    ax.axhline(0.76, color="0.4", linestyle=":", linewidth=1, label="0.76 reference")
+    ax.set_title(title)
+    ax.set_ylabel("Pooled out-of-fold macro-F1 (unseen papers)")
+    ax.set_xlabel("Classifier")
+    ax.set_ylim(0, 1)
+    ax.tick_params(axis="x", rotation=0)
+    ax.legend(title="Training-fold sampler", ncol=5, fontsize=8, loc="upper left")
+    ax.grid(axis="y", alpha=0.25)
+    ax.text(0.99, 0.97, "Missing bar = sampler infeasible in >20% of repeats",
+            transform=ax.transAxes, ha="right", va="top", fontsize=7, color="0.35")
+    save_figure(fig, path)
+
+
+def plot_model_comparison(summary: pd.DataFrame, binary_summary: pd.DataFrame) -> None:
+    """Per-K and binary comparison figures from the official pooled summaries."""
     for k in K_VALUES:
-        subset = summary[summary["k"] == k]
+        subset = summary[summary["k"] == k] if not summary.empty else summary
         if subset.empty:
             continue
-        pivot = subset.pivot(index="model", columns="sampler", values="macro_f1_mean")
-        fig, ax = plt.subplots(figsize=(9, 5))
-        pivot.reindex(MODEL_NAMES).plot(kind="bar", ax=ax, width=0.82)
-        ax.set_title(f"K={k}: model and sampling comparison")
-        ax.set_ylabel("Paper-grouped macro-F1")
-        ax.set_xlabel("Classifier")
-        ax.set_ylim(0, 1)
-        ax.legend(title="Training-fold sampler", ncol=2)
-        ax.grid(axis="y", alpha=0.25)
-        save_figure(fig, FIGURES_DIR / "classification" / f"model_sampler_K{k}.png")
-
-
+        _plot_sampler_bars(
+            subset, f"K={k}: model and sampling comparison "
+                    f"({REPEATS} repeats x {FOLDS} publication-grouped folds)",
+            FIGURES_DIR / "classification" / f"model_sampler_K{k}.png",
+        )
+    if not binary_summary.empty:
+        _plot_sampler_bars(
+            binary_summary, "Binary >=90% FDCA performance screen: model and sampling "
+                            f"comparison ({REPEATS} repeats x {FOLDS} folds)",
+            FIGURES_DIR / "classification" / "model_sampler_binary90.png",
+        )
 
 
 def generate_paper_style_outputs(cluster_results: pd.DataFrame) -> None:
@@ -823,6 +894,14 @@ def main() -> None:
     # Official summaries use repeat-level (pooled OOF) data
     cluster_summary = summarise(cluster_repeat_rows)
     binary_summary = summarise(binary_repeat_rows)
+    coverage = pd.concat([cluster_repeat_df, binary_repeat_df], ignore_index=True)
+    coverage = (coverage.assign(complete=coverage["status"].eq("ok"))
+                .groupby(["k", "model", "sampler"], as_index=False)
+                .agg(repeats=("complete", "size"), complete_repeats=("complete", "sum")))
+    coverage["complete_share"] = coverage["complete_repeats"] / coverage["repeats"]
+    incomplete = coverage[coverage["complete_share"] < MIN_COMPLETE_SHARE]
+    incomplete.to_csv(RESULTS_DIR / "classification_incomplete_combinations.csv", index=False)
+    print(f"Combinations excluded for <{MIN_COMPLETE_SHARE:.0%} complete repeats: {len(incomplete)}")
     cluster_summary.to_csv(RESULTS_DIR / "classification_kmeans_summary.csv", index=False)
     binary_summary.to_csv(RESULTS_DIR / "classification_binary_summary.csv", index=False)
     cluster_summary.insert(0, "target_kind", "kmeans_cluster")
@@ -830,8 +909,8 @@ def main() -> None:
     combined = pd.concat([cluster_summary, binary_summary], ignore_index=True)
     combined.to_csv(RESULTS_DIR / "classification_summary.csv", index=False)
 
-    # Plot model comparison using fold-level summary for backwards compat
-    plot_model_comparison(_summarise_fold_level(cluster_fold_df))
+    # Figures use the same pooled-OOF summaries as the reported tables.
+    plot_model_comparison(summarise(cluster_repeat_rows), summarise(binary_repeat_rows))
 
     best = choose_best_candidate(summarise(cluster_repeat_rows), summarise(binary_repeat_rows))
     write_json(RESULTS_DIR / "best_classification_candidate.json", best)
@@ -907,7 +986,7 @@ def main() -> None:
         "models": list(MODEL_NAMES), "samplers": list(SAMPLERS),
         "note": "K-means classes are descriptive; binary >=90% is a secondary screening target.",
         "fold_diagnostics": "Per-fold metrics in classification_*_fold_scores.csv. Official pooled OOF in classification_*_repeat_scores.csv.",
-        "feature_selection": "Fold-local zero-variance filtering only; no univariate outcome-driven feature ranking.",
+        "feature_selection": "Fold-local median imputation with missing-value indicators and zero-variance filtering only; no univariate outcome-driven feature ranking.",
     })
     print("\nTop K-means classification candidates (pooled OOF, 95% CI):")
     top = summarise(cluster_repeat_rows).head(8)

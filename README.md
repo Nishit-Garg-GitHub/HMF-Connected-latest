@@ -61,8 +61,9 @@ python run_all.py --start 04 --no-clean
    K = 3, 4, 5 and 6. The cluster labels are saved and passed to later stages.
 3. **Oversampling audit:** checks RandomOverSampler (ROS), SMOTE and ADASYN on
    paper-grouped training folds. It never oversamples validation records.
-4. **Model comparison:** compares Decision Tree, SVM, Random Forest and Neural
-   Network under no sampling, ROS, SMOTE and ADASYN. It reports K-means class
+4. **Model comparison:** compares Decision Tree, SVM, Random Forest, Neural
+   Network, Gradient Boosting and Extra Trees under no sampling, ROS, SMOTE
+   and ADASYN. It reports K-means class
    prediction and a secondary paper-inspired binary high-performance screen.
 5. **Learning curves:** evaluates the selected candidate on increasing
    fractions of publication groups.
@@ -103,9 +104,9 @@ candidate. Do not present screening scores as final external validation.
   four continuous outcomes.
 - The strict shared regression dataset contains only records where all four
   outcomes are measured. This run found 60 complete records from 47 papers.
-- The current regression model did not beat the median baseline on every
-  target. Therefore NSGA-II is correctly blocked. This is a scientific safeguard,
-  not a pipeline failure.
+- NSGA-II runs only when the regression validation gate passes
+  (`results/regression_validation_gate.json`); a failed gate blocks it as a
+  scientific safeguard, not a pipeline failure.
 - A favourable F1/R² does not prove causation. SHAP/permutation values are
   associational. Any model-generated catalyst proposal requires experiments.
 
@@ -113,13 +114,54 @@ candidate. Do not present screening scores as final external validation.
 
 - `results/classification_summary.csv`
 - `results/oversampling_audit.csv`
-- `results/learning_curve_selected_model.csv`
+- `results/classification_incomplete_combinations.csv` (sampler/K pairs not ranked)
+- `results/learning_curves_summary.csv`
 - `results/feature_importance_selected_model.csv`
 - `results/multioutput_regression_summary.csv`
 - `results/regression_validation_gate.json`
 - `results/nsga2_status.json`
 - `results/FINAL_RESEARCH_REPORT.md`
-- Figures are under `figures/`.
+- Figures are under `figures/`. `figures/classification/model_sampler_*.png`
+  (including `model_sampler_binary90.png`) plot the same pooled scores as
+  `classification_summary.csv`; `figures/shap/Figure_12_SHAP_Bar.png` and
+  `Figure_13_SHAP_Beeswarm.png` explain the best Stage 04 model for K=3 and K=5.
+
+## Classification update (descriptor fixes + tuned models)
+
+Pooled out-of-fold macro-F1, 25 repeats × 5 publication-grouped folds, best
+sampler per model:
+
+| Target | DT | SVM | RF | NN | GB | ET |
+|---|---|---|---|---|---|---|
+| Binary ≥90% (before) | 0.557 | 0.534 | 0.586 | 0.507 | 0.575 | — |
+| Binary ≥90% (now) | 0.600 | 0.695 | 0.678 | **0.731** | 0.661 | 0.720 |
+| K=3 (before) | 0.410 | 0.298 | 0.379 | 0.389 | 0.421 | — |
+| K=3 (now) | 0.519 | 0.486 | 0.481 | 0.535 | **0.626** | 0.484 |
+
+What changed:
+- **Stage 01 descriptors.** Catalyst flags are parsed from the anode/working
+  electrode only. Before, the Pt *cathode* gave 74 "Pt catalysts", and
+  phosphide/nitride/sulfide flags were always 0. Element symbols are matched on
+  formulas (Ni3S2, CoNiP, VN, Ni₂P). New descriptors: Rh/V/Bi, element count,
+  noble-metal and bimetallic flags, boride, foam/conductive-glass substrate,
+  counter-electrode type (cell group) and electrolyte pH. "23 ± 2 °C" now
+  parses as 23 °C (it used to give 2 °C).
+- **Preprocessing.** Fold-local median imputation now appends missing-value
+  indicators (e.g. temperature not reported), shared by stages 04–06.
+- **Models.** Per-family hyperparameters come from a small grid. The NN no
+  longer early-stops on a 10% split of a tiny fold. Extra Trees was added.
+- **Evaluation fix.** SMOTE/ADASYN neighbours adapt to the smallest training
+  class. A repeat with any failed fold is now `partial` and is not ranked, and
+  a pair needs ≥80% complete repeats. Before, K=4 SMOTE/ADASYN "scores" came
+  from about 1 of 5 folds, so earlier K=4 values (e.g. 0.477) were not
+  comparable. Honest K=4 scores are 0.29–0.43.
+
+Caveats: hyperparameters were selected on the same 154 records, so the scores
+are somewhat optimistic. No model averages ≥0.76 across the 25 repeats; the
+best binary NN reaches 0.76–0.78 on individual repeats. The within-paper label
+permutation test is not significant (p≈0.47), because most descriptors are
+constant within a paper. The model clearly beats the stratified dummy (0.48),
+but its signal is mostly between papers.
 
 The project keeps the full earlier scripts in `archive_legacy/`; the active
 scripts are the connected, runtime-optimised implementation.

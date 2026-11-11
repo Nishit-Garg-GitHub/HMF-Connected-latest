@@ -22,7 +22,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
-from sklearn.ensemble import RandomForestClassifier, ExtraTreesRegressor, GradientBoostingClassifier
+from sklearn.ensemble import (RandomForestClassifier, ExtraTreesClassifier,
+                              ExtraTreesRegressor, GradientBoostingClassifier)
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import StratifiedGroupKFold
 from scipy import stats
@@ -104,6 +105,7 @@ def feature_columns(frame: pd.DataFrame) -> list[str]:
                      "Alkaline_Electrolyte", "Divided_Cell", "Undivided_Cell",
                      "Flow_Cell", "Three_Electrode"}
             or name.startswith("Catalyst_")
+            or name.startswith("Counter_Electrode_")
             or name.startswith("Electrolyte_")
             or name.startswith("Reactant_")
         )
@@ -157,29 +159,48 @@ def paper_groups() -> np.ndarray:
 
 
 def make_classifier(name: str, seed: int = RANDOM_STATE):
-    """Construct small, deterministic models for fast literature-scale CV."""
+    """Construct deterministic models tuned for literature-scale grouped CV.
+
+    Hyperparameters were chosen from a small per-family grid evaluated with
+    the same 5-fold publication-grouped protocol as stage 04 (binary >=90%
+    screen and K=3 clusters). Settings favour strong regularisation because
+    only ~120-154 records from ~99 papers are available:
+    - DecisionTree: depth 6 (depth 5 under-fit the corrected descriptors).
+    - SVM: C=0.3, gamma=0.01 (smoother RBF boundary than gamma='scale').
+    - RandomForest: 300 trees, depth 6.
+    - NeuralNetwork: one 32-unit layer, alpha=0.1, NO early stopping. The
+      former early-stopping split held out 10% of an already tiny, imbalanced
+      training fold and frequently stopped on a majority-class solution.
+    - GradientBoosting: 100 decision stumps (depth 1) with shrinkage.
+    - ExtraTrees: added family; randomised splits are robust on sparse
+      one-hot catalyst descriptors.
+    """
     models = {
         "DecisionTree": DecisionTreeClassifier(
-            max_depth=5, min_samples_leaf=2, class_weight="balanced",
+            max_depth=6, min_samples_leaf=2, class_weight="balanced",
             random_state=seed,
         ),
         "SVM": SVC(
-            C=1.0, kernel="rbf", gamma="scale", class_weight="balanced",
+            C=0.3, kernel="rbf", gamma=0.01, class_weight="balanced",
             probability=True, random_state=seed,
         ),
         "RandomForest": RandomForestClassifier(
-            n_estimators=120, max_depth=8, min_samples_leaf=2,
+            n_estimators=300, max_depth=6, min_samples_leaf=2,
             max_features="sqrt", class_weight="balanced_subsample",
             random_state=seed, n_jobs=1,
         ),
         "NeuralNetwork": MLPClassifier(
-            hidden_layer_sizes=(32, 16), alpha=0.02, max_iter=300,
-            early_stopping=True, n_iter_no_change=15, random_state=seed,
+            hidden_layer_sizes=(32,), alpha=0.1, max_iter=2000,
+            early_stopping=False, random_state=seed,
         ),
         "GradientBoosting": GradientBoostingClassifier(
-            n_estimators=100, max_depth=3, learning_rate=0.1,
+            n_estimators=100, max_depth=1, learning_rate=0.1,
             min_samples_leaf=3, subsample=0.8,
             random_state=seed,
+        ),
+        "ExtraTrees": ExtraTreesClassifier(
+            n_estimators=400, min_samples_leaf=2,
+            class_weight="balanced_subsample", random_state=seed, n_jobs=1,
         ),
     }
     if name not in models:
@@ -213,6 +234,23 @@ def grouped_splits(y: Iterable, groups: Iterable, seed: int, n_splits: int = 3):
         except ValueError:
             continue
     raise ValueError("Insufficient class representation across independent papers.")
+
+
+def classification_preprocessing_steps() -> list:
+    """Fold-local preprocessing shared by every classification stage (04-06).
+
+    ``add_indicator=True`` appends one binary column per descriptor that has
+    missing values in the training fold (e.g. temperature or potential not
+    reported). Whether a paper reports a condition is an input-side property,
+    not an outcome, and median imputation alone would erase it.
+    """
+    from sklearn.feature_selection import VarianceThreshold
+    return [
+        ("imputer", SimpleImputer(strategy="median", add_indicator=True,
+                                  keep_empty_features=True)),
+        ("variance", VarianceThreshold(threshold=0.0)),
+        ("scaler", StandardScaler()),
+    ]
 
 
 def base_preprocessor(scale: bool = True) -> Pipeline:
