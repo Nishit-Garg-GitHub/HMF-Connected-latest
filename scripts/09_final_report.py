@@ -214,6 +214,24 @@ def optimisation_section() -> list[str]:
         "- Any Pareto candidates are model-generated hypotheses and require experimental validation.",
         "",
     ])
+    top_path = RESULTS_DIR / "nsga2_top10_ni_cu_hydroxide.csv"
+    if top_path.exists():
+        top = pd.read_csv(top_path)
+        envelope = status.get("hydroxide_scenario", {}).get("condition_envelope", {})
+        lines.append("### Constrained scenario: Ni(OH)2 / Cu(OH)2 anode (top 10)")
+        if envelope:
+            lines.append("- Conditions bounded to the range reported for real Ni/Cu hydroxide "
+                         f"anodes: {envelope}.")
+        cols = ["rank", "catalyst", "support", "electrolyte", "electrolyte_M", "HMF_mM",
+                "potential_V_RHE", "temperature_C", "predicted_Conversion_pct",
+                "predicted_Yield_pct", "predicted_FE_pct", "predicted_Selectivity_pct"]
+        lines.append(top[[c for c in cols if c in top]].to_markdown(index=False))
+        lines.append("")
+        lines.append("Nearest observed hydroxide record: "
+                     f"{top['nearest_catalyst'].iloc[0]} ({top['nearest_conditions'].iloc[0]}), "
+                     f"measured yield {top['observed_Yield_pct'].iloc[0]}%, "
+                     f"FE {top['observed_FE_pct'].iloc[0]}%.")
+        lines.append("")
     return lines
 
 

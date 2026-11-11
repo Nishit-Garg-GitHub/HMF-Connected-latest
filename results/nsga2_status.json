@@ -1,7 +1,24 @@
 {
   "status": "completed_model_generated_candidates",
-  "n_pareto_candidates": 48,
-  "generations": 35,
-  "population_size": 48,
+  "n_pareto_candidates": 80,
+  "generations": 60,
+  "population_size": 80,
+  "hydroxide_scenario": {
+    "n_candidates": 10,
+    "catalysts": {
+      "Ni(OH)2": 10
+    },
+    "observed_hydroxide_seed_rows": 17,
+    "condition_envelope": {
+      "Potential_vs_RHE_V": [
+        1.4,
+        1.69
+      ],
+      "Temperature_C": [
+        25.0,
+        40.0
+      ]
+    }
+  },
   "warning": "Candidates require experimental confirmation; model predictions are not measurements."
 }

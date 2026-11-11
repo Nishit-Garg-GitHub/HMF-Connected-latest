@@ -26,7 +26,7 @@
         ],
         "warning": "Clusters for records with imputed outcomes are exploratory pseudo-labels, not measured performance classes."
       },
-      "pid": 28950
+      "pid": 31291
     },
     "03_oversampling": {
       "status": "completed",
@@ -344,16 +344,16 @@
     "08_nsga2": {
       "status": "completed",
       "details": {
-        "n_pareto_candidates": 48
+        "n_pareto_candidates": 80
       },
-      "pid": 30300
+      "pid": 31549
     },
     "09_final_report": {
       "status": "completed",
       "details": {
         "report": "results/FINAL_RESEARCH_REPORT.md"
       },
-      "pid": 30310
+      "pid": 31563
     },
     "06_shap_analysis_paper": {
       "status": "completed",

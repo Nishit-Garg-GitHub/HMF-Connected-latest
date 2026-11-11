@@ -243,15 +243,8 @@ def plot_clusters(
                 label=f"Cluster {cluster} - imputed",
             )
 
-    ax.scatter(
-        centers[:, 0],
-        centers[:, 1],
-        marker="X",
-        color="black",
-        s=130,
-        label="Centroids",
-        zorder=10,
-    )
+    # Centroids are intentionally not drawn: the figure shows cluster
+    # membership only. Centre coordinates remain available from the model.
 
     ax.set_xlabel("Conversion (%)")
     ax.set_ylabel("FDCA Yield (%)")
@@ -437,6 +430,82 @@ def run_kmeans(
 
 
 # ============================================================
+# 6b. PAPER-STYLE FIGURE 6 (CONVEX HULLS + SPOKES, 2x2 PANELS)
+# ============================================================
+
+FIGURE6_COLORS = ["#f0545c", "#5fd35f", "#3fa0f0", "#e76fe0", "#f5a05a", "#4f7fc4"]
+
+
+def _draw_cluster_patch(ax, points, color):
+    """Filled convex hull plus spokes from the cluster mean to each point."""
+    from scipy.spatial import ConvexHull, QhullError
+    from matplotlib.patches import Polygon
+
+    centre = points.mean(axis=0)
+    for x, y in points:
+        ax.plot([centre[0], x], [centre[1], y], color=color,
+                linewidth=0.5, alpha=0.55, zorder=2)
+    unique = np.unique(points, axis=0)
+    if len(unique) >= 3:
+        try:
+            hull = ConvexHull(unique)
+            ax.add_patch(Polygon(unique[hull.vertices], closed=True,
+                                 facecolor=color, edgecolor=color,
+                                 alpha=0.22, linewidth=0.8, zorder=1))
+        except QhullError:  # collinear points: spokes are enough
+            pass
+    ax.scatter(points[:, 0], points[:, 1], s=7, color=color,
+               edgecolors="none", zorder=3)
+
+
+def plot_figure6_panels(X_imputed, labels_by_k):
+    """Figure 6 layout: K-means clusters for K=3-6 in a 2x2 grid.
+
+    Points are the (Conversion, Yield) values used for clustering, so
+    records with a median-imputed outcome appear at the imputed value.
+    Cluster centres are not marked; spokes converge on each cluster mean.
+    """
+    from matplotlib.lines import Line2D
+
+    fig, axes = plt.subplots(2, 2, figsize=(10, 8.6))
+    values = X_imputed[["Conversion_pct", "Yield_pct"]].to_numpy(dtype=float)
+    for ax, k, letter in zip(axes.ravel(), K_VALUES, "abcd"):
+        labels = labels_by_k[k]
+        handles = []
+        for cluster in range(k):
+            color = FIGURE6_COLORS[cluster % len(FIGURE6_COLORS)]
+            members = values[labels == cluster]
+            if len(members):
+                _draw_cluster_patch(ax, members, color)
+            handles.append(Line2D([0], [0], marker="o", linestyle="", markersize=5,
+                                  markerfacecolor=color, markeredgecolor=color,
+                                  label=str(cluster)))
+        ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, 1.0),
+                  ncol=min(k, 4 if k <= 4 else 3), frameon=False, fontsize=9,
+                  handletextpad=0.2, columnspacing=1.2)
+        ax.text(0.04, 0.95, f"({letter})", transform=ax.transAxes,
+                fontsize=13, fontweight="bold", va="top", family="serif")
+        ax.set_xlim(-8, 108)
+        ax.set_ylim(-8, 112)
+        ax.set_xticks(range(0, 101, 20))
+        ax.set_yticks(range(0, 101, 20))
+        ax.set_xlabel("Conversion(%)", fontweight="bold", family="serif")
+        ax.set_ylabel("Yield(%)", fontweight="bold", family="serif")
+        for spine in ax.spines.values():
+            spine.set_linewidth(1.0)
+    fig.suptitle("Without sampling K-means clustering results: "
+                 "(a) K = 3, (b) K = 4, (c) K = 5, and (d) K = 6",
+                 fontsize=11, family="serif", y=0.005, va="bottom")
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    out_dir = FIGURES_DIR / "KMeans_Figure6"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out_dir / "HMF_KMeans_Figure6_Style.png", dpi=400, bbox_inches="tight")
+    fig.savefig(out_dir / "HMF_KMeans_Figure6_Style.pdf", bbox_inches="tight")
+    plt.close(fig)
+    print(f"Figure 6-style panels saved: {out_dir / 'HMF_KMeans_Figure6_Style.png'}")
+
+
+# ============================================================
 # 7. MAIN
 # ============================================================
 
@@ -502,6 +571,11 @@ def main():
             imputed_rows=imputed_rows,
             k=k,
         )
+
+    plot_figure6_panels(
+        X_imputed,
+        {k: frame["cluster"].to_numpy() for k, frame in all_labels.items()},
+    )
 
     # --------------------------------------------------------
     # SAVE RUN MANIFEST

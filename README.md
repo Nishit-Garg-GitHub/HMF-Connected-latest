@@ -165,3 +165,27 @@ but its signal is mostly between papers.
 
 The project keeps the full earlier scripts in `archive_legacy/`; the active
 scripts are the connected, runtime-optimised implementation.
+
+## NSGA-II: Ni(OH)2 / Cu(OH)2 scenario
+
+Stage 08 also runs a constrained search with a single-metal Ni(OH)2 or Cu(OH)2
+anode, one sub-run per metal. Every other element and catalyst-family flag is
+0, and derived descriptors are recomputed. Potential and temperature are
+limited to the range reported for real Ni/Cu hydroxide anodes (1.40–1.69 V vs
+RHE, 25–40 °C), so the optimiser cannot propose potentials where these
+catalysts are inactive.
+
+- `results/nsga2_top10_ni_cu_hydroxide.csv`: the top 10 candidates, readable
+  conditions, predictions and the nearest observed literature record.
+- `results/nsga2_best3_cu_hydroxide.csv`: the best Cu(OH)2 candidates (none of
+  them reach the overall top 10).
+- `figures/nsga2/NSGA2_top10_NiCu_hydroxide.png`
+- `figures/KMeans_Figure6/HMF_KMeans_Figure6_Style.png`: K = 3–6 cluster
+  panels in the reference-paper layout (convex hulls, no centroid markers).
+
+All top-10 candidates are Ni(OH)2 on foam in ~0.6–1.5 M KOH, ~10 mM HMF,
+1.40–1.45 V vs RHE and ~25 °C. Predicted yield is ~95% and FE ~96%. This
+region matches published Ni(OH)2/NF results, but the per-target regressors
+have R² ≈ 0. Predictions cluster near the dataset mean and run about 7 points
+above the closest measured record, Ni(OH)2/NF at 88.3% yield. Treat these as
+hypotheses that need experiments.

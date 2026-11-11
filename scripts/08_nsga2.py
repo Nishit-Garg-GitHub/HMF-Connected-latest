@@ -23,8 +23,9 @@ from common import (
 )
 
 SEED = 42
-POPULATION_SIZE = 48
-GENERATIONS = 35
+POPULATION_SIZE = 80
+GENERATIONS = 60
+TOP_N = 10
 CROSSOVER_RATE = 0.85
 MUTATION_RATE = 0.12
 
@@ -160,7 +161,8 @@ def tournament(population: np.ndarray, ranks: np.ndarray,
 def crossover_mutate(parent_a: np.ndarray, parent_b: np.ndarray,
                      lower: np.ndarray, upper: np.ndarray,
                      binary_indices: list[int], rng: np.random.Generator,
-                     categorical_groups: list[list[int]] | None = None):
+                     categorical_groups: list[list[int]] | None = None,
+                     constraint=None):
     """Blend parents and mutate a small subset of descriptors."""
     if rng.random() < CROSSOVER_RATE:
         alpha = rng.random(len(parent_a))
@@ -171,7 +173,8 @@ def crossover_mutate(parent_a: np.ndarray, parent_b: np.ndarray,
         if rng.random() < MUTATION_RATE:
             span = upper[index] - lower[index]
             child[index] += rng.normal(0, 0.08 * span if span else 0.0)
-    return repair(child, lower, upper, binary_indices, categorical_groups)
+    child = repair(child, lower, upper, binary_indices, categorical_groups)
+    return constraint(child) if constraint is not None else child
 
 
 def environmental_selection(population: np.ndarray, objectives: np.ndarray,
@@ -189,8 +192,16 @@ def environmental_selection(population: np.ndarray, objectives: np.ndarray,
     return population[chosen]
 
 
-def run_nsga(models, X: pd.DataFrame, feature_names: list[str]):
-    """Run a compact NSGA-II search seeded by real observed experiments."""
+def run_nsga(models, X: pd.DataFrame, feature_names: list[str],
+             constraint_factory=None, seed_mask: np.ndarray | None = None,
+             return_population: bool = False):
+    """Run a compact NSGA-II search seeded by real observed experiments.
+
+    ``constraint_factory(feature_names, lower, upper)`` may return a function
+    that maps every candidate onto an allowed chemistry (e.g. Ni or Cu
+    hydroxide anodes). ``seed_mask`` prefers matching observed rows when
+    building the initial population.
+    """
     rng = np.random.default_rng(SEED)
     # Use the fitted training imputer to initialise complete candidate vectors.
     # Per-target models each have their own imputer; use the first one available.
@@ -222,15 +233,29 @@ def run_nsga(models, X: pd.DataFrame, feature_names: list[str]):
         group = [i for i, name in enumerate(feature_names) if name.startswith(prefix)]
         if len(group) > 1:
             categorical_groups.append(group)
+    constraint = (constraint_factory(feature_names, lower, upper)
+                  if constraint_factory is not None else None)
     # Seed with actual experimental rows, not arbitrary synthetic chemistry.
     if len(matrix) < 2:
         raise ValueError("NSGA-II needs at least two observed experiments.")
-    initial_ids = rng.choice(len(matrix), size=POPULATION_SIZE, replace=len(matrix) < POPULATION_SIZE)
+    pool = np.arange(len(matrix))
+    if seed_mask is not None and seed_mask.sum() >= 2:
+        preferred = pool[seed_mask]
+        n_pref = min(POPULATION_SIZE // 2, len(preferred) * 3)
+        initial_ids = np.concatenate([
+            rng.choice(preferred, size=n_pref, replace=True),
+            rng.choice(pool, size=POPULATION_SIZE - n_pref, replace=False),
+        ])
+    else:
+        initial_ids = rng.choice(len(matrix), size=POPULATION_SIZE,
+                                 replace=len(matrix) < POPULATION_SIZE)
     population = matrix[initial_ids].copy()
     population = np.vstack([
         repair(row, lower, upper, binary_indices, categorical_groups)
         for row in population
     ])
+    if constraint is not None:
+        population = np.vstack([constraint(row) for row in population])
     history = []
     for generation in range(GENERATIONS):
         objectives = objective_matrix(models, population, temperature, potential)
@@ -241,7 +266,7 @@ def run_nsga(models, X: pd.DataFrame, feature_names: list[str]):
             parent_b = tournament(population, ranks, crowding, rng)
             children.append(crossover_mutate(
                 parent_a, parent_b, lower, upper, binary_indices, rng,
-                categorical_groups,
+                categorical_groups, constraint,
             ))
         combined = np.vstack([population, np.asarray(children)])
         combined_objectives = objective_matrix(models, combined, temperature, potential)
@@ -259,7 +284,258 @@ def run_nsga(models, X: pd.DataFrame, feature_names: list[str]):
         print(f"NSGA-II generation {generation + 1}/{GENERATIONS}: Pareto={len(front)}")
     final_objectives = objective_matrix(models, population, temperature, potential)
     pareto_indices = non_dominated_sort(final_objectives)[0]
+    if return_population:
+        return population, final_objectives, history, matrix
     return population[pareto_indices], final_objectives[pareto_indices], history
+
+
+# ---------------------------------------------------------------------------
+# Constrained scenario: Ni(OH)2 or Cu(OH)2 anode
+# ---------------------------------------------------------------------------
+
+HYDROXIDE_METALS = ("Ni", "Cu")  # one sub-run per metal
+# Descriptors the optimiser may still choose for a hydroxide anode.
+FREE_CATALYST_FLAGS = {"Catalyst_Carbon", "Catalyst_Nanoparticle",
+                       "Catalyst_Foam_Substrate", "Catalyst_Conductive_Glass"}
+
+
+def make_hydroxide_constraint(metal: str, envelope: dict[str, tuple[float, float]]):
+    """Build a constraint factory forcing a single-metal M(OH)2 anode.
+
+    Catalyst_<metal> and Catalyst_Hydroxide are 1, every other element and
+    catalyst-family flag is 0, and derived descriptors (element count, noble,
+    bimetallic) are recomputed. ``envelope`` narrows continuous conditions
+    (potential, temperature) to the range reported for real Ni/Cu hydroxide
+    anodes, so the optimiser cannot extrapolate to e.g. 0.6 V vs RHE where
+    these catalysts are not active. For hydroxide electrolytes the pH is tied
+    to the concentration (pH = 14 + log10[OH-]); potential is vs RHE.
+    """
+    def factory(feature_names, lower, upper):
+        return _hydroxide_constraint(feature_names, lower, upper, metal, envelope)
+    return factory
+
+
+def _hydroxide_constraint(feature_names, lower, upper, metal, envelope):
+    idx = {name: i for i, name in enumerate(feature_names)}
+    catalyst_flags = [i for name, i in idx.items()
+                      if name.startswith("Catalyst_") and name not in FREE_CATALYST_FLAGS]
+    lower = lower.copy()
+    upper = upper.copy()
+    for name, (lo, hi) in envelope.items():
+        if name in idx:
+            lower[idx[name]] = max(lower[idx[name]], lo)
+            upper[idx[name]] = min(upper[idx[name]], hi)
+
+    def constrain(candidate: np.ndarray) -> np.ndarray:
+        candidate = candidate.copy()
+        chosen = idx[f"Catalyst_{metal}"]
+        candidate[catalyst_flags] = 0.0
+        candidate[chosen] = 1.0
+        if "Catalyst_Hydroxide" in idx:
+            candidate[idx["Catalyst_Hydroxide"]] = 1.0
+        if "Catalyst_N_Elements" in idx:
+            candidate[idx["Catalyst_N_Elements"]] = 1.0
+        if "Potential_vs_RHE" in idx:
+            candidate[idx["Potential_vs_RHE"]] = 1.0
+        oh = idx.get("Electrolyte_Electrolyte_Anion_OH")
+        conc = idx.get("Electrolyte_Concentration_M")
+        if oh is not None and candidate[oh] >= 0.5 and conc is not None:
+            if "Alkaline_Electrolyte" in idx:
+                candidate[idx["Alkaline_Electrolyte"]] = 1.0
+            if "Electrolyte_pH" in idx:
+                ph = 14 + np.log10(max(candidate[conc], 1e-4))
+                candidate[idx["Electrolyte_pH"]] = float(np.clip(
+                    ph, lower[idx["Electrolyte_pH"]], upper[idx["Electrolyte_pH"]]))
+        return np.clip(candidate, lower, upper)
+
+    return constrain
+
+
+def _one_hot_label(row: pd.Series, prefix: str) -> str:
+    cols = [c for c in row.index if c.startswith(prefix)]
+    hits = [c[len(prefix):] for c in cols if row[c] >= 0.5]
+    return hits[0] if hits else "nan"
+
+
+def describe_candidates(frame: pd.DataFrame) -> pd.DataFrame:
+    """Human-readable chemistry/conditions for each candidate row."""
+    out = pd.DataFrame(index=frame.index)
+    out["catalyst"] = np.where(frame.get("Catalyst_Cu", 0) >= 0.5, "Cu(OH)2", "Ni(OH)2")
+    substrate = np.where(frame.get("Catalyst_Foam_Substrate", 0) >= 0.5, "foam",
+                np.where(frame.get("Catalyst_Conductive_Glass", 0) >= 0.5, "FTO/ITO/BDD",
+                np.where(frame.get("Catalyst_Carbon", 0) >= 0.5, "carbon", "unspecified")))
+    out["support"] = substrate
+    out["nanostructured"] = (frame.get("Catalyst_Nanoparticle", 0) >= 0.5).astype(int)
+    cation = frame.apply(_one_hot_label, axis=1, prefix="Electrolyte_Electrolyte_Cation_")
+    anion = frame.apply(_one_hot_label, axis=1, prefix="Electrolyte_Electrolyte_Anion_")
+    out["electrolyte"] = [
+        f"{c}{a}" if c != "nan" and a != "nan" else "unspecified"
+        for c, a in zip(cation, anion)
+    ]
+    out["electrolyte_M"] = frame["Electrolyte_Concentration_M"].round(2)
+    out["electrolyte_pH"] = frame["Electrolyte_pH"].round(2) if "Electrolyte_pH" in frame else np.nan
+    out["HMF_mM"] = frame["HMF_Concentration_mM"].round(1)
+    out["potential_V_RHE"] = frame["Potential_vs_RHE_V"].round(3)
+    out["temperature_C"] = frame["Temperature_C"].round(1)
+    out["TEMPO"] = frame["TEMPO_binary"].round().astype(int)
+    cell = np.where(frame.get("Flow_Cell", 0) >= 0.5, "flow",
+           np.where(frame.get("Divided_Cell", 0) >= 0.5, "divided (H-cell)",
+           np.where(frame.get("Undivided_Cell", 0) >= 0.5, "undivided", "unspecified")))
+    out["cell"] = cell
+    return out
+
+
+def select_top_candidates(population, objectives, feature_names, n=TOP_N):
+    """Best n distinct candidates: by Pareto rank, then mean predicted metric.
+
+    Candidates are de-duplicated on rounded descriptor values so the list is
+    not ten copies of the same recipe. Lower potential breaks ties.
+    """
+    ranks, _ = rank_and_crowding(objectives)
+    perf = -objectives[:, :4]
+    table = pd.DataFrame(population, columns=feature_names)
+    for i, target in enumerate(TARGETS):
+        table[f"predicted_{target}"] = perf[:, i]
+    table["predicted_mean_4"] = perf.mean(axis=1)
+    table["pareto_rank"] = ranks
+    key = table[feature_names].round(2).astype(str).agg("|".join, axis=1)
+    table = table.loc[~key.duplicated()]
+    table = table.sort_values(["pareto_rank", "predicted_mean_4", "Potential_vs_RHE_V"],
+                              ascending=[True, False, True])
+    return table.head(n).reset_index(drop=True)
+
+
+def nearest_observed(top: pd.DataFrame, X_imputed: np.ndarray, feature_names,
+                     raw: pd.DataFrame, candidate_mask: np.ndarray) -> pd.DataFrame:
+    """Nearest real literature record (standardised descriptor distance)."""
+    mu = X_imputed.mean(axis=0)
+    sd = X_imputed.std(axis=0)
+    sd[sd == 0] = 1.0
+    reference = (X_imputed[candidate_mask] - mu) / sd
+    ref_rows = np.flatnonzero(candidate_mask)
+    records = []
+    for _, cand in top.iterrows():
+        z = (cand[feature_names].to_numpy(dtype=float) - mu) / sd
+        d = np.sqrt(((reference - z) ** 2).sum(axis=1))
+        j = ref_rows[int(np.argmin(d))]
+        records.append({
+            "nearest_record_row": int(j),
+            "nearest_distance": float(d.min()),
+            "nearest_catalyst": str(raw.loc[j, "Catalyst_Anode_Text"]).strip(" ,|;"),
+            "nearest_paper": str(raw.loc[j, "Paper Title"])[:90],
+            "nearest_conditions": f"{raw.loc[j, 'Electrolyte']} | {raw.loc[j, 'Potential_raw']}",
+            **{f"observed_{t}": raw.loc[j, t] for t in TARGETS},
+        })
+    return pd.DataFrame(records)
+
+
+def plot_top_candidates(top: pd.DataFrame, labels: pd.DataFrame, path: Path) -> None:
+    """Predicted yield vs FE for the top candidates, coloured by potential."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(figsize=(7.5, 5.5))
+    markers = {"Ni(OH)2": "o", "Cu(OH)2": "s"}
+    sc = None
+    for cat, marker in markers.items():
+        m = labels["catalyst"].eq(cat).to_numpy()
+        if m.any():
+            sc = ax.scatter(top.loc[m, "predicted_FE_pct"], top.loc[m, "predicted_Yield_pct"],
+                            c=top.loc[m, "Potential_vs_RHE_V"], cmap="viridis", marker=marker,
+                            s=90, edgecolors="black", linewidths=0.6, label=cat,
+                            vmin=top["Potential_vs_RHE_V"].min(), vmax=top["Potential_vs_RHE_V"].max())
+    for i, row in top.iterrows():
+        ax.annotate(str(i + 1), (row["predicted_FE_pct"], row["predicted_Yield_pct"]),
+                    textcoords="offset points", xytext=(6, 4), fontsize=8)
+    if sc is not None:
+        fig.colorbar(sc, ax=ax, label="Potential (V vs RHE)")
+    ax.set_xlabel("Predicted faradaic efficiency (%)")
+    ax.set_ylabel("Predicted FDCA yield (%)")
+    ax.set_title(f"NSGA-II top {len(top)} Ni(OH)$_2$ / Cu(OH)$_2$ candidates")
+    ax.grid(alpha=0.25)
+    ax.legend(title="Anode")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(path, dpi=300, bbox_inches="tight")
+    fig.savefig(path.with_suffix(".pdf"), bbox_inches="tight")
+    plt.close(fig)
+
+
+def condition_envelope(raw: pd.DataFrame, mask: np.ndarray) -> dict:
+    """Observed potential/temperature range for real Ni/Cu hydroxide anodes."""
+    envelope = {}
+    for column in ("Potential_vs_RHE_V", "Temperature_C"):
+        values = pd.to_numeric(raw.loc[mask, column], errors="coerce").dropna()
+        if len(values) >= 2:
+            envelope[column] = (float(values.min()), float(values.max()))
+    return envelope
+
+
+def run_hydroxide_scenario(models, X: pd.DataFrame, features: list[str]) -> dict:
+    """Constrained NSGA-II: Ni(OH)2 and Cu(OH)2 sub-runs, report the top 10.
+
+    Each metal is optimised separately (so Cu(OH)2 is not crowded out early),
+    the final populations are pooled and re-ranked by Pareto rank.
+    """
+    from common import read_cleaned, FIGURES_DIR
+    raw = read_cleaned()
+    hydroxide_rows = (
+        (raw["Catalyst_Hydroxide"] == 1)
+        & ((raw["Catalyst_Ni"] == 1) | (raw["Catalyst_Cu"] == 1))
+    ).to_numpy()
+    envelope = condition_envelope(raw, hydroxide_rows)
+    print(f"Hydroxide condition envelope: {envelope}")
+    populations, histories = [], []
+    for metal in HYDROXIDE_METALS:
+        population, _, history, matrix = run_nsga(
+            models, X, features,
+            constraint_factory=make_hydroxide_constraint(metal, envelope),
+            seed_mask=hydroxide_rows & (raw[f"Catalyst_{metal}"] == 1).to_numpy(),
+            return_population=True,
+        )
+        populations.append(population)
+        histories.extend({**h, "metal": metal} for h in history)
+    history = histories
+    population = np.vstack(populations)
+    temperature = features.index("Temperature_C") if "Temperature_C" in features else None
+    potential = features.index("Potential_vs_RHE_V") if "Potential_vs_RHE_V" in features else None
+    objectives = objective_matrix(models, population, temperature, potential)
+    top = select_top_candidates(population, objectives, features)
+    cu_mask = population[:, features.index("Catalyst_Cu")] >= 0.5
+    best_cu = select_top_candidates(population[cu_mask], objectives[cu_mask], features, n=3)
+    labels = describe_candidates(top)
+    nearest = nearest_observed(top, matrix, features, raw, hydroxide_rows)
+    report = pd.concat([
+        pd.Series(range(1, len(top) + 1), name="rank"),
+        labels.reset_index(drop=True),
+        top[[f"predicted_{t}" for t in TARGETS] + ["predicted_mean_4", "pareto_rank"]].round(2),
+        nearest,
+    ], axis=1)
+    report.to_csv(RESULTS_DIR / "nsga2_top10_ni_cu_hydroxide.csv", index=False)
+    cu_report = pd.concat([
+        describe_candidates(best_cu).reset_index(drop=True),
+        best_cu[[f"predicted_{t}" for t in TARGETS] + ["predicted_mean_4"]].round(2),
+        nearest_observed(best_cu, matrix, features, raw, hydroxide_rows),
+    ], axis=1)
+    cu_report.to_csv(RESULTS_DIR / "nsga2_best3_cu_hydroxide.csv", index=False)
+    top.to_csv(RESULTS_DIR / "nsga2_top10_ni_cu_hydroxide_descriptors.csv", index=False)
+    pd.DataFrame(history).to_csv(RESULTS_DIR / "nsga2_hydroxide_generation_history.csv", index=False)
+    plot_top_candidates(top, labels, FIGURES_DIR / "nsga2" / "NSGA2_top10_NiCu_hydroxide.png")
+    print("\nTop Ni(OH)2 / Cu(OH)2 candidates:")
+    print(report[["rank", "catalyst", "support", "electrolyte", "electrolyte_M", "HMF_mM",
+                  "potential_V_RHE", "temperature_C", "predicted_Conversion_pct",
+                  "predicted_Yield_pct", "predicted_FE_pct", "predicted_Selectivity_pct"]]
+          .to_string(index=False))
+    print("\nBest Cu(OH)2 candidates:")
+    print(cu_report[["catalyst", "support", "electrolyte", "electrolyte_M", "HMF_mM",
+                     "potential_V_RHE", "temperature_C", "predicted_Conversion_pct",
+                     "predicted_Yield_pct", "predicted_FE_pct", "predicted_Selectivity_pct"]]
+          .to_string(index=False))
+    return {
+        "n_candidates": int(len(report)),
+        "catalysts": report["catalyst"].value_counts().to_dict(),
+        "observed_hydroxide_seed_rows": int(hydroxide_rows.sum()),
+        "condition_envelope": envelope,
+    }
 
 
 def main() -> None:
@@ -311,10 +587,12 @@ def main() -> None:
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     output.to_csv(RESULTS_DIR / "nsga2_pareto_candidates.csv", index=False)
     pd.DataFrame(history).to_csv(RESULTS_DIR / "nsga2_generation_history.csv", index=False)
+    hydroxide = run_hydroxide_scenario(models, X, features)
     write_json(RESULTS_DIR / "nsga2_status.json", {
         "status": "completed_model_generated_candidates",
         "n_pareto_candidates": int(len(output)), "generations": GENERATIONS,
         "population_size": POPULATION_SIZE,
+        "hydroxide_scenario": hydroxide,
         "warning": "Candidates require experimental confirmation; model predictions are not measurements.",
     })
     stage_status("08_nsga2", "completed", {"n_pareto_candidates": int(len(output))})

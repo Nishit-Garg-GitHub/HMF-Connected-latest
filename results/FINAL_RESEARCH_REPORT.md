@@ -151,9 +151,26 @@ Per-target models train on all records with each target observed, preventing sam
 
 ## 8. Genetic algorithm / NSGA-II
 - Status: **completed_model_generated_candidates**.
-- Model-generated Pareto candidates: **48**.
+- Model-generated Pareto candidates: **80**.
 - NSGA-II is gated by the multi-output regression validation results.
 - Any Pareto candidates are model-generated hypotheses and require experimental validation.
+
+### Constrained scenario: Ni(OH)2 / Cu(OH)2 anode (top 10)
+- Conditions bounded to the range reported for real Ni/Cu hydroxide anodes: {'Potential_vs_RHE_V': [1.4, 1.69], 'Temperature_C': [25.0, 40.0]}.
+|   rank | catalyst   | support   | electrolyte   |   electrolyte_M |   HMF_mM |   potential_V_RHE |   temperature_C |   predicted_Conversion_pct |   predicted_Yield_pct |   predicted_FE_pct |   predicted_Selectivity_pct |
+|-------:|:-----------|:----------|:--------------|----------------:|---------:|------------------:|----------------:|---------------------------:|----------------------:|-------------------:|----------------------------:|
+|      1 | Ni(OH)2    | foam      | KOH           |            1.49 |     10   |             1.443 |            25   |                      99.09 |                 95.16 |              96.32 |                       97.41 |
+|      2 | Ni(OH)2    | foam      | KOH           |            1.34 |     11.5 |             1.438 |            29.4 |                      99.01 |                 95.44 |              96.23 |                       96.87 |
+|      3 | Ni(OH)2    | foam      | KOH           |            0.95 |      9.5 |             1.422 |            25.1 |                      99.19 |                 95.44 |              95.09 |                       97.43 |
+|      4 | Ni(OH)2    | foam      | KOH           |            1    |     10.6 |             1.4   |            25   |                      98.34 |                 95.44 |              95.87 |                       97.18 |
+|      5 | Ni(OH)2    | foam      | KOH           |            0.6  |     11.5 |             1.436 |            25.1 |                      99.21 |                 94.39 |              94.7  |                       97.43 |
+|      6 | Ni(OH)2    | foam      | KOH           |            0.61 |     10   |             1.423 |            35.7 |                      99.21 |                 94.94 |              94.7  |                       96.87 |
+|      7 | Ni(OH)2    | foam      | KOH           |            1.05 |     13.3 |             1.429 |            25   |                      99.19 |                 92.7  |              96.21 |                       97.43 |
+|      8 | Ni(OH)2    | foam      | KOH           |            1.04 |      6   |             1.426 |            25.9 |                      99.19 |                 92.39 |              96.21 |                       96.87 |
+|      9 | Ni(OH)2    | foam      | KOH           |            0.74 |     10.5 |             1.408 |            26.6 |                      98.46 |                 94.94 |              94.58 |                       96.62 |
+|     10 | Ni(OH)2    | foam      | KOH           |            1    |     10   |             1.437 |            25   |                      95.73 |                 95.16 |              96.23 |                       97.43 |
+
+Nearest observed hydroxide record: Ni(OH)2/NF (1.0 M KOH | 1.45 V vs. RHE), measured yield 88.3%, FE 90.6%.
 
 ## 9. Reproducibility and limitations
 - All four numerical outcomes are excluded from the input matrix.
