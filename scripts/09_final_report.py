@@ -73,24 +73,47 @@ def clustering_section() -> list[str]:
 
 
 def classification_section() -> list[str]:
-    """Summarise four model families and four sampling alternatives."""
+    """Summarise model families and sampling alternatives with 95% CI."""
     path = RESULTS_DIR / "classification_summary.csv"
     best = read_json(RESULTS_DIR / "best_classification_candidate.json")
     lines = ["## 3. Classification and sampling comparison"]
     if path.exists():
         summary = pd.read_csv(path)
-        lines.append(table_markdown(summary.head(20), [
-            "target_kind", "k", "model", "sampler", "n_valid", "macro_f1_mean",
-            "macro_f1_sd", "weighted_f1_mean", "accuracy_mean",
-            "balanced_accuracy_mean",
-        ]))
+        display_cols = [
+            "target_kind", "k", "model", "sampler", "macro_f1_mean",
+            "macro_f1_sd", "macro_f1_ci95_lo", "macro_f1_ci95_hi",
+            "accuracy_mean", "leakage_flag",
+        ]
+        # Include whichever columns exist
+        display_cols = [c for c in display_cols if c in summary.columns]
+        lines.append(table_markdown(summary.head(20), display_cols))
     else:
         lines.append("_Classification summary was not generated._")
+
+    dummy_str = (
+        f", dummy baseline mean macro-F1={best.get('dummy_macro_f1_mean'):.4f}"
+        if best.get("dummy_macro_f1_mean") is not None else ""
+    )
+    perm_str = (
+        f", permutation test p-value={best.get('permutation_p_value'):.4f}"
+        if best.get("permutation_p_value") is not None else ""
+    )
+    ci_str = (
+        f", 95% CI=[{best.get('macro_f1_ci95_lo', 0):.3f}, {best.get('macro_f1_ci95_hi', 0):.3f}]"
+        if best.get("macro_f1_ci95_lo") is not None else ""
+    )
+    leakage_str = (
+        f" | **LEAKAGE CHECK: {best.get('leakage_flag')}**"
+        if "leakage_flag" in best else ""
+    )
+
     lines.extend([
         "",
-        f"Selected screening candidate: **{best.get('model', 'N/A')} + {best.get('sampler', 'N/A')}**, K={best.get('k', 'N/A')}, mean macro-F1={best.get('macro_f1_mean', 'N/A')}.",
+        f"Selected screening candidate: **{best.get('model', 'N/A')} + {best.get('sampler', 'N/A')}**, "
+        f"K={best.get('k', 'N/A')}, mean macro-F1={best.get('macro_f1_mean', 'N/A')}{ci_str}{dummy_str}{perm_str}{leakage_str}.",
         "Samplers: no sampling, RandomOverSampler (ROS), SMOTE and ADASYN. Sampling occurs inside training folds only. Infeasible sampler/fold combinations are reported rather than silently replaced.",
-        "These are screening results. A high F1 is not guaranteed; model choice should be based on repeated unseen-paper performance and class support, not a single best fold.",
+        "Evaluation uses pooled out-of-fold predictions per repeat across >=20 publication-grouped repeats before calculating macro-F1.",
+        "Scores above 0.8 are flagged for leakage audit. Predicted performance reflects unseen-paper generalization.",
         "",
     ])
     return lines
@@ -135,24 +158,38 @@ def learning_shap_section() -> list[str]:
 
 
 def regression_section() -> list[str]:
-    """Report the single joint four-output regression model and its gate."""
+    """Report per-target and joint regression models and their validation gate."""
     lines = ["## 7. Multi-output regression"]
-    path = RESULTS_DIR / "multioutput_regression_summary.csv"
+    pt_path = RESULTS_DIR / "per_target_regression_summary.csv"
+    joint_path = RESULTS_DIR / "multioutput_regression_summary.csv"
     gate = read_json(RESULTS_DIR / "regression_validation_gate.json")
-    if path.exists():
-        summary = pd.read_csv(path)
-        lines.append(table_markdown(summary, [
+
+    if pt_path.exists():
+        lines.append("### Primary — Per-target regression (SelectKBest + ExtraTrees)")
+        summary_pt = pd.read_csv(pt_path)
+        lines.append(table_markdown(summary_pt, [
+            "target", "n_valid_records", "model_r2_mean", "model_r2_sd",
+            "model_mae_mean", "baseline_mae_mean", "model_rmse_mean",
+        ]))
+        lines.append("")
+
+    if joint_path.exists():
+        lines.append("### Secondary — Joint multi-output regression (complete rows only)")
+        summary_j = pd.read_csv(joint_path)
+        lines.append(table_markdown(summary_j, [
             "target", "model_r2_mean", "model_r2_sd", "model_mae_mean",
             "baseline_mae_mean", "model_rmse_mean",
         ]))
-    else:
-        lines.append("_Four-output regression did not complete._")
+        lines.append("")
+
+    if not pt_path.exists() and not joint_path.exists():
+        lines.append("_Regression summaries were not generated._")
+
     lines.extend([
         "",
-        f"Complete valid records used for the shared four-output comparison: **{gate.get('n_complete_records', 'N/A')}** across **{gate.get('n_papers', 'N/A')}** papers.",
-        f"Rows excluded for out-of-range percentage targets: **{gate.get('n_rows_excluded_invalid_percentage', 'N/A')}**.",
         f"Regression validation gate: **{'PASSED' if gate.get('passed') else 'NOT PASSED'}**.",
-        "One MultiOutputRegressor predicts Conversion, FDCA Yield, Faradaic Efficiency and Selectivity simultaneously. Missing target measurements are not fabricated; the strict shared comparison uses records with all four targets observed.",
+        f"Gate criteria: {gate.get('validation', 'MAE must beat median baseline for every target.')}",
+        "Per-target models train on all records with each target observed, preventing sample starvation from requiring all 4 targets simultaneously.",
         "",
     ])
     return lines

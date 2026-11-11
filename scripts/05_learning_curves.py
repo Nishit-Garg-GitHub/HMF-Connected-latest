@@ -75,7 +75,7 @@ TRAINING_FRACTIONS = [
     0.60, 0.70, 0.80, 0.90, 1.00
 ]
 
-N_REPEATS = 5
+N_REPEATS = 10
 TEST_SIZE = 0.20
 RANDOM_STATE = 42
 
@@ -565,7 +565,9 @@ def create_summary(results):
             sd_validation_accuracy=("validation_accuracy", "std"),
 
             mean_training_macro_f1=("training_macro_f1", "mean"),
+            sd_training_macro_f1=("training_macro_f1", "std"),
             mean_validation_macro_f1=("validation_macro_f1", "mean"),
+            sd_validation_macro_f1=("validation_macro_f1", "std"),
 
             valid_repeats=("repeat", "nunique"),
         )
@@ -574,6 +576,8 @@ def create_summary(results):
     for column in [
         "sd_training_accuracy",
         "sd_validation_accuracy",
+        "sd_training_macro_f1",
+        "sd_validation_macro_f1",
     ]:
         summary[column] = summary[column].fillna(0)
 
@@ -631,19 +635,19 @@ def plot_learning_curves(summary):
             ].to_numpy()
 
             train_mean = subset[
-                "mean_training_accuracy"
+                "mean_training_macro_f1"
             ].to_numpy()
 
             train_std = subset[
-                "sd_training_accuracy"
+                "sd_training_macro_f1"
             ].to_numpy()
 
             validation_mean = subset[
-                "mean_validation_accuracy"
+                "mean_validation_macro_f1"
             ].to_numpy()
 
             validation_std = subset[
-                "sd_validation_accuracy"
+                "sd_validation_macro_f1"
             ].to_numpy()
 
             # Red: training score.
@@ -696,7 +700,7 @@ def plot_learning_curves(summary):
             )
 
             ax.set_ylabel(
-                "Accuracy score",
+                "Macro-F1 score",
                 fontsize=9,
             )
 

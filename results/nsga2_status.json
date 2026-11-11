@@ -1,5 +1,7 @@
 {
-  "status": "blocked",
-  "reason": "Multi-output regression did not beat baseline on all four targets.",
-  "required_gate": "MAE must beat median baseline for Conversion, Yield, FE and Selectivity."
+  "status": "completed_model_generated_candidates",
+  "n_pareto_candidates": 48,
+  "generations": 35,
+  "population_size": 48,
+  "warning": "Candidates require experimental confirmation; model predictions are not measurements."
 }

@@ -1,7 +1,7 @@
 {
-  "source": "D:\\HMF_Connected_Fast_Pipeline\\results\\classification_kmeans_fold_scores.csv",
-  "valid_fold_rows_used": 120,
-  "summary_rows": 20,
+  "source": "/Users/ayushgoyal/Documents/GitHub/HMF-Connected-latest/results/classification_kmeans_fold_scores.csv",
+  "valid_fold_rows_used": 2732,
+  "summary_rows": 28,
   "display_grid_rows": 36,
   "K_values_displayed": [
     3,
@@ -26,46 +26,6 @@
     "macro_f1"
   ],
   "missing_combinations": [
-    {
-      "k": 4,
-      "sampler": "ADASYN",
-      "model": "DecisionTree"
-    },
-    {
-      "k": 4,
-      "sampler": "ADASYN",
-      "model": "SVM"
-    },
-    {
-      "k": 4,
-      "sampler": "ADASYN",
-      "model": "RandomForest"
-    },
-    {
-      "k": 4,
-      "sampler": "ADASYN",
-      "model": "NeuralNetwork"
-    },
-    {
-      "k": 4,
-      "sampler": "SMOTE",
-      "model": "DecisionTree"
-    },
-    {
-      "k": 4,
-      "sampler": "SMOTE",
-      "model": "SVM"
-    },
-    {
-      "k": 4,
-      "sampler": "SMOTE",
-      "model": "RandomForest"
-    },
-    {
-      "k": 4,
-      "sampler": "SMOTE",
-      "model": "NeuralNetwork"
-    },
     {
       "k": 5,
       "sampler": "ADASYN",

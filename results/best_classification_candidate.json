@@ -1,10 +1,15 @@
 {
   "target_kind": "binary_high_performance_90",
   "k": null,
-  "model": "DecisionTree",
-  "sampler": "SMOTE",
-  "macro_f1_mean": 0.6285509398934352,
-  "macro_f1_sd": 0.10508014776482197,
-  "n_valid_folds": 6,
-  "status": "screening_candidate"
+  "model": "RandomForest",
+  "sampler": "ROS",
+  "macro_f1_mean": 0.5863667179576847,
+  "macro_f1_sd": 0.04027814497763899,
+  "macro_f1_ci95_lo": 0.5697407168608059,
+  "macro_f1_ci95_hi": 0.6029927190545635,
+  "n_valid_repeats": 25,
+  "status": "screening_candidate",
+  "dummy_macro_f1_mean": 0.47999905969779716,
+  "dummy_macro_f1_sd": 0.04746187176070721,
+  "permutation_p_value": 0.5544554455445545
 }

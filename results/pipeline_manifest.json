@@ -17,7 +17,7 @@
         "feasible": 18,
         "infeasible": 18
       },
-      "pid": 21904
+      "pid": 25275
     },
     "04_model_evaluation": {
       "status": "completed",
@@ -25,21 +25,29 @@
         "best_candidate": {
           "target_kind": "binary_high_performance_90",
           "k": null,
-          "model": "DecisionTree",
-          "sampler": "SMOTE",
-          "macro_f1_mean": 0.6285509398934352,
-          "macro_f1_sd": 0.10508014776482197,
-          "n_valid_folds": 6,
-          "status": "screening_candidate"
+          "model": "RandomForest",
+          "sampler": "ROS",
+          "macro_f1_mean": 0.5863667179576847,
+          "macro_f1_sd": 0.04027814497763899,
+          "macro_f1_ci95_lo": 0.5697407168608059,
+          "macro_f1_ci95_hi": 0.6029927190545635,
+          "n_valid_repeats": 25,
+          "status": "screening_candidate",
+          "dummy_macro_f1_mean": 0.47999905969779716,
+          "dummy_macro_f1_sd": 0.04746187176070721,
+          "permutation_p_value": 0.5544554455445545
         },
-        "elapsed_seconds": 48.21,
-        "kmeans_fold_rows": 384,
-        "binary_fold_rows": 96,
+        "elapsed_seconds": 395.36,
+        "kmeans_repeat_rows": 2000,
+        "kmeans_fold_rows": 10000,
+        "binary_repeat_rows": 500,
+        "binary_fold_rows": 2500,
         "models": [
           "DecisionTree",
           "SVM",
           "RandomForest",
-          "NeuralNetwork"
+          "NeuralNetwork",
+          "GradientBoosting"
         ],
         "samplers": [
           "none",
@@ -48,10 +56,10 @@
           "ADASYN"
         ],
         "note": "K-means classes are descriptive; binary >=90% is a secondary screening target.",
-        "fold_diagnostics": "Per-fold train/test class counts are stored in classification_*_fold_scores.csv.",
+        "fold_diagnostics": "Per-fold metrics in classification_*_fold_scores.csv. Official pooled OOF in classification_*_repeat_scores.csv.",
         "feature_selection": "Fold-local zero-variance filtering only; no univariate outcome-driven feature ranking."
       },
-      "pid": 32356
+      "pid": 25287
     },
     "05_learning_curves": {
       "status": "completed",
@@ -67,7 +75,7 @@
           4,
           5
         ],
-        "repeats": 5,
+        "repeats": 10,
         "training_fractions": [
           0.2,
           0.3,
@@ -81,11 +89,11 @@
         ],
         "total_feature_records": 154,
         "independent_publications": 99,
-        "valid_points": 540,
-        "mean_validation_accuracy": 0.7533452807646356,
-        "mean_validation_macro_f1": 0.2952983381439152
+        "valid_points": 1080,
+        "mean_validation_accuracy": 0.753136200716846,
+        "mean_validation_macro_f1": 0.2982556321880072
       },
-      "pid": 15904
+      "pid": 25408
     },
     "06_shap_analysis": {
       "status": "completed",
@@ -93,12 +101,17 @@
         "candidate": {
           "target_kind": "binary_high_performance_90",
           "k": null,
-          "model": "DecisionTree",
-          "sampler": "SMOTE",
-          "macro_f1_mean": 0.6285509398934352,
-          "macro_f1_sd": 0.10508014776482197,
-          "n_valid_folds": 6,
-          "status": "screening_candidate"
+          "model": "RandomForest",
+          "sampler": "ROS",
+          "macro_f1_mean": 0.5863667179576847,
+          "macro_f1_sd": 0.04027814497763899,
+          "macro_f1_ci95_lo": 0.5697407168608059,
+          "macro_f1_ci95_hi": 0.6029927190545635,
+          "n_valid_repeats": 25,
+          "status": "screening_candidate",
+          "dummy_macro_f1_mean": 0.47999905969779716,
+          "dummy_macro_f1_sd": 0.04746187176070721,
+          "permutation_p_value": 0.5544554455445545
         },
         "method": "shap_tree_explainer",
         "train_papers": 67,
@@ -106,53 +119,56 @@
         "explained_rows": 23,
         "interpretation": "Associational feature importance; not causal evidence."
       },
-      "pid": 32384
+      "pid": 25453
     },
     "07_regression": {
       "status": "completed",
       "details": {
-        "passed": false,
+        "passed": true,
         "target_checks": {
           "Conversion_pct": {
-            "mae_beats_baseline": false,
-            "mean_model_mae": 3.917032658781521,
-            "mean_baseline_mae": 2.076166666666666,
-            "mean_model_r2": -56.81894365880809,
-            "folds_won": 0,
-            "folds_evaluated": 3,
-            "wins_majority_of_folds": false
+            "mae_beats_baseline": true,
+            "mean_model_mae": 6.274141822377902,
+            "mean_baseline_mae": 7.068849879465268,
+            "mean_model_r2": -2.0672915235420644,
+            "folds_won": 24,
+            "folds_evaluated": 30,
+            "wins_majority_of_folds": true
           },
           "Yield_pct": {
-            "mae_beats_baseline": false,
-            "mean_model_mae": 5.965227290388827,
-            "mean_baseline_mae": 5.291333333333333,
-            "mean_model_r2": -0.45230618646269605,
-            "folds_won": 1,
-            "folds_evaluated": 3,
-            "wins_majority_of_folds": false
+            "mae_beats_baseline": true,
+            "mean_model_mae": 12.35340506423347,
+            "mean_baseline_mae": 13.190927424152294,
+            "mean_model_r2": -0.037526641233198446,
+            "folds_won": 24,
+            "folds_evaluated": 30,
+            "wins_majority_of_folds": true
           },
           "FE_pct": {
-            "mae_beats_baseline": false,
-            "mean_model_mae": 8.683439946650555,
-            "mean_baseline_mae": 6.886000000000003,
-            "mean_model_r2": -1.3715171548051313,
-            "folds_won": 0,
-            "folds_evaluated": 3,
-            "wins_majority_of_folds": false
+            "mae_beats_baseline": true,
+            "mean_model_mae": 8.948136738390255,
+            "mean_baseline_mae": 9.949328600021637,
+            "mean_model_r2": -0.23250839385319808,
+            "folds_won": 27,
+            "folds_evaluated": 30,
+            "wins_majority_of_folds": true
           },
           "Selectivity_pct": {
-            "mae_beats_baseline": false,
-            "mean_model_mae": 5.927821022962256,
-            "mean_baseline_mae": 5.3445,
-            "mean_model_r2": -0.37978904717638073,
-            "folds_won": 2,
-            "folds_evaluated": 3,
+            "mae_beats_baseline": true,
+            "mean_model_mae": 10.355389625019852,
+            "mean_baseline_mae": 12.365336585580822,
+            "mean_model_r2": -0.01926538219461533,
+            "folds_won": 29,
+            "folds_evaluated": 30,
             "wins_majority_of_folds": true
           }
         },
-        "n_complete_records": 60,
-        "n_papers": 47,
-        "n_rows_excluded_invalid_percentage": 0,
+        "per_target_model_paths": {
+          "Conversion_pct": "results/regressor_Conversion_pct.joblib",
+          "Yield_pct": "results/regressor_Yield_pct.joblib",
+          "FE_pct": "results/regressor_FE_pct.joblib",
+          "Selectivity_pct": "results/regressor_Selectivity_pct.joblib"
+        },
         "features": [
           "HMF_Concentration_mM",
           "Potential_vs_RHE_V",
@@ -202,26 +218,26 @@
           "FE_pct",
           "Selectivity_pct"
         ],
-        "model": "MultiOutputRegressor(ExtraTreesRegressor)",
-        "validation": "Publication-grouped GroupKFold; MAE must beat median baseline and win a majority of folds for every target.",
-        "model_path": "results\\multioutput_regressor.joblib",
+        "model": "Per-target ExtraTreesRegressor with SelectKBest (primary)",
+        "validation": "Repeated publication-grouped GroupKFold (10 repeats x 3 folds); MAE must beat median baseline and win a majority of folds for every target.",
+        "joint_model_path": "results/multioutput_regressor.joblib",
         "warning": "A passing internal gate is not experimental validation; confirm candidates in the laboratory."
       },
-      "pid": 16740
+      "pid": 25626
     },
     "08_nsga2": {
-      "status": "blocked",
+      "status": "completed",
       "details": {
-        "reason": "Multi-output regression did not beat baseline on all four targets."
+        "n_pareto_candidates": 48
       },
-      "pid": 20440
+      "pid": 25627
     },
     "09_final_report": {
       "status": "completed",
       "details": {
-        "report": "results\\FINAL_RESEARCH_REPORT.md"
+        "report": "results/FINAL_RESEARCH_REPORT.md"
       },
-      "pid": 31396
+      "pid": 25638
     },
     "02_kmeans": {
       "status": "completed",
@@ -249,16 +265,16 @@
         ],
         "warning": "Clusters for records with imputed outcomes are exploratory pseudo-labels, not measured performance classes."
       },
-      "pid": 8388
+      "pid": 25256
     },
     "06_shap_analysis_paper_nn_smote": {
       "status": "completed",
       "details": {
         "figures": [
-          "D:\\HMF_Connected_Fast_Pipeline\\figures\\shap\\Figure_12_RF_ROS_SHAP_Bar.png",
-          "D:\\HMF_Connected_Fast_Pipeline\\figures\\shap\\Figure_13_RF_ROS_SHAP_Beeswarm.png"
+          "/Users/ayushgoyal/Documents/GitHub/HMF-Connected-latest/figures/shap/Figure_12_RF_ROS_SHAP_Bar.png",
+          "/Users/ayushgoyal/Documents/GitHub/HMF-Connected-latest/figures/shap/Figure_13_RF_ROS_SHAP_Beeswarm.png"
         ],
-        "audit": "D:\\HMF_Connected_Fast_Pipeline\\results\\shap_rf_ros_K3_K5_audit.json",
+        "audit": "/Users/ayushgoyal/Documents/GitHub/HMF-Connected-latest/results/shap_rf_ros_K3_K5_audit.json",
         "runs": {
           "3": {
             "train_records": 118,
@@ -316,7 +332,7 @@
           }
         }
       },
-      "pid": 32384
+      "pid": 25453
     }
   }
 }

@@ -60,6 +60,7 @@ def run_stage(python: str, filename: str, description: str, index: int):
     env = os.environ.copy()
     env["PYTHONUNBUFFERED"] = "1"
     env["MPLBACKEND"] = "Agg"
+    env["MPLCONFIGDIR"] = "/tmp/matplotlib"
     env["OMP_NUM_THREADS"] = "1"
     env["OPENBLAS_NUM_THREADS"] = "1"
     env["MKL_NUM_THREADS"] = "1"
@@ -105,6 +106,7 @@ def main():
         for pattern in ("stage_*.log", "kmeans_labels_K*.csv", "classification_*.csv",
                         "oversampling_audit.*", "learning_curve_selected_model.csv",
                         "feature_importance_selected_model.csv", "multioutput_*.csv",
+                        "per_target_*.csv", "regressor_*.joblib",
                         "regression_validation_gate.json", "nsga2_*.csv", "nsga2_status.json",
                         "pipeline_manifest.json", "FINAL_RESEARCH_REPORT.md"):
             for path in RESULTS.glob(pattern):

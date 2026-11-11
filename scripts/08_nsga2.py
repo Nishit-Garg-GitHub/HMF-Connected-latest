@@ -19,7 +19,7 @@ from joblib import load
 
 from common import (
     RESULTS_DIR, TARGETS, build_feature_matrix, read_processed, stage_status,
-    write_json,
+    write_json, mutual_info_scored,
 )
 
 SEED = 42
@@ -37,10 +37,21 @@ def load_gate() -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def objective_matrix(model, population: np.ndarray, temp_idx: int | None,
+def objective_matrix(models, population: np.ndarray, temp_idx: int | None,
                      potential_idx: int | None) -> np.ndarray:
-    """Return minimisation objectives: negative performance plus conditions."""
-    predictions = np.clip(model.predict(population), 0, 100)
+    """Return minimisation objectives: negative performance plus conditions.
+
+    `models` may be a single joint multi-output model or a dict of
+    per-target models.  Per-target models are preferred because they use
+    more training records.
+    """
+    if isinstance(models, dict):
+        predictions = np.column_stack([
+            np.clip(models[target].predict(population), 0, 100)
+            for target in TARGETS
+        ])
+    else:
+        predictions = np.clip(models.predict(population), 0, 100)
     columns = [-predictions[:, i] for i in range(4)]
     if temp_idx is not None:
         columns.append(population[:, temp_idx])
@@ -178,13 +189,16 @@ def environmental_selection(population: np.ndarray, objectives: np.ndarray,
     return population[chosen]
 
 
-def run_nsga(model, X: pd.DataFrame, feature_names: list[str]):
+def run_nsga(models, X: pd.DataFrame, feature_names: list[str]):
     """Run a compact NSGA-II search seeded by real observed experiments."""
     rng = np.random.default_rng(SEED)
     # Use the fitted training imputer to initialise complete candidate vectors.
-    # The model pipeline accepts raw features, so these imputed values are
-    # passed through its imputer a second time without changing their values.
-    imputer = model.named_steps.get("imputer")
+    # Per-target models each have their own imputer; use the first one available.
+    if isinstance(models, dict):
+        first_model = next(iter(models.values()))
+        imputer = first_model.named_steps.get("imputer") if hasattr(first_model, "named_steps") else None
+    else:
+        imputer = models.named_steps.get("imputer") if hasattr(models, "named_steps") else None
     matrix = X.to_numpy(dtype=float)
     matrix = imputer.transform(matrix) if imputer is not None else matrix
     lower = np.nanmin(matrix, axis=0)
@@ -219,7 +233,7 @@ def run_nsga(model, X: pd.DataFrame, feature_names: list[str]):
     ])
     history = []
     for generation in range(GENERATIONS):
-        objectives = objective_matrix(model, population, temperature, potential)
+        objectives = objective_matrix(models, population, temperature, potential)
         ranks, crowding = rank_and_crowding(objectives)
         children = []
         while len(children) < POPULATION_SIZE:
@@ -230,9 +244,9 @@ def run_nsga(model, X: pd.DataFrame, feature_names: list[str]):
                 categorical_groups,
             ))
         combined = np.vstack([population, np.asarray(children)])
-        combined_objectives = objective_matrix(model, combined, temperature, potential)
+        combined_objectives = objective_matrix(models, combined, temperature, potential)
         population = environmental_selection(combined, combined_objectives, POPULATION_SIZE)
-        current = objective_matrix(model, population, temperature, potential)
+        current = objective_matrix(models, population, temperature, potential)
         front = non_dominated_sort(current)[0]
         history.append({
             "generation": generation + 1,
@@ -243,7 +257,7 @@ def run_nsga(model, X: pd.DataFrame, feature_names: list[str]):
             "best_selectivity": float(-np.min(current[front, 3])),
         })
         print(f"NSGA-II generation {generation + 1}/{GENERATIONS}: Pareto={len(front)}")
-    final_objectives = objective_matrix(model, population, temperature, potential)
+    final_objectives = objective_matrix(models, population, temperature, potential)
     pareto_indices = non_dominated_sort(final_objectives)[0]
     return population[pareto_indices], final_objectives[pareto_indices], history
 
@@ -253,7 +267,7 @@ def main() -> None:
     warnings.filterwarnings("ignore", category=FutureWarning)
     gate = load_gate()
     if not gate.get("passed", False):
-        message = gate.get("reason", "Multi-output regression did not beat baseline on all four targets.")
+        message = gate.get("reason", "Regression did not beat baseline on all required targets.")
         write_json(RESULTS_DIR / "nsga2_status.json", {
             "status": "blocked", "reason": message,
             "required_gate": "MAE must beat median baseline for Conversion, Yield, FE and Selectivity.",
@@ -261,10 +275,23 @@ def main() -> None:
         stage_status("08_nsga2", "blocked", {"reason": message})
         print("NSGA-II BLOCKED:", message)
         return
-    model_path = RESULTS_DIR / gate["model_path"]
-    if not model_path.exists():
-        raise FileNotFoundError(f"Validated regression model missing: {model_path}")
-    model = load(model_path)
+
+    # Load models: per-target models preferred, fallback to joint model
+    root_dir = Path(__file__).resolve().parents[1]
+    if "per_target_model_paths" in gate and gate["per_target_model_paths"]:
+        models = {}
+        for target, relpath in gate["per_target_model_paths"].items():
+            full_path = root_dir / relpath
+            if not full_path.exists():
+                raise FileNotFoundError(f"Missing per-target regressor for {target}: {full_path}")
+            models[target] = load(full_path)
+    else:
+        model_key = "joint_model_path" if "joint_model_path" in gate else "model_path"
+        model_path = root_dir / gate[model_key]
+        if not model_path.exists():
+            raise FileNotFoundError(f"Validated regression model missing: {model_path}")
+        models = load(model_path)
+
     frame = read_processed()
     X, features, _ = build_feature_matrix(frame)
     if list(gate.get("features", [])) != list(features):
@@ -272,7 +299,7 @@ def main() -> None:
             "Feature contract mismatch between validated regression model and current preprocessing. "
             "Re-run stage 07 before NSGA-II."
         )
-    pareto_X, pareto_objectives, history = run_nsga(model, X, features)
+    pareto_X, pareto_objectives, history = run_nsga(models, X, features)
     # Objectives are stored in minimisation form; first four columns are -predicted metrics.
     output = pd.DataFrame(pareto_X, columns=features)
     for i, target in enumerate(TARGETS):

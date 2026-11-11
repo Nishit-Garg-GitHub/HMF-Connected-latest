@@ -19,9 +19,10 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
-from sklearn.ensemble import RandomForestClassifier, ExtraTreesRegressor
+from sklearn.ensemble import RandomForestClassifier, ExtraTreesRegressor, GradientBoostingClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import StratifiedGroupKFold
+from scipy import stats
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT_DIR = ROOT / "scripts"
@@ -172,6 +173,11 @@ def make_classifier(name: str, seed: int = RANDOM_STATE):
             hidden_layer_sizes=(32, 16), alpha=0.02, max_iter=300,
             early_stopping=True, n_iter_no_change=15, random_state=seed,
         ),
+        "GradientBoosting": GradientBoostingClassifier(
+            n_estimators=100, max_depth=3, learning_rate=0.1,
+            min_samples_leaf=3, subsample=0.8,
+            random_state=seed,
+        ),
     }
     if name not in models:
         raise KeyError(f"Unknown classifier: {name}")
@@ -251,3 +257,24 @@ def save_figure(fig, path: Path) -> None:
     fig.savefig(path, dpi=250, bbox_inches="tight")
     import matplotlib.pyplot as plt
     plt.close(fig)
+
+
+def confidence_interval_95(values) -> tuple[float, float, float, float]:
+    """Return (mean, sd, ci_low, ci_high) for an array of scores."""
+    values = np.asarray(values, dtype=float)
+    values = values[np.isfinite(values)]
+    n = len(values)
+    if n < 2:
+        m = float(values[0]) if n == 1 else float("nan")
+        return m, float("nan"), float("nan"), float("nan")
+    mean = float(np.mean(values))
+    sd = float(np.std(values, ddof=1))
+    se = sd / np.sqrt(n)
+    ci = stats.t.interval(0.95, df=n - 1, loc=mean, scale=se)
+    return mean, sd, float(ci[0]), float(ci[1])
+
+
+def mutual_info_scored(X, y):
+    """Pickleable feature scoring function with fixed random seed."""
+    from sklearn.feature_selection import mutual_info_regression
+    return mutual_info_regression(X, y, random_state=RANDOM_STATE)

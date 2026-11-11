@@ -143,7 +143,7 @@ def shap_or_fallback(pipe, X_train, X_test, y_test, feature_names):
         transformed_test = pipe.named_steps["scaler"].transform(transformed_test)
         selected_names = np.asarray(feature_names)[pipe.named_steps["variance"].get_support()]
         estimator = pipe.named_steps["model"]
-        if model_name in {"DecisionTreeClassifier", "RandomForestClassifier"}:
+        if model_name in {"DecisionTreeClassifier", "RandomForestClassifier", "GradientBoostingClassifier"}:
             explainer = shap.TreeExplainer(estimator)
             values = explainer.shap_values(transformed_test)
             if isinstance(values, list):
