@@ -113,22 +113,22 @@ Scores above 0.8 are flagged for leakage audit. Predicted performance reflects u
 ## 6. SHAP / feature importance
 | feature                           |   mean_abs_shap |
 |:----------------------------------|----------------:|
-| Catalyst_Conductive_Glass         |       0.0897748 |
-| Catalyst_Cu                       |       0.0636189 |
-| Catalyst_V                        |       0.0576132 |
-| Counter_Electrode_Carbon          |       0.0483421 |
-| Catalyst_Carbon                   |       0.0388169 |
-| missingindicator_Temperature_C    |       0.0359286 |
-| Catalyst_Hydroxide                |       0.0348796 |
-| Electrolyte_Electrolyte_Anion_nan |       0.0274185 |
-| Catalyst_N_Elements               |       0.0254851 |
-| Catalyst_Oxyhydroxide             |       0.0244946 |
-| Catalyst_Nitride                  |       0.023863  |
-| Three_Electrode                   |       0.0232732 |
+| Catalyst_Conductive_Glass         |       0.10351   |
+| Catalyst_Oxyhydroxide             |       0.0531022 |
+| Counter_Electrode_Carbon          |       0.0448159 |
+| Catalyst_V                        |       0.0443142 |
+| Catalyst_Cu                       |       0.041505  |
+| Catalyst_Fe                       |       0.0333054 |
+| Catalyst_Hydroxide                |       0.0309157 |
+| missingindicator_Temperature_C    |       0.0214634 |
+| Catalyst_Carbon                   |       0.0202323 |
+| Catalyst_Bimetallic               |       0.0194738 |
+| Electrolyte_Electrolyte_Cation_Na |       0.0192481 |
+| Catalyst_Phosphide                |       0.0192267 |
 Feature importance is associational and should not be interpreted as causal evidence.
 
 ## 7. Multi-output regression
-### Primary — Per-target regression (SelectKBest + ExtraTrees)
+### Primary — Per-target regression (SelectKBest + RandomForest)
 | target          |   model_r2_mean |   model_r2_sd |   model_mae_mean |   baseline_mae_mean |   model_rmse_mean |
 |:----------------|----------------:|--------------:|-----------------:|--------------------:|------------------:|
 | Conversion_pct  |      -1.73258   |      4.86348  |          6.40674 |             7.06885 |           13.513  |
@@ -151,7 +151,7 @@ Per-target models train on all records with each target observed, preventing sam
 
 ## 8. Genetic algorithm / NSGA-II
 - Status: **completed_model_generated_candidates**.
-- Model-generated Pareto candidates: **80**.
+- Model-generated Pareto candidates: **96**.
 - NSGA-II is gated by the multi-output regression validation results.
 - Any Pareto candidates are model-generated hypotheses and require experimental validation.
 
@@ -159,16 +159,16 @@ Per-target models train on all records with each target observed, preventing sam
 - Conditions bounded to the range reported for real Ni/Cu hydroxide anodes: {'Potential_vs_RHE_V': [1.4, 1.69], 'Temperature_C': [25.0, 40.0]}.
 |   rank | catalyst   | support   | electrolyte   |   electrolyte_M |   HMF_mM |   potential_V_RHE |   temperature_C |   predicted_Conversion_pct |   predicted_Yield_pct |   predicted_FE_pct |   predicted_Selectivity_pct |
 |-------:|:-----------|:----------|:--------------|----------------:|---------:|------------------:|----------------:|---------------------------:|----------------------:|-------------------:|----------------------------:|
-|      1 | Ni(OH)2    | foam      | KOH           |            1.49 |     10   |             1.443 |            25   |                      99.09 |                 95.16 |              96.32 |                       97.41 |
-|      2 | Ni(OH)2    | foam      | KOH           |            1.34 |     11.5 |             1.438 |            29.4 |                      99.01 |                 95.44 |              96.23 |                       96.87 |
-|      3 | Ni(OH)2    | foam      | KOH           |            0.95 |      9.5 |             1.422 |            25.1 |                      99.19 |                 95.44 |              95.09 |                       97.43 |
-|      4 | Ni(OH)2    | foam      | KOH           |            1    |     10.6 |             1.4   |            25   |                      98.34 |                 95.44 |              95.87 |                       97.18 |
-|      5 | Ni(OH)2    | foam      | KOH           |            0.6  |     11.5 |             1.436 |            25.1 |                      99.21 |                 94.39 |              94.7  |                       97.43 |
-|      6 | Ni(OH)2    | foam      | KOH           |            0.61 |     10   |             1.423 |            35.7 |                      99.21 |                 94.94 |              94.7  |                       96.87 |
-|      7 | Ni(OH)2    | foam      | KOH           |            1.05 |     13.3 |             1.429 |            25   |                      99.19 |                 92.7  |              96.21 |                       97.43 |
-|      8 | Ni(OH)2    | foam      | KOH           |            1.04 |      6   |             1.426 |            25.9 |                      99.19 |                 92.39 |              96.21 |                       96.87 |
-|      9 | Ni(OH)2    | foam      | KOH           |            0.74 |     10.5 |             1.408 |            26.6 |                      98.46 |                 94.94 |              94.58 |                       96.62 |
-|     10 | Ni(OH)2    | foam      | KOH           |            1    |     10   |             1.437 |            25   |                      95.73 |                 95.16 |              96.23 |                       97.43 |
+|      1 | Ni(OH)2    | foam      | KOH           |            1.1  |     11.1 |             1.41  |            25   |                     99.048 |                95.159 |             96.174 |                      97.178 |
+|      2 | Ni(OH)2    | foam      | KOH           |            0.8  |     12.1 |             1.41  |            25.4 |                     99.048 |                95.159 |             96.174 |                      97.178 |
+|      3 | Ni(OH)2    | foam      | KOH           |            0.83 |      8.2 |             1.411 |            25.2 |                     99.048 |                95.441 |             95.045 |                      97.178 |
+|      4 | Ni(OH)2    | foam      | KOH           |            0.84 |     11.9 |             1.412 |            26.1 |                     99.193 |                95.441 |             95.085 |                      96.841 |
+|      5 | Ni(OH)2    | foam      | KOH           |            0.45 |     11.7 |             1.415 |            25   |                     99.231 |                94.797 |             94.641 |                      97.186 |
+|      6 | Ni(OH)2    | foam      | KOH           |            0.65 |      8.8 |             1.412 |            25.7 |                     99.21  |                94.942 |             94.701 |                      96.841 |
+|      7 | Ni(OH)2    | foam      | KOH           |            0.42 |     12   |             1.41  |            25.2 |                     99.153 |                94.342 |             94.6   |                      96.967 |
+|      8 | Ni(OH)2    | foam      | KOH           |            0.69 |     11   |             1.416 |            25   |                     99.21  |                94.942 |             94.701 |                      97.397 |
+|      9 | Ni(OH)2    | foam      | KOH           |            0.71 |     11.5 |             1.412 |            25.5 |                     99.182 |                94.487 |             94.928 |                      97.397 |
+|     10 | Ni(OH)2    | foam      | KOH           |            0.43 |     11.8 |             1.412 |            25.4 |                     99.231 |                94.797 |             93.175 |                      97.186 |
 
 Nearest observed hydroxide record: Ni(OH)2/NF (1.0 M KOH | 1.45 V vs. RHE), measured yield 88.3%, FE 90.6%.
 

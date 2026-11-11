@@ -990,7 +990,7 @@ def plot_oversampled_nn_figure11(summary):
             panel += 1
 
     fig.suptitle(
-        "Figure 11. Learning curves of the oversampled neural network",
+        "Learning curves of the oversampled neural network",
         fontsize=14, fontweight="bold", y=0.995
     )
     fig.tight_layout(rect=[0.02, 0.02, 1, 0.975], h_pad=1.8, w_pad=1.3)

@@ -65,7 +65,7 @@
           "dummy_macro_f1_sd": 0.04746187176070721,
           "permutation_p_value": 0.46534653465346537
         },
-        "elapsed_seconds": 131.8,
+        "elapsed_seconds": 132.12,
         "kmeans_repeat_rows": 2400,
         "kmeans_fold_rows": 12000,
         "binary_repeat_rows": 600,
@@ -88,7 +88,7 @@
         "fold_diagnostics": "Per-fold metrics in classification_*_fold_scores.csv. Official pooled OOF in classification_*_repeat_scores.csv.",
         "feature_selection": "Fold-local median imputation with missing-value indicators and zero-variance filtering only; no univariate outcome-driven feature ranking."
       },
-      "pid": 30001
+      "pid": 32690
     },
     "05_learning_curves": {
       "status": "completed",
@@ -122,7 +122,7 @@
         "mean_validation_accuracy": 0.7508064516129034,
         "mean_validation_macro_f1": 0.3365462288103133
       },
-      "pid": 30225
+      "pid": 32952
     },
     "06_shap_analysis": {
       "status": "completed",
@@ -148,7 +148,7 @@
         "explained_rows": 23,
         "interpretation": "Associational feature importance; not causal evidence."
       },
-      "pid": 30269
+      "pid": 33083
     },
     "06_shap_analysis_paper_nn_smote": {
       "status": "completed",
@@ -334,26 +334,26 @@
           "FE_pct",
           "Selectivity_pct"
         ],
-        "model": "Per-target ExtraTreesRegressor with SelectKBest (primary)",
+        "model": "Per-target RandomForestRegressor with SelectKBest (primary)",
         "validation": "Repeated publication-grouped GroupKFold (10 repeats x 3 folds); MAE must beat median baseline and win a majority of folds for every target.",
         "joint_model_path": "results/multioutput_regressor.joblib",
         "warning": "A passing internal gate is not experimental validation; confirm candidates in the laboratory."
       },
-      "pid": 30271
+      "pid": 33507
     },
     "08_nsga2": {
       "status": "completed",
       "details": {
-        "n_pareto_candidates": 80
+        "n_pareto_candidates": 96
       },
-      "pid": 31549
+      "pid": 33517
     },
     "09_final_report": {
       "status": "completed",
       "details": {
         "report": "results/FINAL_RESEARCH_REPORT.md"
       },
-      "pid": 31563
+      "pid": 33539
     },
     "06_shap_analysis_paper": {
       "status": "completed",
@@ -424,7 +424,7 @@
           }
         }
       },
-      "pid": 30269
+      "pid": 33083
     }
   }
 }

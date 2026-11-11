@@ -546,7 +546,7 @@ def run_paper_shap(X_all: pd.DataFrame, feature_names: list[str]):
                      f" (macro-F1 {score:.3f})", fontweight="bold")
         ax.grid(axis="x", alpha=0.2)
     fig.suptitle(
-        "Figure 12. Global SHAP feature importance of the best Stage 04 model per K",
+        "Global SHAP feature importance of the best Stage 04 model per K",
         fontsize=13, fontweight="bold",
     )
     fig.tight_layout()
@@ -569,7 +569,7 @@ def run_paper_shap(X_all: pd.DataFrame, feature_names: list[str]):
             f" (class {payload['class_label']})",
         )
     fig.suptitle(
-        "Figure 13. SHAP beeswarm plots of the best Stage 04 model per K",
+        "SHAP beeswarm plots of the best Stage 04 model per K",
         fontsize=13, fontweight="bold",
     )
     fig.tight_layout()

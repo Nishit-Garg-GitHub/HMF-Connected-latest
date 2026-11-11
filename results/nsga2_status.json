@@ -1,14 +1,28 @@
 {
   "status": "completed_model_generated_candidates",
-  "n_pareto_candidates": 80,
-  "generations": 60,
-  "population_size": 80,
+  "algorithm": "NSGA-II, mixed encoding, entropy-weighted decision (Li et al. 2025 design)",
+  "objectives": {
+    "maximise": [
+      "Conversion",
+      "FDCA yield",
+      "FE"
+    ],
+    "minimise": [
+      "Temperature",
+      "Potential vs RHE"
+    ]
+  },
+  "generations": 1000,
+  "population_size": 100,
+  "n_pareto_candidates": 96,
+  "general_entropy_weights": {
+    "Conversion_pct": 0.10310805310945038,
+    "Yield_pct": 0.13953202785313695,
+    "FE_pct": 0.17714121306209785,
+    "Temperature_C": 0.13415142266365201,
+    "Potential_vs_RHE_V": 0.4460672833116628
+  },
   "hydroxide_scenario": {
-    "n_candidates": 10,
-    "catalysts": {
-      "Ni(OH)2": 10
-    },
-    "observed_hydroxide_seed_rows": 17,
     "condition_envelope": {
       "Potential_vs_RHE_V": [
         1.4,
@@ -18,6 +32,20 @@
         25.0,
         40.0
       ]
+    },
+    "entropy_weights": {
+      "Conversion_pct": 0.17190929784404732,
+      "Yield_pct": 0.2573305520004265,
+      "FE_pct": 0.13388342997193767,
+      "Temperature_C": 0.16855679834680679,
+      "Potential_vs_RHE_V": 0.2683199218367817
+    },
+    "top10_catalysts": {
+      "Ni(OH)2": 10
+    },
+    "spacing_converged_generation": {
+      "Ni": 20,
+      "Cu": 20
     }
   },
   "warning": "Candidates require experimental confirmation; model predictions are not measurements."

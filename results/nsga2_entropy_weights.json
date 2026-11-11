@@ -1,0 +1,16 @@
+{
+  "general": {
+    "Conversion_pct": 0.10310805310945038,
+    "Yield_pct": 0.13953202785313695,
+    "FE_pct": 0.17714121306209785,
+    "Temperature_C": 0.13415142266365201,
+    "Potential_vs_RHE_V": 0.4460672833116628
+  },
+  "hydroxide": {
+    "Conversion_pct": 0.17190929784404732,
+    "Yield_pct": 0.2573305520004265,
+    "FE_pct": 0.13388342997193767,
+    "Temperature_C": 0.16855679834680679,
+    "Potential_vs_RHE_V": 0.2683199218367817
+  }
+}

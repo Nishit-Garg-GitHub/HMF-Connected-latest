@@ -41,7 +41,7 @@ Open the project root (the folder containing `run_all.py`) in VS Code.
 # Install any missing packages
 pip install -r requirements.txt
 
-# Run all nine stages sequentially
+# Run all ten stages sequentially
 python run_all.py
 ```
 
@@ -83,7 +83,9 @@ python run_all.py --start 04 --no-clean
 - Sampling is inside the training-fold pipeline only.
 - Learning curves and SHAP reuse the selected classifier instead of launching
   another full model grid.
-- Regression uses 3 publication-grouped folds and 160 ExtraTrees per output.
+- Regression: per-target SelectKBest (k=15) + RandomForest models drive the
+  validation gate and NSGA-II; a joint ExtraTrees model (160 trees per output)
+  is kept as a secondary comparison.
 - NSGA-II uses a small population/generation budget and is skipped when the
   regression validation gate fails.
 
@@ -166,26 +168,43 @@ but its signal is mostly between papers.
 The project keeps the full earlier scripts in `archive_legacy/`; the active
 scripts are the connected, runtime-optimised implementation.
 
-## NSGA-II: Ni(OH)2 / Cu(OH)2 scenario
+## NSGA-II (reference-article design) and research paper
 
-Stage 08 also runs a constrained search with a single-metal Ni(OH)2 or Cu(OH)2
-anode, one sub-run per metal. Every other element and catalyst-family flag is
-0, and derived descriptors are recomputed. Potential and temperature are
-limited to the range reported for real Ni/Cu hydroxide anodes (1.40–1.69 V vs
-RHE, 25–40 °C), so the optimiser cannot propose potentials where these
-catalysts are inactive.
+Stage 08 follows the integrated genetic algorithm of Li et al. (ACS Sustainable
+Chem. Eng. 2025, 13, 13940), adapted to electro-oxidation:
 
-- `results/nsga2_top10_ni_cu_hydroxide.csv`: the top 10 candidates, readable
-  conditions, predictions and the nearest observed literature record.
-- `results/nsga2_best3_cu_hydroxide.csv`: the best Cu(OH)2 candidates (none of
-  them reach the overall top 10).
-- `figures/nsga2/NSGA2_top10_NiCu_hydroxide.png`
-- `figures/KMeans_Figure6/HMF_KMeans_Figure6_Style.png`: K = 3–6 cluster
-  panels in the reference-paper layout (convex hulls, no centroid markers).
+- Mixed encoding: discrete descriptors are {0, 1}, one-hot electrolyte groups
+  obey sum = 1, and continuous variables are min-max normalised to [0, 1].
+- Objectives: maximise predicted conversion, FDCA yield and FE; minimise
+  temperature and potential. These two replace the article's pressure and
+  reaction time, which this dataset does not record.
+- NSGA-II runs with population 100 for 1000 generations, using
+  non-dominated sorting and crowding distance.
+- A spacing-metric trace is plotted
+  (`figures/nsga2/Figure_14_Spacing_Trace.png`).
+- Pareto solutions are ranked by an entropy-weighted composite fitness
+  (`results/nsga2_entropy_weights.json`).
 
-All top-10 candidates are Ni(OH)2 on foam in ~0.6–1.5 M KOH, ~10 mM HMF,
-1.40–1.45 V vs RHE and ~25 °C. Predicted yield is ~95% and FE ~96%. This
-region matches published Ni(OH)2/NF results, but the per-target regressors
-have R² ≈ 0. Predictions cluster near the dataset mean and run about 7 points
-above the closest measured record, Ni(OH)2/NF at 88.3% yield. Treat these as
-hypotheses that need experiments.
+Two searches run. The unconstrained one (`results/nsga2_pareto_candidates.csv`)
+extrapolates to unphysical conditions (about 0.55 V, 4–9 °C). The constrained
+one uses a single-metal Ni(OH)2 or Cu(OH)2 anode and is bounded to the
+potential and temperature range reported for real Ni/Cu hydroxide anodes
+(1.40–1.69 V vs RHE, 25–40 °C):
+
+- `results/nsga2_top10_ni_cu_hydroxide.csv`: the top 10 with predictions, the
+  nearest measured record and a cross-check probability from the stage 04
+  classifier.
+- `results/nsga2_best3_cu_hydroxide.csv`: the best Cu(OH)2 solutions.
+
+All top-10 solutions are Ni(OH)2 on Ni foam in ~0.4–1.1 M KOH, ~10 mM HMF,
+~1.41 V vs RHE and ~25 °C, with predicted ~95% yield and FE. A published
+Ni(OH)2/NF electrode was studied at these conditions. Predictions run about
+7 points above its measured yield (88.3%) because the regressors' R² ≈ 0.
+
+Stage 10 (`scripts/10_research_paper.py`) writes
+`results/HMF_FDCA_ML_Research_Paper.pdf`. It is a 13-page manuscript in the
+reference article's structure (abstract, introduction, methods with
+equations, results, GA, literature comparison, conclusion, references). All
+numbers are read from `results/`, so it stays consistent after any re-run.
+`figures/KMeans_Figure6/HMF_KMeans_Figure6_Style.png` reproduces the
+article's Figure 6 layout.

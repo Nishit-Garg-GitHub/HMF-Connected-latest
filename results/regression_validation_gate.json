@@ -113,7 +113,7 @@
     "FE_pct",
     "Selectivity_pct"
   ],
-  "model": "Per-target ExtraTreesRegressor with SelectKBest (primary)",
+  "model": "Per-target RandomForestRegressor with SelectKBest (primary)",
   "validation": "Repeated publication-grouped GroupKFold (10 repeats x 3 folds); MAE must beat median baseline and win a majority of folds for every target.",
   "joint_model_path": "results/multioutput_regressor.joblib",
   "warning": "A passing internal gate is not experimental validation; confirm candidates in the laboratory."

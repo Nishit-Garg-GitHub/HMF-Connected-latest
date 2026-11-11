@@ -658,7 +658,7 @@ def generate_paper_style_outputs(cluster_results: pd.DataFrame) -> None:
         ax.legend(frameon=False, ncol=2, fontsize=9, loc="upper right")
 
     fig.suptitle(
-        "Figure 9. F1-scores of the four models after oversampling",
+        "F1-scores of the four models after oversampling",
         fontweight="bold", fontsize=15,
     )
     fig.tight_layout(rect=(0, 0, 1, 0.94))
@@ -716,7 +716,7 @@ def generate_paper_style_outputs(cluster_results: pd.DataFrame) -> None:
             if display.iloc[row - 1]["Valid folds"] == 0:
                 cell.set_text_props(color="dimgray", style="italic")
     ax.set_title(
-        "Table 1. Model performance after oversampling "
+        "Model performance after oversampling "
         "(mean held-out publication-grouped scores)",
         fontsize=13, fontweight="bold", pad=15,
     )
@@ -807,7 +807,7 @@ def generate_paper_style_outputs(cluster_results: pd.DataFrame) -> None:
 
     axes[-1].set_xlabel("Evaluation metric within each K-means cluster configuration")
     fig.suptitle(
-        "Figure 10. Performance evaluation after oversampling",
+        "Performance evaluation after oversampling",
         fontweight="bold", fontsize=15, y=0.995,
     )
     fig.tight_layout(rect=(0, 0, 1, 0.975))

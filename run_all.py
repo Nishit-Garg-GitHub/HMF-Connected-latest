@@ -1,4 +1,4 @@
-"""Run the HMF–FDCA research workflow sequentially from one command.
+"""Run the HMF–FDCA research workflow (stages 01-10) sequentially from one command.
 
 Every stage consumes artifacts from the previous stage. The runner stops on
 an error, writes a log for each script, and supports resuming from a selected
@@ -28,13 +28,14 @@ STAGES = [
     ("07_regression.py", "07 — joint four-output regression"),
     ("08_nsga2.py", "08 — validation-gated NSGA-II"),
     ("09_final_report.py", "09 — integrated final report"),
+    ("10_research_paper.py", "10 — research-paper style PDF manuscript"),
 ]
 
 
 def parse_args():
     """Parse optional resume and clean-run controls."""
     parser = argparse.ArgumentParser(description="Run the connected HMF/FDCA ML workflow.")
-    parser.add_argument("--start", default="01", choices=[f"{i:02d}" for i in range(1, 10)],
+    parser.add_argument("--start", default="01", choices=[f"{i:02d}" for i in range(1, len(STAGES) + 1)],
                         help="Resume from this stage number (default: 01).")
     parser.add_argument("--no-clean", action="store_true",
                         help="Keep previous results; otherwise stage logs/status are reset.")

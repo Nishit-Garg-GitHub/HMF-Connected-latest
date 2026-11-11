@@ -170,7 +170,7 @@ def regression_section() -> list[str]:
     gate = read_json(RESULTS_DIR / "regression_validation_gate.json")
 
     if pt_path.exists():
-        lines.append("### Primary — Per-target regression (SelectKBest + ExtraTrees)")
+        lines.append("### Primary — Per-target regression (SelectKBest + RandomForest)")
         summary_pt = pd.read_csv(pt_path)
         lines.append(table_markdown(summary_pt, [
             "target", "n_valid_records", "model_r2_mean", "model_r2_sd",

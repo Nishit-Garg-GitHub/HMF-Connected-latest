@@ -5,7 +5,9 @@ all records where that specific target is observed and in [0, 100]) and jointly
 (multi-output, requiring all four targets present). Per-target models are
 primary and drive the validation gate; the joint model is kept as a secondary
 comparison. Validation is grouped by publication. A median baseline is evaluated
-alongside a compact ExtraTrees estimator. Per-target models are saved only when
+alongside the models: per-target pipelines use mutual-information SelectKBest
+(k=15) with a shallow RandomForestRegressor; the secondary joint model uses
+ExtraTrees. Per-target models are saved only when
 they improve on the baseline across the agreed validation gate; otherwise
 NSGA-II is blocked.
 """
@@ -443,7 +445,7 @@ def main() -> None:
         "per_target_model_paths": per_target_models,
         "features": features,
         "targets": TARGETS,
-        "model": "Per-target ExtraTreesRegressor with SelectKBest (primary)",
+        "model": "Per-target RandomForestRegressor with SelectKBest (primary)",
         "validation": (
             f"Repeated publication-grouped GroupKFold ({N_REPEATS_REG} repeats x {N_SPLITS} folds); "
             "MAE must beat median baseline and win a majority of folds for every target."
