@@ -31,6 +31,9 @@ from sklearn.dummy import DummyClassifier
 from imblearn.pipeline import Pipeline as ImbPipeline
 from imblearn.over_sampling import RandomOverSampler, SMOTE, ADASYN
 
+warnings.filterwarnings("ignore", category=UserWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
+
 from common import (
     RESULTS_DIR, FIGURES_DIR, build_feature_matrix, grouped_splits,
     load_cluster_labels, make_classifier, paper_groups, read_cleaned, read_processed,
@@ -186,16 +189,18 @@ def _fold_record_to_metrics(record: dict) -> dict:
     if record["status"] == "ok" and len(record["y_true"]) > 0:
         y_true = record["y_true"]
         y_pred = record["y_pred"]
-        out.update({
-            "macro_f1": float(f1_score(y_true, y_pred, average="macro", zero_division=0)),
-            "weighted_f1": float(f1_score(y_true, y_pred, average="weighted", zero_division=0)),
-            "accuracy": float(accuracy_score(y_true, y_pred)),
-            "precision_macro": float(precision_score(y_true, y_pred, average="macro", zero_division=0)),
-            "recall_macro": float(recall_score(y_true, y_pred, average="macro", zero_division=0)),
-            "balanced_accuracy": float(balanced_accuracy_score(y_true, y_pred)),
-            "classes_train": int(len(np.unique(y_true))),  # approximate
-            "classes_test": int(len(np.unique(y_true))),
-        })
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            out.update({
+                "macro_f1": float(f1_score(y_true, y_pred, average="macro", zero_division=0)),
+                "weighted_f1": float(f1_score(y_true, y_pred, average="weighted", zero_division=0)),
+                "accuracy": float(accuracy_score(y_true, y_pred)),
+                "precision_macro": float(precision_score(y_true, y_pred, average="macro", zero_division=0)),
+                "recall_macro": float(recall_score(y_true, y_pred, average="macro", zero_division=0)),
+                "balanced_accuracy": float(balanced_accuracy_score(y_true, y_pred)),
+                "classes_train": int(len(np.unique(y_true))),  # approximate
+                "classes_test": int(len(np.unique(y_true))),
+            })
     else:
         out.update({
             "macro_f1": np.nan, "weighted_f1": np.nan, "accuracy": np.nan,
@@ -241,19 +246,21 @@ def evaluate_repeat(X, y, groups, seed, k, model_name, sampler_name):
             },
             fold_records,
         )
-    repeat_record = {
-        "k": k, "seed": seed, "model": model_name, "sampler": sampler_name,
-        "status": "ok",
-        "pooled_macro_f1": float(f1_score(all_true, all_pred, average="macro", zero_division=0)),
-        "pooled_weighted_f1": float(f1_score(all_true, all_pred, average="weighted", zero_division=0)),
-        "pooled_accuracy": float(accuracy_score(all_true, all_pred)),
-        "pooled_precision_macro": float(precision_score(all_true, all_pred, average="macro", zero_division=0)),
-        "pooled_recall_macro": float(recall_score(all_true, all_pred, average="macro", zero_division=0)),
-        "pooled_balanced_accuracy": float(balanced_accuracy_score(all_true, all_pred)),
-        "n_pooled_samples": len(all_true),
-        "folds_ok": sum(1 for r in fold_records if r["status"] == "ok"),
-        "folds_total": len(fold_records),
-    }
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        repeat_record = {
+            "k": k, "seed": seed, "model": model_name, "sampler": sampler_name,
+            "status": "ok",
+            "pooled_macro_f1": float(f1_score(all_true, all_pred, average="macro", zero_division=0)),
+            "pooled_weighted_f1": float(f1_score(all_true, all_pred, average="weighted", zero_division=0)),
+            "pooled_accuracy": float(accuracy_score(all_true, all_pred)),
+            "pooled_precision_macro": float(precision_score(all_true, all_pred, average="macro", zero_division=0)),
+            "pooled_recall_macro": float(recall_score(all_true, all_pred, average="macro", zero_division=0)),
+            "pooled_balanced_accuracy": float(balanced_accuracy_score(all_true, all_pred)),
+            "n_pooled_samples": len(all_true),
+            "folds_ok": sum(1 for r in fold_records if r["status"] == "ok"),
+            "folds_total": len(fold_records),
+        }
     return repeat_record, fold_records
 
 
@@ -317,8 +324,9 @@ def run_binary_high_performance(X_all: pd.DataFrame, groups_all: np.ndarray) -> 
     groups = groups_all[row_ids]
     repeat_output: list[dict] = []
     fold_output: list[dict] = []
-    print(f"Binary >=90% FDCA screen: {len(y)} records; class counts={np.bincount(y).tolist()}")
+    print(f"Binary >=90% FDCA screen: {len(y)} records; class counts={np.bincount(y).tolist()}", flush=True)
     for seed in SEED_LIST[:REPEATS]:
+        print(f"Binary screen | repeat seed={seed} | {len(MODEL_NAMES)} models x {len(SAMPLERS)} samplers", flush=True)
         for model_name in MODEL_NAMES:
             for sampler_name in SAMPLERS:
                 repeat_record, fold_records = evaluate_repeat(X, y, groups, seed, 0, model_name, sampler_name)

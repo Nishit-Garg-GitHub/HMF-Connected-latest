@@ -12,6 +12,9 @@ import warnings
 from pathlib import Path
 from typing import Iterable
 
+warnings.filterwarnings("ignore", category=UserWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
+
 import numpy as np
 import pandas as pd
 from sklearn.impute import SimpleImputer

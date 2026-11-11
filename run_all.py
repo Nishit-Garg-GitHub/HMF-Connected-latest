@@ -11,6 +11,7 @@ import argparse
 import os
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -59,8 +60,11 @@ def run_stage(python: str, filename: str, description: str, index: int):
     command = [python, str(SCRIPTS / filename)]
     env = os.environ.copy()
     env["PYTHONUNBUFFERED"] = "1"
+    env["PYTHONWARNINGS"] = "ignore::UserWarning,ignore::FutureWarning"
     env["MPLBACKEND"] = "Agg"
-    env["MPLCONFIGDIR"] = "/tmp/matplotlib"
+    mpl_dir = Path(tempfile.gettempdir()) / "hmf_mpl_config"
+    mpl_dir.mkdir(parents=True, exist_ok=True)
+    env["MPLCONFIGDIR"] = str(mpl_dir)
     env["OMP_NUM_THREADS"] = "1"
     env["OPENBLAS_NUM_THREADS"] = "1"
     env["MKL_NUM_THREADS"] = "1"
