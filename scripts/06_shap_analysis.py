@@ -26,7 +26,7 @@ from imblearn.over_sampling import RandomOverSampler, SMOTE, ADASYN
 
 from common import (
     RESULTS_DIR, FIGURES_DIR, build_feature_matrix, make_classifier,
-    classification_preprocessing_steps,
+    classification_preprocessing_steps, binary_high_performance_labels,
     paper_groups, read_cleaned, read_processed, save_figure, stage_status,
 )
 
@@ -48,24 +48,7 @@ def load_candidate() -> dict:
 def candidate_labels(candidate: dict):
     """Read the selected target labels without deriving them from predictors."""
     if candidate.get("target_kind") == "binary_high_performance_90":
-        raw = read_cleaned()
-        if "Major_Product_Clean" in raw:
-            fdca = raw["Major_Product_Clean"].astype(str).str.contains(
-                r"FDCA|FURANDICARBOXYLIC", case=False, regex=True, na=False
-            )
-        else:
-            fdca = pd.Series(True, index=raw.index)
-        yld = pd.to_numeric(raw["Yield_pct"], errors="coerce")
-        conv = pd.to_numeric(raw["Conversion_pct"], errors="coerce")
-        keep = fdca & yld.notna()
-        row_ids = np.flatnonzero(keep.to_numpy())
-        performance = np.where(
-            conv.iloc[row_ids].notna().to_numpy(),
-            np.minimum(conv.iloc[row_ids].fillna(100).clip(0, 100).to_numpy(),
-                       yld.iloc[row_ids].clip(0, 100).to_numpy()),
-            yld.iloc[row_ids].clip(0, 100).to_numpy(),
-        )
-        return row_ids, (performance >= 90).astype(int)
+        return binary_high_performance_labels()
     labels = pd.read_csv(RESULTS_DIR / f"kmeans_labels_K{int(candidate['k'])}.csv")
     return labels.source_row.astype(int).to_numpy(), labels.cluster.astype(int).to_numpy()
 
@@ -408,12 +391,13 @@ def run_paper_shap(X_all: pd.DataFrame, feature_names: list[str]):
         row_ids = labels["source_row"].astype(int).to_numpy()
         y = labels["cluster"].astype(int).to_numpy()
 
-        if len(row_ids) != len(X_all) or not np.array_equal(
-            row_ids, np.arange(len(X_all))
-        ):
+        # Stage 02 labels only the records that report both outcomes, so the
+        # file may cover a subset of the Stage 01 rows; it must still index them.
+        if (len(np.unique(row_ids)) != len(row_ids) or row_ids.min() < 0
+                or row_ids.max() >= len(X_all)):
             raise ValueError(
-                f"K={k} label file does not align with Stage 01 feature rows. "
-                "Expected source_row 0..N-1."
+                f"K={k} label file has duplicate or out-of-range source_row values "
+                "for the Stage 01 feature table."
             )
 
         X = X_all.iloc[row_ids].reset_index(drop=True)

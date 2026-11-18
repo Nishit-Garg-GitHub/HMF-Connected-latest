@@ -20,7 +20,7 @@ from sklearn.preprocessing import StandardScaler
 from imblearn.over_sampling import RandomOverSampler, SMOTE, ADASYN
 
 from common import (
-    RESULTS_DIR, build_feature_matrix, grouped_splits, load_cluster_labels,
+    RESULTS_DIR, balance_with_singleton_fallback, build_feature_matrix, grouped_splits, load_cluster_labels,
     paper_groups, read_processed, stage_status, write_json,
 )
 
@@ -219,11 +219,13 @@ def generate_kmeans_oversampling_figures(frame: pd.DataFrame) -> None:
         for col_no, method in enumerate(methods):
             ax = axes[row_no, col_no]
             try:
-                sampler = _make_2d_sampler(method, y, SEED)
-                scaled_resampled, y_resampled = sampler.fit_resample(scaled_xy, y)
-                synthetic_scaled = scaled_resampled[len(y):]
+                scaled_resampled, y_resampled, info = balance_with_singleton_fallback(
+                    method, scaled_xy, y, SEED)
+                dup = info["duplicated_singleton_classes"]
+                # drop the duplicated copy of each singleton so only newly created rows count
+                synthetic_scaled = scaled_resampled[len(y) + len(dup):]
                 synthetic_xy = scaler.inverse_transform(synthetic_scaled)
-                y_synthetic = np.asarray(y_resampled[len(y):], dtype=int)
+                y_synthetic = np.asarray(y_resampled[len(y) + len(dup):], dtype=int)
 
                 combined_xy = np.vstack([raw_xy, synthetic_xy])
                 combined_y = np.concatenate([y, y_synthetic])
@@ -260,7 +262,8 @@ def generate_kmeans_oversampling_figures(frame: pd.DataFrame) -> None:
 
                 ax.text(
                     0.02, 0.98,
-                    f"Measured: {len(raw_xy)} | Synthetic: {len(synthetic_xy)}",
+                    f"Measured: {len(raw_xy)} | Synthetic: {len(synthetic_xy)}"
+                    + (f"\nsingleton class(es) {dup} duplicated: no interpolation" if dup else ""),
                     transform=ax.transAxes, va="top", ha="left", fontsize=7,
                     bbox={"facecolor": "white", "alpha": 0.75, "edgecolor": "none"},
                 )
@@ -274,7 +277,8 @@ def generate_kmeans_oversampling_figures(frame: pd.DataFrame) -> None:
                         edgecolors="black", linewidths=0.25,
                     )
                 ax.text(
-                    0.5, 0.5, f"{method} infeasible\n{str(exc)[:110]}",
+                    0.5, 0.5,
+                    f"{method} undefined here:\na class of 1-4 records has no\nmajority-class neighbours\n(imbalanced-learn refuses to fit)",
                     transform=ax.transAxes, ha="center", va="center",
                     fontsize=7, wrap=True,
                     bbox={"facecolor": "white", "alpha": 0.85},

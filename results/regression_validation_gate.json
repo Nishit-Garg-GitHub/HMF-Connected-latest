@@ -2,40 +2,60 @@
   "passed": true,
   "target_checks": {
     "Conversion_pct": {
-      "mae_beats_baseline": true,
-      "mean_model_mae": 6.406741543751247,
-      "mean_baseline_mae": 7.068849879465268,
-      "mean_model_r2": -1.7325811298659402,
-      "folds_won": 23,
-      "folds_evaluated": 30,
-      "wins_majority_of_folds": true
+      "required": false,
+      "mae_beats_baseline": false,
+      "mean_model_mae": 5.0713528266051044,
+      "mean_baseline_mae": 4.553774637681161,
+      "mean_model_r2": 0.18506835519012013,
+      "pooled_r2_sd": 0.06533415921194266,
+      "mean_fold_r2": -3.280509051279637,
+      "r2_at_or_above_floor": true,
+      "folds_won": 18,
+      "folds_evaluated": 50,
+      "wins_majority_of_folds": false,
+      "passed": false
     },
     "Yield_pct": {
+      "required": true,
       "mae_beats_baseline": true,
-      "mean_model_mae": 11.863919390384309,
-      "mean_baseline_mae": 13.190927424152294,
-      "mean_model_r2": 0.044075895894395284,
-      "folds_won": 25,
-      "folds_evaluated": 30,
-      "wins_majority_of_folds": true
+      "mean_model_mae": 8.728526451090708,
+      "mean_baseline_mae": 11.123682726951568,
+      "mean_model_r2": 0.4434720527414583,
+      "pooled_r2_sd": 0.06953204712452074,
+      "mean_fold_r2": 0.3475466832577393,
+      "r2_at_or_above_floor": true,
+      "folds_won": 43,
+      "folds_evaluated": 50,
+      "wins_majority_of_folds": true,
+      "passed": true
     },
     "FE_pct": {
+      "required": true,
       "mae_beats_baseline": true,
-      "mean_model_mae": 8.60037075845578,
-      "mean_baseline_mae": 9.949328600021637,
-      "mean_model_r2": -0.06555448196811367,
-      "folds_won": 27,
-      "folds_evaluated": 30,
-      "wins_majority_of_folds": true
+      "mean_model_mae": 7.377261146906121,
+      "mean_baseline_mae": 8.567113768115943,
+      "mean_model_r2": 0.38921422610434053,
+      "pooled_r2_sd": 0.09852144447464845,
+      "mean_fold_r2": 0.08120830542254621,
+      "r2_at_or_above_floor": true,
+      "folds_won": 38,
+      "folds_evaluated": 50,
+      "wins_majority_of_folds": true,
+      "passed": true
     },
     "Selectivity_pct": {
+      "required": false,
       "mae_beats_baseline": true,
-      "mean_model_mae": 9.970054879750165,
-      "mean_baseline_mae": 12.365336585580822,
-      "mean_model_r2": 0.02997716481434619,
+      "mean_model_mae": 8.648304713847704,
+      "mean_baseline_mae": 9.478430994152047,
+      "mean_model_r2": 0.30110285715266344,
+      "pooled_r2_sd": 0.08497804857598355,
+      "mean_fold_r2": -1.1338664755088024,
+      "r2_at_or_above_floor": true,
       "folds_won": 29,
-      "folds_evaluated": 30,
-      "wins_majority_of_folds": true
+      "folds_evaluated": 50,
+      "wins_majority_of_folds": true,
+      "passed": true
     }
   },
   "per_target_model_paths": {
@@ -113,8 +133,12 @@
     "FE_pct",
     "Selectivity_pct"
   ],
-  "model": "Per-target RandomForestRegressor with SelectKBest (primary)",
-  "validation": "Repeated publication-grouped GroupKFold (10 repeats x 3 folds); MAE must beat median baseline and win a majority of folds for every target.",
+  "model": "Per-target mean of Huber GradientBoosting and ExtraTrees regressors (primary)",
+  "required_targets": [
+    "Yield_pct",
+    "FE_pct"
+  ],
+  "validation": "Repeated publication-grouped GroupKFold (10 repeats x 5 folds). For each required target (Yield_pct, FE_pct) the mean MAE must beat the training-fold MEDIAN baseline, win a majority of folds and have mean pooled out-of-fold R2 >= 0.0. Other targets are informational.",
   "joint_model_path": "results/multioutput_regressor.joblib",
   "warning": "A passing internal gate is not experimental validation; confirm candidates in the laboratory."
 }

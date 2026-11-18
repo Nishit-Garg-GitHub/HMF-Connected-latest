@@ -1,0 +1,10 @@
+{
+  "method": "Tree SHAP on the mean of Huber GB and ExtraTrees; fitted on all valid records",
+  "bootstraps": 30,
+  "bootstrap_unit": "publication",
+  "interpretation": "Associational; not causal. Direction = correlation of feature value with SHAP.",
+  "literature_verdicts": {
+    "consistent": 2,
+    "not distinguishable": 7
+  }
+}

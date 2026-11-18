@@ -23,11 +23,10 @@
   ],
   "repeats": 10,
   "total_fold_fraction_sampler_rows": 1080,
-  "completed_points": 454,
-  "infeasible_points": 626,
+  "completed_points": 756,
+  "infeasible_points": 324,
   "infeasibility_reasons": {
-    "ADASYN requires at least 2 training observations per class; minimum class count is 1.": 313,
-    "SMOTE requires at least 2 training observations per class; minimum class count is 1.": 313
+    "ADASYN could not be fitted: Not any neigbours belong to the majority class. This case will induce a NaN case with a division by zero. ADASYN is not suited for this specific dataset. Use SMOTE instead.": 324
   },
   "methodology": "Publication-grouped outer split; fold-local imputation, variance filtering, scaling and training-only ROS/ADASYN/SMOTE. Training and validation scores are calculated on original, non-resampled observations."
 }

@@ -1,0 +1,85 @@
+[general] generation 1/1000: Pareto=22 spacing=0.0396 best Y=97.67
+[general] generation 100/1000: Pareto=100 spacing=0.0232 best Y=98.23
+[general] generation 200/1000: Pareto=100 spacing=0.0234 best Y=98.25
+[general] generation 300/1000: Pareto=100 spacing=0.0210 best Y=98.25
+[general] generation 400/1000: Pareto=100 spacing=0.0212 best Y=98.25
+[general] generation 500/1000: Pareto=100 spacing=0.0236 best Y=98.25
+[general] generation 600/1000: Pareto=100 spacing=0.0275 best Y=98.25
+[general] generation 700/1000: Pareto=100 spacing=0.0219 best Y=98.25
+[general] generation 800/1000: Pareto=100 spacing=0.0209 best Y=98.25
+[general] generation 900/1000: Pareto=100 spacing=0.0206 best Y=98.25
+[general] generation 1000/1000: Pareto=100 spacing=0.0233 best Y=98.25
+Hydroxide condition envelope: {'Potential_vs_RHE_V': (1.4, 1.69), 'Temperature_C': (25.0, 40.0)}
+[NiOH2] generation 1/1000: Pareto=18 spacing=0.0093 best Y=97.58
+[NiOH2] generation 100/1000: Pareto=100 spacing=0.0025 best Y=97.83
+[NiOH2] generation 200/1000: Pareto=100 spacing=0.0030 best Y=97.83
+[NiOH2] generation 300/1000: Pareto=100 spacing=0.0029 best Y=97.83
+[NiOH2] generation 400/1000: Pareto=100 spacing=0.0030 best Y=97.83
+[NiOH2] generation 500/1000: Pareto=100 spacing=0.0034 best Y=97.83
+[NiOH2] generation 600/1000: Pareto=100 spacing=0.0033 best Y=97.83
+[NiOH2] generation 700/1000: Pareto=100 spacing=0.0036 best Y=97.83
+[NiOH2] generation 800/1000: Pareto=100 spacing=0.0035 best Y=97.83
+[NiOH2] generation 900/1000: Pareto=100 spacing=0.0029 best Y=97.83
+[NiOH2] generation 1000/1000: Pareto=100 spacing=0.0036 best Y=97.83
+[CuOH2] generation 1/1000: Pareto=25 spacing=0.0152 best Y=93.20
+[CuOH2] generation 100/1000: Pareto=100 spacing=0.0059 best Y=93.73
+[CuOH2] generation 200/1000: Pareto=100 spacing=0.0060 best Y=93.74
+[CuOH2] generation 300/1000: Pareto=100 spacing=0.0063 best Y=93.74
+[CuOH2] generation 400/1000: Pareto=100 spacing=0.0051 best Y=93.74
+[CuOH2] generation 500/1000: Pareto=100 spacing=0.0056 best Y=93.74
+[CuOH2] generation 600/1000: Pareto=100 spacing=0.0053 best Y=93.74
+[CuOH2] generation 700/1000: Pareto=100 spacing=0.0065 best Y=93.74
+[CuOH2] generation 800/1000: Pareto=100 spacing=0.0063 best Y=93.74
+[CuOH2] generation 900/1000: Pareto=100 spacing=0.0090 best Y=93.74
+[CuOH2] generation 1000/1000: Pareto=100 spacing=0.0058 best Y=93.74
+[NiCuOH2] generation 1/1000: Pareto=20 spacing=0.0136 best Y=96.75
+[NiCuOH2] generation 100/1000: Pareto=100 spacing=0.0029 best Y=97.23
+[NiCuOH2] generation 200/1000: Pareto=100 spacing=0.0027 best Y=97.23
+[NiCuOH2] generation 300/1000: Pareto=100 spacing=0.0030 best Y=97.23
+[NiCuOH2] generation 400/1000: Pareto=100 spacing=0.0030 best Y=97.23
+[NiCuOH2] generation 500/1000: Pareto=100 spacing=0.0026 best Y=97.23
+[NiCuOH2] generation 600/1000: Pareto=100 spacing=0.0028 best Y=97.23
+[NiCuOH2] generation 700/1000: Pareto=100 spacing=0.0027 best Y=97.23
+[NiCuOH2] generation 800/1000: Pareto=100 spacing=0.0040 best Y=97.23
+[NiCuOH2] generation 900/1000: Pareto=100 spacing=0.0032 best Y=97.23
+[NiCuOH2] generation 1000/1000: Pareto=100 spacing=0.0030 best Y=97.23
+
+Entropy weights (hydroxide): {'Yield_pct': 0.171, 'FE_pct': 0.064, 'Temperature_C': 0.299, 'Potential_vs_RHE_V': 0.466}
+
+Top Ni(OH)2 / Cu(OH)2 solutions:
+ rank catalyst support electrolyte  electrolyte_M  HMF_mM  potential_V_RHE  temperature_C  predicted_Yield_pct  predicted_FE_pct  entropy_fitness
+    1  Ni(OH)2    foam         KOH           1.16    10.0            1.400           25.0               97.809            97.162            0.990
+    2  Ni(OH)2    foam         KOH           1.97    10.3            1.402           25.0               97.705            97.351            0.979
+    3  Ni(OH)2  carbon         KOH           1.27    10.0            1.400           25.0               97.811            96.302            0.972
+    4  Ni(OH)2  carbon         KOH           1.07    10.0            1.400           25.0               97.829            96.282            0.972
+    5  Ni(OH)2    foam         KOH           2.98    13.0            1.400           25.0               96.985            97.353            0.963
+    6  Ni(OH)2    foam         KOH           1.49    10.1            1.406           25.0               97.747            97.370            0.935
+    7  Ni(OH)2    foam         KOH           2.58    11.3            1.408           25.0               97.710            97.370            0.924
+    8  Ni(OH)2    foam         KOH           2.32    11.4            1.400           25.1               97.754            97.365            0.917
+    9  Ni(OH)2    foam         KOH           2.04    10.5            1.404           25.1               97.759            97.206            0.915
+   10  Ni(OH)2    foam         KOH           2.65    10.1            1.409           25.0               97.781            97.185            0.914
+
+Best Cu(OH)2 solutions:
+ rank catalyst support electrolyte  electrolyte_M  HMF_mM  potential_V_RHE  temperature_C  predicted_Yield_pct  predicted_FE_pct  entropy_fitness
+    1  Cu(OH)2    foam         KOH           1.11    11.4            1.400           25.0               91.053            97.223            0.824
+    2  Cu(OH)2    foam         KOH           1.37    11.6            1.401           25.0               90.598            97.071            0.816
+    3  Cu(OH)2    foam         KOH           1.37     7.3            1.402           25.0               91.148            96.867            0.812
+
+Best Ni-Cu hydroxide solutions:
+ rank        catalyst support electrolyte  electrolyte_M  HMF_mM  potential_V_RHE  temperature_C  predicted_Yield_pct  predicted_FE_pct  entropy_fitness
+    1 Ni-Cu hydroxide    foam         KOH           0.95    10.1              1.4           25.0               97.025            96.415            0.958
+    2 Ni-Cu hydroxide    foam         KOH           0.95    10.1              1.4           25.0               97.201            95.982            0.952
+    3 Ni-Cu hydroxide    foam         KOH           2.55    15.1              1.4           25.0               96.329            96.657            0.948
+
+Top solutions at E >= 1.45 V vs RHE:
+ rank        catalyst support electrolyte  electrolyte_M  HMF_mM  potential_V_RHE  temperature_C  predicted_Yield_pct  predicted_FE_pct  entropy_fitness
+    1         Ni(OH)2    foam         KOH           2.69    12.1            1.450           25.0               97.567            97.576            0.543
+    2         Ni(OH)2    foam         KOH           2.97    12.4            1.451           25.0               97.213            97.602            0.540
+    3         Ni(OH)2    foam         KOH           2.90    11.7            1.454           25.0               97.273            97.592            0.526
+    4         Ni(OH)2    foam         KOH           2.97    11.2            1.454           25.0               97.273            97.597            0.522
+    5         Ni(OH)2    foam         KOH           2.91    12.5            1.451           25.0               96.871            97.592            0.520
+    6         Ni(OH)2    foam         KOH           2.75    11.9            1.452           25.1               97.273            97.592            0.505
+    7         Ni(OH)2    foam         KOH           2.23    11.4            1.451           25.1               97.276            97.592            0.504
+    8 Ni-Cu hydroxide    foam         KOH           2.52    10.2            1.450           25.0               96.896            96.885            0.531
+    9 Ni-Cu hydroxide    foam         KOH           2.42    10.1            1.451           25.0               97.033            96.213            0.517
+   10 Ni-Cu hydroxide    foam         KOH           1.43    10.1            1.451           25.0               97.141            96.101            0.496

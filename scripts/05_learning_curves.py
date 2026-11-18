@@ -42,6 +42,7 @@ from imblearn.over_sampling import RandomOverSampler, SMOTE, ADASYN
 from common import (
     RESULTS_DIR,
     FIGURES_DIR,
+    balance_with_singleton_fallback,
     build_feature_matrix,
     make_classifier,
     classification_preprocessing_steps,
@@ -789,32 +790,20 @@ def fit_oversampled_nn_scores(X, y, train_idx, test_idx, seed, k, method):
 
     if method == "ROS":
         sampler = RandomOverSampler(random_state=seed)
-    elif method == "SMOTE":
-        if min_count < 2:
-            raise ValueError(
-                f"SMOTE requires at least 2 training observations per class; "
-                f"minimum class count is {min_count}."
-            )
-        sampler = SMOTE(
-            k_neighbors=min(2, min_count - 1),
-            random_state=seed,
-        )
-    elif method == "ADASYN":
-        if min_count < 2:
-            raise ValueError(
-                f"ADASYN requires at least 2 training observations per class; "
-                f"minimum class count is {min_count}."
-            )
-        sampler = ADASYN(
-            n_neighbors=min(2, min_count - 1),
-            random_state=seed,
-        )
+    elif method in ("SMOTE", "ADASYN"):
+        sampler = None  # handled below with the singleton fallback
     else:
         raise ValueError(f"Unknown sampler: {method}")
 
-    X_resampled, y_resampled = sampler.fit_resample(
-        X_train_scaled, y_train
-    )
+    fallback = False
+    if sampler is None:
+        X_resampled, y_resampled, info = balance_with_singleton_fallback(
+            method, X_train_scaled, y_train, seed)
+        fallback = bool(info["duplicated_singleton_classes"])
+    else:
+        X_resampled, y_resampled = sampler.fit_resample(
+            X_train_scaled, y_train
+        )
 
     # Keep the NN identical to the tuned Stage 04 NeuralNetwork.
     model = make_classifier("NeuralNetwork", seed)
@@ -837,6 +826,7 @@ def fit_oversampled_nn_scores(X, y, train_idx, test_idx, seed, k, method):
         "validation_accuracy": accuracy_score(y_test, test_pred),
         "resampled_records": int(len(y_resampled)),
         "minimum_training_class_count": min_count,
+        "singleton_fallback": fallback,
     }
 
 
@@ -920,6 +910,7 @@ def summarise_oversampled_nn_curves(results):
             sd_validation_macro_f1=("validation_macro_f1", "std"),
             mean_resampled_records=("resampled_records", "mean"),
             valid_repeats=("repeat", "nunique"),
+            singleton_fallback_share=("singleton_fallback", "mean"),
         )
     )
     for col in ["sd_training_macro_f1", "sd_validation_macro_f1"]:
@@ -945,7 +936,8 @@ def plot_oversampled_nn_figure11(summary):
 
             if subset.empty:
                 ax.text(
-                    0.5, 0.5, "N/A\n(no feasible training points)",
+                    0.5, 0.5, ("N/A\n(ADASYN undefined: no majority-class\nneighbours for a 2-4 record class)"
+                               if method == "ADASYN" else "N/A\n(no feasible training points)"),
                     ha="center", va="center", transform=ax.transAxes,
                     fontsize=9, color="dimgray"
                 )
@@ -975,6 +967,11 @@ def plot_oversampled_nn_figure11(summary):
                     color="green", alpha=0.10
                 )
 
+            if (not subset.empty and method != "ROS"
+                    and subset["singleton_fallback_share"].max() > 0):
+                ax.text(0.04, 0.04, "singleton class duplicated before\n"
+                        f"{method} in {subset['singleton_fallback_share'].mean():.0%} of fits",
+                        transform=ax.transAxes, fontsize=6.5, color="dimgray", va="bottom")
             ax.set_title(f"K={k} | {method}", fontsize=10, fontweight="bold")
             ax.set_xlabel("Training examples", fontsize=8)
             ax.set_ylabel("Macro-F1 score", fontsize=8)

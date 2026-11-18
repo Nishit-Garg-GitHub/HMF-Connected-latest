@@ -25,6 +25,8 @@ from sklearn.svm import SVC
 from sklearn.ensemble import (RandomForestClassifier, ExtraTreesClassifier,
                               ExtraTreesRegressor, GradientBoostingClassifier)
 from sklearn.neural_network import MLPClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import VotingClassifier, GradientBoostingRegressor, VotingRegressor
 from sklearn.model_selection import StratifiedGroupKFold
 from scipy import stats
 
@@ -158,6 +160,36 @@ def paper_groups() -> np.ndarray:
     return groups.to_numpy()
 
 
+HIGH_PERFORMANCE_THRESHOLD = 90.0
+
+
+def binary_high_performance_labels(raw: pd.DataFrame | None = None):
+    """Return (row_ids, y) for the secondary ">= 90 %" FDCA screen.
+
+    Single definition shared by stages 04, 06 and 08. Rows must report FDCA as
+    the major product and a measured yield inside 0-100. Performance is
+    min(conversion, yield) when a valid conversion is reported, else the yield.
+    Because yield <= conversion physically, this equals the yield in all but a
+    handful of records where the source reports yield > conversion. Values
+    outside 0-100 are treated as missing, never clipped (same rule as
+    regression).
+    """
+    raw = read_cleaned() if raw is None else raw
+    if "Major_Product_Clean" in raw.columns:
+        fdca = raw["Major_Product_Clean"].astype(str).str.contains(
+            r"FDCA|FURANDICARBOXYLIC", case=False, regex=True, na=False)
+    else:
+        fdca = pd.Series(True, index=raw.index)
+    yld = pd.to_numeric(raw["Yield_pct"], errors="coerce")
+    conv = pd.to_numeric(raw["Conversion_pct"], errors="coerce")
+    keep = fdca & yld.between(0, 100)
+    row_ids = np.flatnonzero(keep.to_numpy())
+    yl = yld.iloc[row_ids].to_numpy(dtype=float)
+    cv = conv.where(conv.between(0, 100)).iloc[row_ids].to_numpy(dtype=float)
+    performance = np.where(np.isfinite(cv), np.minimum(cv, yl), yl)
+    return row_ids, (performance >= HIGH_PERFORMANCE_THRESHOLD).astype(int)
+
+
 def make_classifier(name: str, seed: int = RANDOM_STATE):
     """Construct deterministic models tuned for literature-scale grouped CV.
 
@@ -202,10 +234,91 @@ def make_classifier(name: str, seed: int = RANDOM_STATE):
             n_estimators=400, min_samples_leaf=2,
             class_weight="balanced_subsample", random_state=seed, n_jobs=1,
         ),
+        # Soft vote of a randomised-tree model and a strongly regularised linear
+        # model: their errors differ (non-linear vs additive), which helps on
+        # ~100 records. Hyperparameters were set in a small exploratory
+        # comparison on the same records, so scores are mildly optimistic.
+        "Ensemble": VotingClassifier(
+            estimators=[
+                ("et", ExtraTreesClassifier(
+                    n_estimators=400, min_samples_leaf=2,
+                    class_weight="balanced_subsample", random_state=seed, n_jobs=1)),
+                ("lr", LogisticRegression(
+                    C=0.1, class_weight="balanced", max_iter=2000)),
+            ],
+            voting="soft",
+        ),
     }
     if name not in models:
         raise KeyError(f"Unknown classifier: {name}")
     return models[name]
+
+
+def make_regressor_single(seed: int = RANDOM_STATE) -> Pipeline:
+    """Per-target regressor used by stages 06-08: median imputation + a mean of
+    Huber gradient boosting (depth-2 trees) and extra-trees.
+
+    In a pooled out-of-fold, paper-grouped comparison this beat the earlier
+    depth-3 random forest with mutual-information feature selection (R2 about
+    0.3-0.4 instead of about 0.1 for Yield/FE/Selectivity). The imputer is the
+    first pipeline step because stage 09 reuses it.
+    """
+    return Pipeline([
+        ("imputer", SimpleImputer(strategy="median", keep_empty_features=True)),
+        ("model", VotingRegressor([
+            ("gb", GradientBoostingRegressor(
+                n_estimators=80, max_depth=2, learning_rate=0.05, subsample=0.7,
+                loss="huber", random_state=seed)),
+            ("et", ExtraTreesRegressor(
+                n_estimators=300, min_samples_leaf=4, max_features=0.5,
+                random_state=seed, n_jobs=1)),
+        ])),
+    ])
+
+
+def balance_with_singleton_fallback(name: str, X, y, seed: int = RANDOM_STATE):
+    """SMOTE / ADASYN for display-oriented analyses (stage 03 figure, stage 05 curves).
+
+    SMOTE and ADASYN need at least two members in every class. When a class has a
+    single record, that record is first duplicated (random over-sampling to two),
+    after which no interpolation is possible for that class: its "synthetic" points
+    coincide with the measured one. ADASYN neighbours are widened from 2 up to 10
+    (never above the smallest class size minus one) until the algorithm finds majority-class neighbours. Returns
+    (X_resampled, y_resampled, info) with info listing the duplicated classes and
+    the neighbour count used. Raises ValueError if no setting works.
+
+    Stage 04 does NOT use this fallback: its classification scores treat these
+    combinations as infeasible, so headline F1 values are unaffected.
+    """
+    from imblearn.over_sampling import ADASYN, RandomOverSampler, SMOTE
+    y = np.asarray(y)
+    X = np.asarray(X)
+    classes, counts = np.unique(y, return_counts=True)
+    singles = [int(c) for c, n in zip(classes, counts) if n < 2]
+    n_orig = len(y)
+    if singles:
+        ros = RandomOverSampler(sampling_strategy={c: 2 for c in singles}, random_state=seed)
+        X, y = ros.fit_resample(X, y)
+    min_count = int(np.unique(y, return_counts=True)[1].min())
+    if min_count < 2:
+        raise ValueError("a class has no records")
+    info = {"duplicated_singleton_classes": singles, "n_before": n_orig}
+    if name == "SMOTE":
+        sampler = SMOTE(k_neighbors=min(2, min_count - 1), random_state=seed)
+        X_res, y_res = sampler.fit_resample(X, y)
+        info["neighbours"] = min(2, min_count - 1)
+        return X_res, y_res, info
+    if name == "ADASYN":
+        last = None
+        for nn in range(min(2, min_count - 1), min(10, min_count - 1) + 1):  # needs n_neighbors <= class size - 1
+            try:
+                X_res, y_res = ADASYN(n_neighbors=nn, random_state=seed).fit_resample(X, y)
+                info["neighbours"] = nn
+                return X_res, y_res, info
+            except (ValueError, RuntimeError) as exc:
+                last = exc
+        raise ValueError(f"ADASYN could not be fitted: {last}")
+    raise ValueError(name)
 
 
 def grouped_splits(y: Iterable, groups: Iterable, seed: int, n_splits: int = 3):

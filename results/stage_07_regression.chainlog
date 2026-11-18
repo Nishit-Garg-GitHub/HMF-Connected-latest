@@ -1,0 +1,49 @@
+==============================================================================
+STAGE 07 — PER-TARGET REGRESSION (PRIMARY)
+Features=61 | Repeats=10 | Folds=5
+
+Conversion_pct: 117 valid records, 86 papers
+  Conversion_pct: completed 10 repeats x 5 folds
+
+Yield_pct: 132 valid records, 93 papers
+  Yield_pct: completed 10 repeats x 5 folds
+
+FE_pct: 119 valid records, 84 papers
+  FE_pct: completed 10 repeats x 5 folds
+
+Selectivity_pct: 91 valid records, 67 papers
+  Selectivity_pct: completed 10 repeats x 5 folds
+
+Nested (selection-corrected) regression:
+                 nested_r2  nested_mae  baseline_mae
+target                                              
+Conversion_pct       0.008       5.678         4.538
+FE_pct               0.386       7.206         8.553
+Selectivity_pct      0.297       8.519         9.420
+Yield_pct            0.451       8.685        11.181
+
+==============================================================================
+STAGE 07 — JOINT FOUR-OUTPUT REGRESSION (SECONDARY)
+Complete valid records=67 | papers=53 | inputs=61
+Rows excluded for out-of-range observed percentages: 0
+Regression fold 1/5 complete: train=53, test=14
+Regression fold 2/5 complete: train=53, test=14
+Regression fold 3/5 complete: train=54, test=13
+Regression fold 4/5 complete: train=54, test=13
+Regression fold 5/5 complete: train=54, test=13
+
+--- Per-target summary (PRIMARY) ---
+         target  fold_r2_mean  model_mae_mean  baseline_mae_mean  model_rmse_mean  model_r2_mean  model_r2_sd  baseline_r2_mean  n_records
+ Conversion_pct     -3.280509        5.071353           4.553775        10.880248       0.185068     0.065334         -0.093673        117
+         FE_pct      0.081208        7.377261           8.567114        11.725027       0.389214     0.098521         -0.116583        119
+Selectivity_pct     -1.133866        8.648305           9.478431        14.340591       0.301103     0.084978         -0.179466         91
+      Yield_pct      0.347547        8.728526          11.123683        15.099638       0.443472     0.069532         -0.169571        132
+
+--- Joint multi-output summary (SECONDARY) ---
+         target  model_r2_mean  model_r2_sd  model_mae_mean  baseline_mae_mean  model_rmse_mean
+ Conversion_pct      -1.762758     3.654055        3.409731           3.314802         6.618558
+         FE_pct       0.095872     0.665223        6.437423           7.886154         9.435547
+Selectivity_pct      -0.057763     0.748444        5.819772           6.257132         8.984403
+      Yield_pct       0.144900     0.851276        5.190208           6.981798         8.403837
+
+NSGA-II gate: PASSED

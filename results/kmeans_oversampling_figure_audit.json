@@ -11,8 +11,8 @@
     "SMOTE"
   ],
   "measured_records_only": true,
-  "n_records_with_measured_conversion_and_yield": 102,
-  "synthetic_points_generated": 791,
+  "n_records_with_measured_conversion_and_yield": 111,
+  "synthetic_points_generated": 1329,
   "coordinate_space": [
     "Conversion_pct",
     "Yield_pct"

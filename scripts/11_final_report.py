@@ -1,6 +1,6 @@
-"""Stage 09 — assemble the connected pipeline's audit and research report.
+"""Stage 11 — assemble the connected pipeline's audit and research report.
 
-This report reads outputs produced by stages 01–08. It does not rerun model
+This report reads outputs produced by stages 01–10. It does not rerun model
 training. It records data coverage, K-means outputs, classification F1,
 resampling feasibility, learning curves, feature interpretation, four-target
 regression metrics and the NSGA-II validation decision. Screening scores are
@@ -170,10 +170,10 @@ def regression_section() -> list[str]:
     gate = read_json(RESULTS_DIR / "regression_validation_gate.json")
 
     if pt_path.exists():
-        lines.append("### Primary — Per-target regression (SelectKBest + RandomForest)")
+        lines.append("### Primary — Per-target regression (Huber gradient boosting + extra-trees)")
         summary_pt = pd.read_csv(pt_path)
         lines.append(table_markdown(summary_pt, [
-            "target", "n_valid_records", "model_r2_mean", "model_r2_sd",
+            "target", "n_records", "model_r2_mean", "model_r2_sd",
             "model_mae_mean", "baseline_mae_mean", "model_rmse_mean",
         ]))
         lines.append("")
@@ -210,12 +210,15 @@ def optimisation_section() -> list[str]:
     if status.get("n_pareto_candidates") is not None:
         lines.append(f"- Model-generated Pareto candidates: **{status['n_pareto_candidates']}**.")
     lines.extend([
-        "- NSGA-II is gated by the multi-output regression validation results.",
+        "- NSGA-II runs only if the regressors for its objectives (yield and FE) beat the median baseline (MAE, fold wins, pooled R2 >= 0). Conversion is not an objective because it fails this test.",
         "- Any Pareto candidates are model-generated hypotheses and require experimental validation.",
         "",
     ])
     top_path = RESULTS_DIR / "nsga2_top10_ni_cu_hydroxide.csv"
-    if top_path.exists():
+    if status.get("failed_targets"):
+        lines.append(f"- Targets that failed the gate: {', '.join(status['failed_targets'])}.")
+        lines.append("")
+    if top_path.exists() and str(status.get("status", "")).startswith("completed"):
         top = pd.read_csv(top_path)
         envelope = status.get("hydroxide_scenario", {}).get("condition_envelope", {})
         lines.append("### Constrained scenario: Ni(OH)2 / Cu(OH)2 anode (top 10)")
@@ -223,8 +226,8 @@ def optimisation_section() -> list[str]:
             lines.append("- Conditions bounded to the range reported for real Ni/Cu hydroxide "
                          f"anodes: {envelope}.")
         cols = ["rank", "catalyst", "support", "electrolyte", "electrolyte_M", "HMF_mM",
-                "potential_V_RHE", "temperature_C", "predicted_Conversion_pct",
-                "predicted_Yield_pct", "predicted_FE_pct", "predicted_Selectivity_pct"]
+                "potential_V_RHE", "temperature_C", "predicted_Yield_pct",
+                "member_spread_Yield_pct", "predicted_FE_pct", "observed_Yield_pct"]
         lines.append(top[[c for c in cols if c in top]].to_markdown(index=False))
         lines.append("")
         lines.append("Nearest observed hydroxide record: "
@@ -232,6 +235,26 @@ def optimisation_section() -> list[str]:
                      f"measured yield {top['observed_Yield_pct'].iloc[0]}%, "
                      f"FE {top['observed_FE_pct'].iloc[0]}%.")
         lines.append("")
+        for key, title in (("Cu_hydroxide", "Top 10 — Cu(OH)2 anode"), ("NiCu_hydroxide", "Top 10 — Ni-Cu hydroxide anode")):
+            kp = RESULTS_DIR / f"nsga2_top10_{key}.csv"
+            if kp.exists():
+                kt = pd.read_csv(kp)
+                lines.append(f"### {title}")
+                lines.append(kt[[c for c in cols if c in kt]].to_markdown(index=False))
+                lines.append("")
+        rob_path = RESULTS_DIR / "nsga2_top10_robust_potential.csv"
+        if rob_path.exists():
+            rob = pd.read_csv(rob_path)
+            lines.append("### Robust ranking (E >= 1.45 V vs RHE)")
+            lines.append(rob[[c for c in cols if c in rob]].to_markdown(index=False))
+            lines.append("")
+        lit_path = RESULTS_DIR / "literature_check.csv"
+        if lit_path.exists():
+            lines.append("### Regression SHAP versus literature")
+            lit = pd.read_csv(lit_path)
+            lines.append(lit[[c for c in ["factor", "target", "expected", "data_direction",
+                                          "importance_rank", "verdict"] if c in lit]].to_markdown(index=False))
+            lines.append("")
     return lines
 
 
@@ -240,7 +263,7 @@ def main() -> None:
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     lines = [
         "# HMF Electrooxidation to FDCA — Integrated ML Research Report", "",
-        "## Research architecture", "Literature dataset (154 records) → cleaning and feature engineering → K-means (K=3,4,5,6) → fold-local class balancing (ROS, SMOTE, ADASYN) → classifier comparison → learning curves → SHAP/feature importance → joint four-output regression → validation-gated NSGA-II.",
+        "## Research architecture", "Literature dataset (154 records) → cleaning and feature engineering → K-means (K=3,4,5,6) → fold-local class balancing (ROS, SMOTE, ADASYN) → classifier comparison → learning curves → SHAP/feature importance → per-target regression with validation gate → regression SHAP and literature check → hydroxide-restricted NSGA-II.",
         "",
         "This report distinguishes paper-inspired methodology from the results obtained on the current literature dataset. It does not claim that screening scores are experimental validation.",
         "",
@@ -265,7 +288,7 @@ def main() -> None:
         "",
     ])
     REPORT_PATH.write_text("\n".join(lines), encoding="utf-8")
-    stage_status("09_final_report", "completed", {"report": str(REPORT_PATH.relative_to(REPORT_PATH.parents[1]))})
+    stage_status("11_final_report", "completed", {"report": str(REPORT_PATH.relative_to(REPORT_PATH.parents[1]))})
     print(f"Final research report written: {REPORT_PATH}")
 
 

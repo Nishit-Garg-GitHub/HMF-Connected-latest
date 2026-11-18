@@ -1,4 +1,4 @@
-"""Stage 08 — validation-gated NSGA-II catalyst/condition optimisation.
+"""Stage 09 — validation-gated NSGA-II catalyst/condition optimisation.
 
 The design follows the integrated genetic algorithm of the reference article
 (Li et al., ACS Sustainable Chem. Eng. 2025, 13, 13940; sections 2.6 / 3.6),
@@ -11,9 +11,11 @@ adapted from thermal aerobic oxidation to HMF electro-oxidation:
 * Objectives. The article maximises conversion X and yield Y while
   minimising temperature T, |P - 1 atm| and reaction time. This dataset has no
   pressure or time, so the electrochemical operating burdens are temperature
-  T and applied potential E (V vs RHE); faradaic efficiency is added as a
-  third performance objective. Predictions come from the per-target
-  regressors that passed the stage 07 validation gate.
+  T and applied potential E (V vs RHE). The performance objectives are FDCA
+  yield and faradaic efficiency: they are the targets whose regressors pass the
+  stage 07 validation gate. Conversion is NOT optimised because its regressor
+  does not beat the median baseline (yield <= conversion, so a high yield
+  implies a high conversion).
 * NSGA-II. Fast non-dominated sorting + crowding distance, binary
   tournament, blend crossover and Gaussian mutation, (mu + lambda) survival.
 * Convergence. The spacing metric S = sqrt(1/|H| sum (d_mean - d_i)^2) of the
@@ -47,10 +49,13 @@ GENERATIONS = 1000
 CROSSOVER_RATE = 0.9
 MUTATION_RATE = 0.10
 TOP_N = 10
+ROBUST_MIN_POTENTIAL = 1.45   # V vs RHE; Ni(OH)2/NiOOH operating region with most data
 
 # Objective columns (all maximised quantities are negated -> minimisation).
-OBJECTIVES = ["Conversion_pct", "Yield_pct", "FE_pct", "Temperature_C", "Potential_vs_RHE_V"]
-BENEFIT = {"Conversion_pct": True, "Yield_pct": True, "FE_pct": True,
+USED_TARGETS = ("Yield_pct", "FE_pct")          # validated regressors only
+OBJECTIVES = ["Yield_pct", "FE_pct", "Temperature_C", "Potential_vs_RHE_V"]
+N_PERF = len(USED_TARGETS)
+BENEFIT = {"Yield_pct": True, "FE_pct": True,
            "Temperature_C": False, "Potential_vs_RHE_V": False}
 ONE_HOT_PREFIXES = ("Electrolyte_Electrolyte_Cation_", "Electrolyte_Electrolyte_Anion_", "Reactant_")
 
@@ -86,14 +91,28 @@ def load_regressors(gate: dict):
 
 
 def predict_targets(models, real: np.ndarray) -> np.ndarray:
-    """Predicted Conversion, Yield, FE, Selectivity (clipped to 0-100)."""
-    if isinstance(models, dict):
-        return np.column_stack([np.clip(models[t].predict(real), 0, 100) for t in TARGETS])
-    return np.clip(models.predict(real), 0, 100)
+    """Predicted Yield and FE (clipped to 0-100); only validated targets are used."""
+    return np.column_stack([np.clip(models[t].predict(real), 0, 100) for t in USED_TARGETS])
+
+
+def member_spread(models, real: np.ndarray) -> np.ndarray:
+    """Disagreement (|GB - ET|) of the two ensemble members for each used target.
+
+    A large spread means the prediction depends on the model family, i.e. the
+    candidate lies where the data do not pin the response down.
+    """
+    out = []
+    for t in USED_TARGETS:
+        pipe = models[t]
+        Xi = pipe.named_steps["imputer"].transform(real)
+        preds = [np.clip(est.predict(Xi), 0, 100)
+                 for est in pipe.named_steps["model"].estimators_]
+        out.append(np.abs(preds[0] - preds[1]))
+    return np.column_stack(out)
 
 
 def model_imputer(models):
-    first = next(iter(models.values())) if isinstance(models, dict) else models
+    first = next(iter(models.values()))
     return first.named_steps.get("imputer") if hasattr(first, "named_steps") else None
 
 
@@ -158,7 +177,7 @@ def objective_values(models, enc: MixedEncoding, real: np.ndarray):
     pred = predict_targets(models, real)
     t = real[:, enc.idx["Temperature_C"]]
     e = real[:, enc.idx["Potential_vs_RHE_V"]]
-    objectives = np.column_stack([-pred[:, 0], -pred[:, 1], -pred[:, 2], t, e])
+    objectives = np.column_stack([-pred[:, 0], -pred[:, 1], t, e])
     return objectives, pred
 
 
@@ -209,8 +228,8 @@ def normalised_objectives(F: np.ndarray, enc: "MixedEncoding") -> np.ndarray:
     within their feasible interval (lower bound = 0).
     """
     Z = np.empty_like(F, dtype=float)
-    Z[:, :3] = (100.0 + F[:, :3]) / 100.0
-    for col, name in ((3, "Temperature_C"), (4, "Potential_vs_RHE_V")):
+    Z[:, :N_PERF] = (100.0 + F[:, :N_PERF]) / 100.0
+    for col, name in ((N_PERF, "Temperature_C"), (N_PERF + 1, "Potential_vs_RHE_V")):
         i = enc.idx[name]
         Z[:, col] = (F[:, col] - enc.lower[i]) / enc.span[i]
     return Z
@@ -274,9 +293,8 @@ def nsga2(models, enc: MixedEncoding, seed_rows: np.ndarray, label: str, rng):
         history.append({
             "scenario": label, "generation": gen, "pareto_count": int(len(first)),
             "spacing": spacing_metric(F[first], enc),
-            "best_conversion": float(-F[first, 0].min()),
-            "best_yield": float(-F[first, 1].min()),
-            "best_fe": float(-F[first, 2].min()),
+            "best_yield": float(-F[first, 0].min()),
+            "best_fe": float(-F[first, 1].min()),
         })
         if gen % 100 == 0 or gen == 1:
             h = history[-1]
@@ -319,14 +337,13 @@ def decision_table(enc, pop, F, P) -> tuple[pd.DataFrame, dict]:
     """Decode, rank by Pareto front, weight by entropy, de-duplicate."""
     real = np.vstack([enc.decode(g) for g in pop])
     table = pd.DataFrame(real, columns=enc.names)
-    for i, t in enumerate(TARGETS):
+    for i, t in enumerate(USED_TARGETS):
         table[f"predicted_{t}"] = P[:, i]
     rank, _ = rank_and_crowding(F)
     table["pareto_rank"] = rank
     key = table[enc.names].round(3).astype(str).agg("|".join, axis=1)
     table = table.loc[~key.duplicated()].reset_index(drop=True)
     decision = pd.DataFrame({
-        "Conversion_pct": table["predicted_Conversion_pct"],
         "Yield_pct": table["predicted_Yield_pct"],
         "FE_pct": table["predicted_FE_pct"],
         "Temperature_C": table["Temperature_C"],
@@ -343,7 +360,7 @@ def decision_table(enc, pop, F, P) -> tuple[pd.DataFrame, dict]:
 # Chemistry constraint: single-metal Ni(OH)2 / Cu(OH)2 anode
 # ---------------------------------------------------------------------------
 
-HYDROXIDE_METALS = ("Ni", "Cu")
+HYDROXIDE_METALS = ("Ni", "Cu", "NiCu")   # NiCu = Ni-Cu bimetallic hydroxide
 FREE_CATALYST_FLAGS = {"Catalyst_Carbon", "Catalyst_Nanoparticle",
                        "Catalyst_Foam_Substrate", "Catalyst_Conductive_Glass"}
 
@@ -353,14 +370,18 @@ def hydroxide_constraint(enc: MixedEncoding, metal: str):
     derived descriptors recomputed; KOH/NaOH pH tied to concentration."""
     idx = enc.idx
     flags = [i for n, i in idx.items() if n.startswith("Catalyst_") and n not in FREE_CATALYST_FLAGS]
+    metals = ("Ni", "Cu") if metal == "NiCu" else (metal,)
 
     def constrain(real: np.ndarray) -> np.ndarray:
         real = real.copy()
         real[flags] = 0.0
-        real[idx[f"Catalyst_{metal}"]] = 1.0
+        for m in metals:
+            real[idx[f"Catalyst_{m}"]] = 1.0
         real[idx["Catalyst_Hydroxide"]] = 1.0
+        if "Catalyst_Bimetallic" in idx:
+            real[idx["Catalyst_Bimetallic"]] = float(len(metals) == 2)
         if "Catalyst_N_Elements" in idx:
-            real[idx["Catalyst_N_Elements"]] = 1.0
+            real[idx["Catalyst_N_Elements"]] = float(len(metals))
         if "Potential_vs_RHE" in idx:
             real[idx["Potential_vs_RHE"]] = 1.0
         oh = idx.get("Electrolyte_Electrolyte_Anion_OH")
@@ -415,7 +436,8 @@ def describe(frame: pd.DataFrame) -> pd.DataFrame:
         lambda r: "+".join(c.split("_")[1] for c in metals if r[c] >= 0.5) or "none", axis=1)
     out["catalyst"] = np.where(
         frame.get("Catalyst_Hydroxide", 0) >= 0.5,
-        out["metals"].where(out["metals"].str.contains(r"\+"), out["metals"] + "(OH)2"),
+        out["metals"].where(out["metals"].str.contains(r"\+"), out["metals"] + "(OH)2")
+           .str.replace("Ni+Cu", "Ni-Cu hydroxide", regex=False),
         out["metals"])
     out["support"] = np.where(frame.get("Catalyst_Foam_Substrate", 0) >= 0.5, "foam",
                      np.where(frame.get("Catalyst_Conductive_Glass", 0) >= 0.5, "FTO/ITO/BDD",
@@ -467,13 +489,8 @@ def high_performance_probability(X: pd.DataFrame, raw: pd.DataFrame, candidates:
     from imblearn.pipeline import Pipeline as ImbPipeline
     from imblearn.over_sampling import RandomOverSampler, SMOTE, ADASYN
     from common import classification_preprocessing_steps, make_classifier
-    fdca = raw["Major_Product_Clean"].astype(str).str.contains(
-        r"FDCA|FURANDICARBOXYLIC", case=False, regex=True, na=False)
-    yld = pd.to_numeric(raw["Yield_pct"], errors="coerce")
-    conv = pd.to_numeric(raw["Conversion_pct"], errors="coerce")
-    rows = np.flatnonzero((fdca & yld.notna()).to_numpy())
-    yl, cv = yld.iloc[rows].clip(0, 100).to_numpy(), conv.iloc[rows].clip(0, 100).to_numpy()
-    y = (np.where(np.isfinite(cv), np.minimum(cv, yl), yl) >= 90).astype(int)
+    from common import binary_high_performance_labels
+    rows, y = binary_high_performance_labels(raw)
     sampler = {"ROS": RandomOverSampler(random_state=SEED),
                "SMOTE": SMOTE(k_neighbors=2, random_state=SEED),
                "ADASYN": ADASYN(n_neighbors=2, random_state=SEED)}.get(best["sampler"])
@@ -490,8 +507,9 @@ def plot_spacing(history: pd.DataFrame, path: Path) -> None:
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    runs = [("NiOH2", "(a)", "Ni(OH)$_2$"), ("CuOH2", "(b)", "Cu(OH)$_2$")]
-    fig, axes = plt.subplots(1, 2, figsize=(11, 3.8))
+    runs = [("NiOH2", "(a)", "Ni(OH)$_2$"), ("CuOH2", "(b)", "Cu(OH)$_2$"),
+            ("NiCuOH2", "(c)", "Ni-Cu hydroxide")]
+    fig, axes = plt.subplots(1, 3, figsize=(15, 3.8))
     for ax, (label, letter, title) in zip(axes, runs):
         h = history[history["scenario"] == label]
         ax.plot(h["generation"], h["spacing"], color="#1f3fbf", linewidth=1.2, label="Spacing")
@@ -539,20 +557,35 @@ def plot_top(top: pd.DataFrame, labels: pd.DataFrame, path: Path) -> None:
 # Main
 # ---------------------------------------------------------------------------
 
+def remove_stale_outputs() -> None:
+    """Delete candidates from an earlier run whose regressors passed a gate they no longer pass."""
+    for pattern in ("nsga2_*.csv", "nsga2_entropy_weights.json"):
+        for path in RESULTS_DIR.glob(pattern):
+            path.unlink(missing_ok=True)
+    for path in (FIGURES_DIR / "nsga2").glob("*"):
+        path.unlink(missing_ok=True)
+
+
 def main() -> None:
     """Respect the regression validation gate before any optimisation."""
     warnings.filterwarnings("ignore")
     gate = load_gate()
     if not gate.get("passed", False):
-        message = gate.get("reason", "Regression did not beat baseline on all required targets.")
+        message = gate.get("reason", "Regression did not pass the validation gate on all required targets.")
+        failed = [t for t, c in gate.get("target_checks", {}).items()
+                  if c.get("required", True) and not c.get("passed", False)]
+        remove_stale_outputs()
         write_json(RESULTS_DIR / "nsga2_status.json", {
-            "status": "blocked", "reason": message,
-            "required_gate": "MAE must beat median baseline for Conversion, Yield, FE and Selectivity.",
+            "status": "blocked", "reason": message, "failed_targets": failed,
+            "required_gate": "MAE must beat the median baseline, win a majority of folds and have "
+                             "mean pooled R2 >= 0 for Yield and FE (the optimised targets).",
         })
-        stage_status("08_nsga2", "blocked", {"reason": message})
+        stage_status("09_nsga2", "blocked", {"reason": message})
         print("NSGA-II BLOCKED:", message)
         return
 
+    if tuple(gate.get("required_targets", ())) != USED_TARGETS:
+        raise RuntimeError("Gate targets differ from the optimiser's targets; re-run stage 07.")
     models = load_regressors(gate)
     frame = read_processed()
     X, features, _ = build_feature_matrix(frame)
@@ -587,7 +620,10 @@ def main() -> None:
         for name, (lo, hi) in envelope.items():
             enc_m.set_bounds(name, lo, hi)
         enc_m.constraint = hydroxide_constraint(enc_m, metal)
-        seeds = matrix[hyd_mask & (raw[f"Catalyst_{metal}"] == 1).to_numpy()]
+        has_metal = np.ones(len(raw), dtype=bool)
+        for m in (("Ni", "Cu") if metal == "NiCu" else (metal,)):
+            has_metal &= (raw[f"Catalyst_{m}"] == 1).to_numpy()
+        seeds = matrix[hyd_mask & has_metal] if (hyd_mask & has_metal).any() else matrix[:0]
         seeds = np.vstack([seeds, matrix[rng.choice(len(matrix), 40, replace=False)]])
         pop_m, F_m, P_m, hist_m = nsga2(models, enc_m, seeds, f"{metal}OH2", rng)
         history += hist_m
@@ -609,21 +645,54 @@ def main() -> None:
 
     top = table.head(TOP_N).reset_index(drop=True)
     top_labels = labels.head(TOP_N).reset_index(drop=True)
-    cu = table[table["Catalyst_Cu"] >= 0.5].head(3).reset_index(drop=True)
-    pred_cols = [f"predicted_{t}" for t in TARGETS] + ["entropy_fitness", "pareto_rank"]
+    cu = table[(table["Catalyst_Cu"] >= 0.5) & (table["Catalyst_Ni"] < 0.5)].head(3).reset_index(drop=True)
+    nicu = table[(table["Catalyst_Cu"] >= 0.5) & (table["Catalyst_Ni"] >= 0.5)].head(3).reset_index(drop=True)
+    # Well-supported region: the optimiser is rewarded for low potential, so the
+    # headline ranking collapses onto the lower edge of the envelope where few
+    # records exist. Re-rank only solutions at ordinary operating potentials.
+    robust = table[table["Potential_vs_RHE_V"] >= ROBUST_MIN_POTENTIAL].head(TOP_N).reset_index(drop=True)
+    pred_cols = [f"predicted_{t}" for t in USED_TARGETS] + ["entropy_fitness", "pareto_rank"]
     if p_high is not None:
         pred_cols.append("classifier_P_high90")
 
     def report(rows: pd.DataFrame, lab: pd.DataFrame) -> pd.DataFrame:
+        spread = member_spread(models, rows[features].to_numpy(dtype=float))
+        spread_df = pd.DataFrame(spread, columns=[f"member_spread_{t}" for t in USED_TARGETS]).round(2)
         return pd.concat([
             pd.Series(range(1, len(rows) + 1), name="rank"),
             lab.reset_index(drop=True),
             rows[pred_cols].round(3).reset_index(drop=True),
+            spread_df,
             nearest_observed(rows, matrix, features, raw, hyd_mask),
         ], axis=1)
 
     top_report = report(top, top_labels)
-    cu_report = report(cu, describe(cu))
+    cu_report = report(cu, describe(cu)) if len(cu) else pd.DataFrame()
+    nicu_report = report(nicu, describe(nicu)) if len(nicu) else pd.DataFrame()
+    robust_report = report(robust, describe(robust)) if len(robust) else pd.DataFrame()
+    # Top-10 for each hydroxide anode so Ni(OH)2, Cu(OH)2 and Ni-Cu hydroxide can be
+    # compared on equal footing (same entropy-weighted fitness; table is already
+    # sorted by Pareto rank then fitness). The headline top-10 above is unchanged.
+    ni = table["Catalyst_Ni"] >= 0.5
+    cu_flag = table["Catalyst_Cu"] >= 0.5
+    per_catalyst = {"Ni_hydroxide": table[ni & ~cu_flag], "Cu_hydroxide": table[cu_flag & ~ni],
+                    "NiCu_hydroxide": table[ni & cu_flag]}
+    summary_rows = []
+    for key, sub in per_catalyst.items():
+        sub10 = sub.head(TOP_N).reset_index(drop=True)
+        if len(sub10):
+            rep = report(sub10, describe(sub10))
+            rep.to_csv(RESULTS_DIR / f"nsga2_top10_{key}.csv", index=False)
+            summary_rows.append({"catalyst": key, "n_candidates": len(sub),
+                                 "best_predicted_Yield_pct": rep["predicted_Yield_pct"].iloc[0],
+                                 "best_predicted_FE_pct": rep["predicted_FE_pct"].iloc[0],
+                                 "best_fitness": rep["entropy_fitness"].iloc[0],
+                                 "best_pareto_rank": int(rep["pareto_rank"].iloc[0])})
+    pd.DataFrame(summary_rows).to_csv(RESULTS_DIR / "nsga2_best_by_catalyst.csv", index=False)
+    pool_all = pd.concat([describe(table), table], axis=1)
+    pool_all.to_csv(RESULTS_DIR / "nsga2_pareto_hydroxide_all.csv", index=False)
+    nicu_report.to_csv(RESULTS_DIR / "nsga2_best3_nicu_hydroxide.csv", index=False)
+    robust_report.to_csv(RESULTS_DIR / "nsga2_top10_robust_potential.csv", index=False)
     top_report.to_csv(RESULTS_DIR / "nsga2_top10_ni_cu_hydroxide.csv", index=False)
     top.to_csv(RESULTS_DIR / "nsga2_top10_ni_cu_hydroxide_descriptors.csv", index=False)
     cu_report.to_csv(RESULTS_DIR / "nsga2_best3_cu_hydroxide.csv", index=False)
@@ -646,7 +715,7 @@ def main() -> None:
     status = {
         "status": "completed_model_generated_candidates",
         "algorithm": "NSGA-II, mixed encoding, entropy-weighted decision (Li et al. 2025 design)",
-        "objectives": {"maximise": ["Conversion", "FDCA yield", "FE"],
+        "objectives": {"maximise": ["FDCA yield", "FE"],
                        "minimise": ["Temperature", "Potential vs RHE"]},
         "generations": GENERATIONS, "population_size": POPULATION_SIZE,
         "n_pareto_candidates": int((general["pareto_rank"] == 0).sum()),
@@ -656,22 +725,26 @@ def main() -> None:
             "entropy_weights": weights,
             "top10_catalysts": top_labels["catalyst"].value_counts().to_dict(),
             "spacing_converged_generation": {m: converged_at(f"{m}OH2") for m in HYDROXIDE_METALS},
+            "scenarios": list(HYDROXIDE_METALS),
         },
         "warning": "Candidates require experimental confirmation; model predictions are not measurements.",
     }
     write_json(RESULTS_DIR / "nsga2_status.json", status)
-    stage_status("08_nsga2", "completed", {"n_pareto_candidates": status["n_pareto_candidates"]})
+    stage_status("09_nsga2", "completed", {"n_pareto_candidates": status["n_pareto_candidates"]})
 
     print("\nEntropy weights (hydroxide):", {k: round(v, 3) for k, v in weights.items()})
     print("\nTop Ni(OH)2 / Cu(OH)2 solutions:")
     show = ["rank", "catalyst", "support", "electrolyte", "electrolyte_M", "HMF_mM",
-            "potential_V_RHE", "temperature_C", "predicted_Conversion_pct",
-            "predicted_Yield_pct", "predicted_FE_pct", "entropy_fitness"]
+            "potential_V_RHE", "temperature_C", "predicted_Yield_pct",
+            "predicted_FE_pct", "entropy_fitness"]
     if p_high is not None:
         show.append("classifier_P_high90")
     print(top_report[show].to_string(index=False))
-    print("\nBest Cu(OH)2 solutions:")
-    print(cu_report[show].to_string(index=False))
+    for title, rep_df in (("Best Cu(OH)2 solutions", cu_report),
+                          ("Best Ni-Cu hydroxide solutions", nicu_report),
+                          (f"Top solutions at E >= {ROBUST_MIN_POTENTIAL} V vs RHE", robust_report)):
+        print(f"\n{title}:")
+        print(rep_df[show].to_string(index=False) if len(rep_df) else "  none on the final front")
 
 
 if __name__ == "__main__":

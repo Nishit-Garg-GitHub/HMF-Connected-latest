@@ -1,0 +1,27 @@
+{
+  "experiment": "observed_only_kmeans",
+  "record_selection": "observed",
+  "total_records": 154,
+  "clustered_records": 111,
+  "complete_records_available": 111,
+  "fully_observed_records": 111,
+  "records_with_imputed_outcomes": 0,
+  "imputation_method": "median",
+  "imputation_medians": {
+    "Conversion_pct": 99.9,
+    "Yield_pct": 96.4
+  },
+  "k_values": [
+    3,
+    4,
+    5,
+    6
+  ],
+  "label_files": [
+    "kmeans_labels_K3.csv",
+    "kmeans_labels_K4.csv",
+    "kmeans_labels_K5.csv",
+    "kmeans_labels_K6.csv"
+  ],
+  "warning": "Only records with measured Conversion and Yield are clustered."
+}

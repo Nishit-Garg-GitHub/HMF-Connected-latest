@@ -24,12 +24,13 @@
 \title{Machine-Learning Screening of Electrocatalytic 5-Hydroxymethylfurfural
 Oxidation to 2,5-Furandicarboxylic Acid from Literature Data: Leakage-Aware Classification,
 Regression and Multi-Objective Optimisation}
-\author{\textit{Author names and affiliations to be added}}
-\date{11 November 2026}
+\author{Nishit Garg \and Aditya Singh\\[0.4em]
+\textit{BITS Pilani}}
+\date{18 November 2026}
 \begin{document}
 \maketitle
 \begin{abstract}
-We assembled 154 electrocatalytic HMF-oxidation records from 99 publications and built a leakage-aware machine-learning pipeline that (i) engineers chemical descriptors for the catalyst, electrolyte, cell configuration and operating conditions, (ii) clusters reported conversion and FDCA yield with K-means, (iii) compares six classifier families under four class-balancing strategies, (iv) interprets the selected models with SHAP, (v) regresses four performance outcomes and (vi) searches catalyst/condition space with a validation-gated NSGA-II. All model selection uses publication-grouped cross-validation so that no paper contributes records to both training and test folds. Correcting descriptor extraction (anode-only catalyst parsing, formula-aware compound families, temperature and pH parsing, counter-electrode descriptors), retaining missing-value indicators and re-tuning the models raised the best pooled out-of-fold macro-F1 for a binary $\geq$90\% performance screen from 0.586 to 0.731 (neural network with SMOTE; 95\% CI 0.717--0.744; stratified dummy 0.480), and for three-cluster K-means labels from 0.421 to 0.626. We also identify and correct an evaluation flaw in which folds where an oversampler could not be fitted were silently discarded, which had inflated earlier $K=4$ scores. No model--sampler combinations reached a mean macro-F1 of 0.76, reflecting the small, heterogeneous and imbalanced literature corpus rather than a pipeline limitation. Regression models only modestly beat a median baseline, and NSGA-II outputs are presented as hypotheses for experimental testing.
+We assembled 154 electrocatalytic HMF-oxidation records from 99 publications and built a leakage-aware machine-learning pipeline that (i) engineers chemical descriptors for the catalyst, electrolyte, cell configuration and operating conditions, (ii) clusters reported conversion and FDCA yield with K-means, (iii) compares seven classifier families under four class-balancing strategies, (iv) interprets the selected models with SHAP, (v) regresses four performance outcomes and (vi) searches catalyst/condition space with a validation-gated NSGA-II. All model selection uses publication-grouped cross-validation so that no paper contributes records to both training and test folds. Correcting descriptor extraction (anode-only catalyst parsing, formula-aware compound families, temperature and pH parsing, counter-electrode descriptors), retaining missing-value indicators and re-tuning the models raised the best pooled out-of-fold macro-F1 for a binary $\geq$90\% performance screen from 0.586 to 0.741 (soft-voting ensemble without balancing; 95\% CI 0.728--0.753; stratified dummy 0.479); for three-cluster K-means labels of the records with measured outcomes the best score is 0.658 (stratified dummy 0.328). We also identify and correct an evaluation flaw in which folds where an oversampler could not be fitted were silently discarded, which had inflated earlier $K=4$ scores. No model--sampler combinations reached a mean macro-F1 of 0.76, reflecting the small, heterogeneous and imbalanced literature corpus rather than a pipeline limitation. Per-target gradient-boosting/extra-trees regressors beat a training-fold median baseline under publication-grouped validation for FDCA yield (pooled out-of-fold $R^2=0.44$) and faradaic efficiency ($R^2=0.39$) but not for conversion, which is therefore excluded from optimisation. Tree-SHAP analysis of these regressors is compared with published trends, and a NSGA-II search restricted to Ni(OH)$_2$, Cu(OH)$_2$ and Ni--Cu hydroxide anodes yields candidate conditions that are presented as hypotheses for experimental testing, not as validated optima.
 \end{abstract}
 \noindent\textbf{Keywords:} HMF electrooxidation; FDCA; machine learning; grouped cross-validation; class imbalance; SHAP; NSGA-II
 
@@ -51,9 +52,15 @@ contributions: (1) a publication-grouped, fold-local evaluation protocol in whic
 scaling and oversampling are fitted only on training papers; (2) a corrected descriptor set for
 the anode catalyst, electrolyte and cell configuration; and (3) an honest assessment of how far
 classification, regression and optimisation can be pushed with the current corpus.
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=\textwidth,height=0.85\textheight,keepaspectratio]{assets/diagnostics__Fig_Workflow.png}
+\caption{Workflow of the study: leakage-aware classification, validated regression, SHAP with literature check and hydroxide-restricted NSGA-II.}
+\label{fig:workflow}
+\end{figure}
 \section{Data and methods}
 \subsection{Literature dataset}
-The corpus contains 154 experiments from 99 publications (Table~\ref{tab:data}). Each record lists the cell type, HMF concentration, catalyst description, electrolyte, applied potential, TEMPO use, temperature and up to four outcomes: HMF conversion, FDCA yield, faradaic efficiency (FE) and selectivity. Outcome reporting is incomplete; only 60 records report all four outcomes.
+The corpus contains 154 experiments from 99 publications (Table~\ref{tab:data}). Each record lists the cell type, HMF concentration, catalyst description, electrolyte, applied potential, TEMPO use, temperature and up to four outcomes: HMF conversion, FDCA yield, faradaic efficiency (FE) and selectivity. Outcome reporting is incomplete; only 67 records report all four outcomes.
 
 \begin{table}[!htbp]
 \centering
@@ -68,14 +75,20 @@ Independent publications (CV groups) & 99 \\
 Input descriptors (before missing-value indicators) & 61 \\
 Missing-value indicator columns added in-fold & 5 \\
 Records reporting conversion & 117 \\
-Records reporting FDCA yield & 123 \\
+Records reporting FDCA yield & 132 \\
 Records reporting faradaic efficiency & 119 \\
 Records reporting selectivity & 91 \\
-Records reporting all four outcomes & 60 \\
-Binary-screen records (FDCA product, yield reported) & 119 (89 positive) \\
+Records reporting all four outcomes & 67 \\
+Binary-screen records (FDCA product, yield reported) & 128 (95 positive) \\
 \bottomrule
 \end{tabular}
 \end{table}
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=\textwidth,height=0.85\textheight,keepaspectratio]{assets/diagnostics__Fig_Data_Overview.png}
+\caption{Record availability per outcome, outcome distributions and anode descriptors.}
+\label{fig:data}
+\end{figure}
 \subsection{Descriptor engineering}
 Inputs are restricted to eight agreed experimental groups: TEMPO, temperature, reactant,
 HMF concentration, catalyst, electrolyte, potential versus RHE and cell configuration. All
@@ -100,11 +113,15 @@ inferred as $14+\log_{10}[\mathrm{OH^-}]$ for hydroxides. Counter-electrode desc
 This yields 61 descriptors. Within every training fold, missing continuous values are median-imputed and a binary indicator is appended for each of the 5 descriptors with missing values. Whether a paper reports, for example, its temperature or potential is a property of the input record and carries information that median imputation alone would erase.
 \subsection{Classification targets}
 \textit{K-means labels.} Conversion and FDCA yield are standardised and clustered for
-$K\in\{3,4,5,6\}$ (100 initialisations). Missing outcomes are median-imputed for clustering only
-and flagged; labels are never used as inputs (Table~\ref{tab:clusters}).
+$K\in\{3,4,5,6\}$ (100 initialisations). Only records that report both outcomes are clustered, so
+no class label is built from an imputed value (a median-imputed all-record variant is available as
+a sensitivity run); labels are never used as inputs (Table~\ref{tab:clusters}). Where a paper
+reports conversion and FDCA selectivity but not yield and FDCA is the major product, yield is
+derived as $X\cdot S/100$ and flagged as derived; this adds records to the yield-based analyses
+without altering any reported value.
 
 \textit{Binary performance screen.} For records whose major product is FDCA and whose yield is
-reported, a performance score
+reported or derived (values outside 0--100\% are treated as missing, never clipped), a performance score
 \begin{equation}
 P = \begin{cases} \min(X, Y) & \text{if conversion } X \text{ is reported,}\\ Y & \text{otherwise,}\end{cases}
 \end{equation}
@@ -117,17 +134,18 @@ is computed from conversion $X$ and yield $Y$, and records with $P\geq 90\%$ for
 \toprule
 $K$ & Cluster sizes & Smallest cluster \\
 \midrule
-3 & 138, 5, 11 & 5 \\
-4 & 137, 3, 4, 10 & 3 \\
-5 & 17, 7, 2, 4, 124 & 2 \\
-6 & 127, 2, 4, 6, 14, 1 & 1 \\
+3 & 97, 5, 9 & 5 \\
+4 & 97, 1, 4, 9 & 1 \\
+5 & 86, 4, 14, 6, 1 & 1 \\
+6 & 81, 3, 4, 16, 1, 6 & 1 \\
 \bottomrule
 \end{tabular}
 \end{table}
 \subsection{Models and class balancing}
-Six classifier families were compared: decision tree (DT), RBF support vector machine (SVM),
-random forest (RF), multilayer perceptron (NN), gradient boosting (GB) and extremely randomised
-trees (ET), each under no balancing, random oversampling (ROS), SMOTE~\cite{chawla2002} and
+Seven classifier families were compared: decision tree (DT), RBF support vector machine (SVM),
+random forest (RF), multilayer perceptron (NN), gradient boosting (GB), extremely randomised
+trees (ET) and a soft-voting ensemble (ENS) of extra-trees and an $L_2$-regularised logistic
+regression, each under no balancing, random oversampling (ROS), SMOTE~\cite{chawla2002} and
 ADASYN~\cite{he2008}, using scikit-learn~\cite{pedregosa2011} and
 imbalanced-learn~\cite{lemaitre2017}. Hyperparameters were selected from a small per-family grid
 evaluated with the same grouped protocol: DT depth 6; SVM $C=0.3$, $\gamma=0.01$; RF 300 trees of
@@ -145,8 +163,11 @@ pooled and a single macro-F1 is computed,
 \end{equation}
 where $\mathrm{P}_c$ and $\mathrm{R}_c$ are the precision and recall of class $c$. The mean, standard
 deviation and $t$-based 95\% confidence interval are reported over repeats. The selected model is
-compared with a stratified dummy classifier on identical splits and with a permutation test in
-which labels are shuffled within publications.
+compared with a stratified dummy classifier on identical splits and with two permutation tests
+(100 permutations): labels shuffled within publications, which probes only within-paper
+variation, and labels shuffled across all records, which tests for any signal. Candidates from
+different tasks are ranked by their macro-F1 lift over the task's own dummy baseline, because
+chance level differs between the binary and the $K$-class tasks.
 
 \subsubsection*{Correction of fold-dropping bias}\label{sec:eval-fix}
 SMOTE and ADASYN require more minority-class training rows than neighbours. In the previous
@@ -154,29 +175,42 @@ implementation a fold that failed this requirement was silently skipped and the 
 was computed on the remaining folds; for $K=4$ only about 1.2 of 5 folds (35 of 154 records) were
 scored. Neighbour counts now adapt to $\min(2, n_{\min}-1)$, a repeat counts only if every fold
 produced predictions, and a combination is ranked only if at least 80\% of its repeats are
-complete. 30 combinations (mostly SMOTE/ADASYN at $K\geq 5$, where single-record classes occur) are therefore reported as infeasible rather than scored.
+complete. 42 combinations (SMOTE/ADASYN at $K\geq 4$, where single-record classes occur) are therefore reported as infeasible rather than scored.
 \subsection{Interpretation, regression and optimisation}
-SHAP values~\cite{lundberg2017} are computed on a held-out 20\% of publications, with Tree SHAP for
-tree ensembles and Kernel SHAP through the complete fitted pipeline otherwise. For the K-means
-analysis the best Stage-04 model for each $K$ is explained. Conversion, yield, FE and
-selectivity are regressed per target (random forest with mutual-information feature selection,
-$k=15$) on all records that report that target, using 10 repeats of 3-fold GroupKFold; a joint
-four-output extra-trees model on complete rows is reported as a secondary analysis. A
-validation gate requires every target to beat the median baseline in mean MAE and in a majority
-of folds before the regressors may drive optimisation.
+\textit{Regression.} Conversion, yield, FE and selectivity are regressed per target on every
+record that reports that target (valid range 0--100\%). Each regressor is the mean of a Huber-loss
+gradient-boosting model (80 depth-2 trees) and an extra-trees model (300 trees, minimum leaf 4)
+after median imputation, evaluated with 10 repeats of 5-fold GroupKFold by publication. Scores
+are pooled out-of-fold $R^2$ and MAE against a training-fold \emph{median} baseline. A target
+passes the validation gate when its MAE beats that baseline, it wins more than half of the
+folds and its pooled $R^2\geq0$; only the targets optimised downstream (yield and FE) are
+required to pass. Because the model family was chosen on the same records, a nested
+(selection-corrected) cross-validation is also reported.
 
-NSGA-II~\cite{deb2002} searches a mixed binary/continuous encoding of the descriptor space,
-maximising predicted conversion, yield and FE while minimising temperature and potential. Pareto
-solutions are ranked by an entropy-weighted fitness
+\textit{SHAP.} Tree SHAP~\cite{lundberg2017} is computed for the two ensemble members of each
+validated regressor and averaged. Stability is assessed on 30 publication-level bootstrap
+resamples (how often a descriptor is in the top five and whether its sign persists), and the
+direction of an effect is the correlation between a descriptor's value and its SHAP value.
+For the classifiers, SHAP is computed on a held-out 20\% of publications. SHAP describes what a fitted
+model uses; it does not establish causal catalyst effects.
+
+\textit{Optimisation.} NSGA-II~\cite{deb2002} (population 100, 1000 generations) searches a mixed
+binary/continuous encoding of the descriptor space, maximising predicted yield and FE while
+minimising temperature $T$ and potential $E$. Conversion is not an objective because its
+regressor did not beat the baseline. Three searches restrict the anode to Ni(OH)$_2$, Cu(OH)$_2$
+or a Ni--Cu hydroxide within the potential and temperature range reported for such anodes.
+Pareto solutions are ranked by an entropy-weighted fitness
 \begin{equation}
-F = w_1\tilde X + w_2\tilde Y + w_3\widetilde{\mathrm{FE}} - w_4\tilde T - w_5\tilde E,
+F = w_1\tilde Y + w_2\widetilde{\mathrm{FE}} - w_3\tilde T - w_4\tilde E,
 \qquad w_j = \frac{1-e_j}{\sum_k (1-e_k)},
 \end{equation}
 with min--max scaled objectives and $e_j$ the Shannon entropy of objective $j$ over the front.
-Convergence is tracked with the spacing metric of the first front.
+Convergence is tracked with the spacing metric. The disagreement of the two ensemble members is
+reported as a model-spread indicator, and a second ranking restricted to $E\geq1.45$\,V
+guards against the optimiser sitting at the lower bound of the permitted range.
 \section{Results}
 \subsection{Clustering}
-K-means separates a dominant high-conversion/high-yield group from small groups with low yield at high conversion or low conversion (Figure~\ref{fig:kmeans}). 52 of 154 records required outcome imputation for clustering, and the smallest clusters contain between one and five records (Table~\ref{tab:clusters}). Macro-F1 weights each class equally, so misclassifying a two-record cluster costs as much as misclassifying the majority class.
+K-means separates a dominant high-conversion/high-yield group from small groups with low yield at high conversion or low conversion (Figure~\ref{fig:kmeans}). 111 of 154 records report both outcomes and are clustered; the remaining records are not used for K-means, so no label is built from an imputed value. The smallest cluster contains 1 record(s) (Table~\ref{tab:clusters}). Macro-F1 weights each class equally, so misclassifying a two-record cluster costs as much as misclassifying the majority class.
 \begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.78\textwidth,height=0.85\textheight,keepaspectratio]{assets/KMeans_Figure6__HMF_KMeans_Figure6_Style.png}
@@ -186,54 +220,59 @@ K-means separates a dominant high-conversion/high-yield group from small groups 
 \begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.85\textwidth,height=0.85\textheight,keepaspectratio]{oversampling_kmeans/KMeans_After_Oversampling_K3_to_K6.pdf}
-\caption{ADASYN and SMOTE synthetic records (crosses) in performance space for $K=3$--6, drawn for the 102 records with both outcomes measured. Panels marked infeasible contain a class with fewer than two measured records.}
+\caption{ADASYN and SMOTE synthetic records (crosses) in performance space for $K=3$--6, drawn for the records with both outcomes measured (descriptive only). Where a K-means class has a single record (e.g.\ $K\geq4$), that record is duplicated before SMOTE, so the class gains no interpolated points. ADASYN is undefined for $K\geq4$ because a class of 1--4 near-identical records has no majority-class neighbours; those panels show measured records only.}
 \label{fig:oversampled}
 \end{figure}
 \subsection{Classification performance}
-Table~\ref{tab:beforeafter} summarises the effect of the revision. For the binary screen (119 records, 89 positive), the best model is the neural network with SMOTE (macro-F1 0.731 $\pm$ 0.033), against 0.480 for a stratified dummy classifier (Table~\ref{tab:binary}, Figure~\ref{fig:binary}). Extra-trees without balancing is statistically indistinguishable (0.720). Every pre-existing family improved on the binary screen, by +0.04 (DT) to +0.22 (NN). For $K=3$ the best model is GB + none (0.626; Table~\ref{tab:k3}). For $K\geq4$, scores stay between 0.2 and 0.45: several classes have fewer than five members, and a single grouped fold frequently contains none of them in training. The within-publication permutation test gives $p=0.47$. Because most descriptors are constant within a paper, shuffling labels inside papers preserves the paper-level signal the model exploits, so this test is conservative here; the dummy comparison and the confidence interval are the more informative checks.
+Table~\ref{tab:beforeafter} summarises the effect of the revision. For the binary screen (128 records, 95 positive), the best model is the soft-voting ensemble without balancing (macro-F1 0.741 $\pm$ 0.031), against 0.479 for a stratified dummy classifier (Table~\ref{tab:binary}, Figure~\ref{fig:binary}). The best extra-trees configuration (no balancing) scores 0.726, within one repeat-to-repeat SD of the best model. Every pre-existing family improved on the binary screen, by +0.04 (DT) to +0.21 (NN). For $K=3$ the best model is GB + ROS (0.658; Table~\ref{tab:k3}). For $K\geq4$, ranked scores lie between 0.20 and 0.36: clusters contain as few as one record, and SMOTE/ADASYN cannot be fitted on such classes, so those combinations are reported as infeasible. The selected candidate (gradient boosting + ROS on the $K=3$ cluster task, the largest lift over its dummy baseline) is subjected to two permutation tests. The within-publication test gives $p=0.14$. Because most descriptors are constant within a paper, shuffling labels inside papers preserves the paper-level signal the model exploits, so this test only shows that the model does not explain variation between records of the same paper. Shuffling labels across all records gives $p=0.010$ (100 permutations; the smallest attainable value is 0.01), so the score is unlikely under no signal at all. Because the model and hyperparameters were selected on these same records, the score remains optimistic. 
 
 \begin{table}[!htbp]
 \centering\small
-\caption{Best pooled out-of-fold macro-F1 per classifier family and task (best sampler in parentheses), before (commit \texttt{bdbd2e2}) and after the descriptor, preprocessing, model and evaluation revisions. 95\% CI over 25 repeats. Earlier $K=4$ values were computed on the subset of folds where SMOTE/ADASYN could be fitted and are therefore not comparable (Section~\ref{sec:eval-fix}).}
+\caption{Best pooled out-of-fold macro-F1 per classifier family and task (best sampler in parentheses), before (commit \texttt{bdbd2e2}) and after the descriptor, preprocessing, model and evaluation revisions. 95\% CI over 25 repeats. K-means rows are not like-for-like: earlier values used all 154 records with median-imputed outcomes, current values use only the records with measured outcomes, and earlier $K=4$ values were computed on the subset of folds where SMOTE/ADASYN could be fitted (Section~\ref{sec:eval-fix}).}
 \label{tab:beforeafter}
 \begin{tabular}{llllll}
 \toprule
 Task & Model & Before & After & 95\% CI & $\Delta$ \\
 \midrule
-Binary $\geq$90\% & DT & 0.557 (ROS) & 0.600 (ADASYN) & [0.580, 0.619] & +0.042 \\
- & SVM & 0.534 (ADASYN) & 0.695 (ROS) & [0.671, 0.718] & +0.160 \\
- & RF & 0.586 (ROS) & 0.678 (ROS) & [0.659, 0.698] & +0.092 \\
- & NN & 0.507 (ADASYN) & 0.731 (SMOTE) & [0.717, 0.744] & +0.224 \\
- & GB & 0.575 (ROS) & 0.661 (SMOTE) & [0.641, 0.681] & +0.086 \\
- & ET & -- & 0.720 (none) & [0.706, 0.733] & new \\
+Binary $\geq$90\% & DT & 0.557 (ROS) & 0.599 (ADASYN) & [0.586, 0.611] & +0.041 \\
+ & SVM & 0.534 (ADASYN) & 0.733 (ROS) & [0.718, 0.748] & +0.198 \\
+ & RF & 0.586 (ROS) & 0.700 (ROS) & [0.688, 0.712] & +0.114 \\
+ & NN & 0.507 (ADASYN) & 0.715 (none) & [0.700, 0.729] & +0.208 \\
+ & GB & 0.575 (ROS) & 0.680 (SMOTE) & [0.662, 0.697] & +0.104 \\
+ & ET & -- & 0.726 (none) & [0.716, 0.735] & new \\
+ & ENS & -- & 0.741 (none) & [0.728, 0.753] & new \\
 \midrule
-K-means, $K=3$ & DT & 0.410 (ROS) & 0.519 (none) & [0.487, 0.550] & +0.109 \\
- & SVM & 0.298 (ADASYN) & 0.486 (none) & [0.448, 0.524] & +0.187 \\
- & RF & 0.379 (ROS) & 0.481 (ROS) & [0.443, 0.518] & +0.102 \\
- & NN & 0.389 (SMOTE) & 0.535 (ROS) & [0.496, 0.574] & +0.146 \\
- & GB & 0.421 (ROS) & 0.626 (none) & [0.601, 0.650] & +0.205 \\
- & ET & -- & 0.484 (SMOTE) & [0.474, 0.495] & new \\
+K-means, $K=3$ & DT & 0.410 (ROS) & 0.616 (ROS) & [0.591, 0.642] & +0.207 \\
+ & SVM & 0.298 (ADASYN) & 0.569 (none) & [0.557, 0.581] & +0.270 \\
+ & RF & 0.379 (ROS) & 0.480 (ROS) & [0.446, 0.513] & +0.101 \\
+ & NN & 0.389 (SMOTE) & 0.522 (SMOTE) & [0.502, 0.543] & +0.133 \\
+ & GB & 0.421 (ROS) & 0.658 (ROS) & [0.633, 0.683] & +0.237 \\
+ & ET & -- & 0.453 (ROS) & [0.434, 0.473] & new \\
+ & ENS & -- & 0.551 (ROS) & [0.536, 0.566] & new \\
 \midrule
-K-means, $K=4$ & DT & 0.360 (SMOTE) & 0.427 (SMOTE) & [0.393, 0.462] & +0.068 \\
- & SVM & 0.458 (SMOTE) & 0.290 (none) & [0.277, 0.302] & -0.168 \\
- & RF & 0.477 (ADASYN) & 0.290 (ROS) & [0.281, 0.300] & -0.187 \\
- & NN & 0.248 (ADASYN) & 0.318 (SMOTE) & [0.300, 0.337] & +0.071 \\
- & GB & 0.437 (SMOTE) & 0.314 (SMOTE) & [0.306, 0.323] & -0.123 \\
- & ET & -- & 0.325 (SMOTE) & [0.318, 0.331] & new \\
+K-means, $K=4$ & DT & 0.360 (SMOTE) & 0.359 (none) & [0.337, 0.381] & -0.001 \\
+ & SVM & 0.458 (SMOTE) & 0.353 (none) & [0.348, 0.359] & -0.105 \\
+ & RF & 0.477 (ADASYN) & 0.291 (ROS) & [0.277, 0.306] & -0.186 \\
+ & NN & 0.248 (ADASYN) & 0.355 (ROS) & [0.343, 0.367] & +0.108 \\
+ & GB & 0.437 (SMOTE) & 0.350 (ROS) & [0.340, 0.361] & -0.087 \\
+ & ET & -- & 0.297 (ROS) & [0.283, 0.311] & new \\
+ & ENS & -- & 0.350 (none) & [0.341, 0.358] & new \\
 \midrule
-K-means, $K=5$ & DT & 0.232 (ROS) & 0.220 (ROS) & [0.211, 0.229] & -0.012 \\
- & SVM & 0.255 (none) & 0.302 (ROS) & [0.296, 0.307] & +0.047 \\
- & RF & 0.272 (ROS) & 0.286 (ROS) & [0.279, 0.293] & +0.014 \\
- & NN & 0.237 (ROS) & 0.321 (ROS) & [0.307, 0.335] & +0.084 \\
- & GB & 0.265 (ROS) & 0.278 (none) & [0.268, 0.289] & +0.014 \\
- & ET & -- & 0.298 (none) & [0.286, 0.310] & new \\
+K-means, $K=5$ & DT & 0.232 (ROS) & 0.323 (ROS) & [0.309, 0.337] & +0.091 \\
+ & SVM & 0.255 (none) & 0.237 (ROS) & [0.228, 0.246] & -0.018 \\
+ & RF & 0.272 (ROS) & 0.308 (ROS) & [0.292, 0.325] & +0.036 \\
+ & NN & 0.237 (ROS) & 0.265 (ROS) & [0.250, 0.281] & +0.029 \\
+ & GB & 0.265 (ROS) & 0.325 (none) & [0.309, 0.342] & +0.061 \\
+ & ET & -- & 0.270 (ROS) & [0.257, 0.283] & new \\
+ & ENS & -- & 0.278 (ROS) & [0.267, 0.290] & new \\
 \midrule
-K-means, $K=6$ & DT & 0.215 (ROS) & 0.225 (none) & [0.212, 0.238] & +0.010 \\
- & SVM & 0.215 (none) & 0.245 (ROS) & [0.238, 0.253] & +0.030 \\
- & RF & 0.215 (ROS) & 0.250 (ROS) & [0.246, 0.255] & +0.035 \\
- & NN & 0.198 (ROS) & 0.283 (ROS) & [0.268, 0.299] & +0.085 \\
- & GB & 0.207 (none) & 0.231 (ROS) & [0.225, 0.237] & +0.024 \\
- & ET & -- & 0.254 (ROS) & [0.247, 0.261] & new \\
+K-means, $K=6$ & DT & 0.215 (ROS) & 0.220 (ROS) & [0.203, 0.237] & +0.005 \\
+ & SVM & 0.215 (none) & 0.235 (ROS) & [0.227, 0.243] & +0.020 \\
+ & RF & 0.215 (ROS) & 0.229 (ROS) & [0.220, 0.238] & +0.014 \\
+ & NN & 0.198 (ROS) & 0.236 (none) & [0.223, 0.248] & +0.038 \\
+ & GB & 0.207 (none) & 0.234 (ROS) & [0.217, 0.250] & +0.027 \\
+ & ET & -- & 0.241 (ROS) & [0.235, 0.247] & new \\
+ & ENS & -- & 0.231 (ROS) & [0.225, 0.237] & new \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -245,12 +284,13 @@ K-means, $K=6$ & DT & 0.215 (ROS) & 0.225 (none) & [0.212, 0.238] & +0.010 \\
 \toprule
 Model & None & ROS & SMOTE & ADASYN \\
 \midrule
-DT & 0.593 $\pm$ 0.031 & 0.593 $\pm$ 0.040 & 0.598 $\pm$ 0.042 & 0.600 $\pm$ 0.047 \\
-SVM & 0.681 $\pm$ 0.032 & 0.695 $\pm$ 0.056 & 0.630 $\pm$ 0.043 & 0.637 $\pm$ 0.026 \\
-RF & 0.658 $\pm$ 0.042 & 0.678 $\pm$ 0.047 & 0.640 $\pm$ 0.036 & 0.630 $\pm$ 0.027 \\
-NN & 0.718 $\pm$ 0.038 & 0.718 $\pm$ 0.037 & \textbf{0.731 $\pm$ 0.033} & 0.721 $\pm$ 0.035 \\
-GB & 0.568 $\pm$ 0.033 & 0.631 $\pm$ 0.045 & 0.661 $\pm$ 0.048 & 0.645 $\pm$ 0.047 \\
-ET & 0.720 $\pm$ 0.032 & 0.696 $\pm$ 0.041 & 0.716 $\pm$ 0.038 & 0.713 $\pm$ 0.030 \\
+DT & 0.585 $\pm$ 0.040 & 0.591 $\pm$ 0.047 & 0.593 $\pm$ 0.046 & 0.599 $\pm$ 0.030 \\
+SVM & 0.697 $\pm$ 0.028 & 0.733 $\pm$ 0.036 & 0.680 $\pm$ 0.038 & 0.673 $\pm$ 0.028 \\
+RF & 0.684 $\pm$ 0.029 & 0.700 $\pm$ 0.029 & 0.681 $\pm$ 0.024 & 0.656 $\pm$ 0.032 \\
+NN & 0.715 $\pm$ 0.035 & 0.713 $\pm$ 0.042 & 0.709 $\pm$ 0.035 & 0.711 $\pm$ 0.042 \\
+GB & 0.629 $\pm$ 0.038 & 0.660 $\pm$ 0.039 & 0.680 $\pm$ 0.042 & 0.677 $\pm$ 0.036 \\
+ET & 0.726 $\pm$ 0.023 & 0.707 $\pm$ 0.026 & 0.723 $\pm$ 0.029 & 0.706 $\pm$ 0.028 \\
+ENS & \textbf{0.741 $\pm$ 0.031} & 0.726 $\pm$ 0.034 & 0.732 $\pm$ 0.024 & 0.720 $\pm$ 0.028 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -262,15 +302,28 @@ ET & 0.720 $\pm$ 0.032 & 0.696 $\pm$ 0.041 & 0.716 $\pm$ 0.038 & 0.713 $\pm$ 0.0
 \toprule
 Model & None & ROS & SMOTE & ADASYN \\
 \midrule
-DT & 0.519 $\pm$ 0.076 & 0.512 $\pm$ 0.079 & 0.450 $\pm$ 0.056 & 0.454 $\pm$ 0.065 \\
-SVM & 0.486 $\pm$ 0.093 & 0.403 $\pm$ 0.102 & 0.436 $\pm$ 0.099 & 0.422 $\pm$ 0.085 \\
-RF & 0.328 $\pm$ 0.024 & 0.481 $\pm$ 0.091 & 0.358 $\pm$ 0.037 & 0.360 $\pm$ 0.040 \\
-NN & 0.438 $\pm$ 0.073 & 0.535 $\pm$ 0.095 & 0.515 $\pm$ 0.084 & 0.520 $\pm$ 0.084 \\
-GB & \textbf{0.626 $\pm$ 0.060} & 0.591 $\pm$ 0.043 & 0.604 $\pm$ 0.081 & 0.603 $\pm$ 0.097 \\
-ET & 0.457 $\pm$ 0.047 & 0.444 $\pm$ 0.041 & 0.484 $\pm$ 0.026 & 0.478 $\pm$ 0.027 \\
+DT & 0.581 $\pm$ 0.066 & 0.616 $\pm$ 0.063 & 0.486 $\pm$ 0.070 & 0.490 $\pm$ 0.066 \\
+SVM & 0.569 $\pm$ 0.030 & 0.509 $\pm$ 0.061 & 0.479 $\pm$ 0.050 & 0.477 $\pm$ 0.047 \\
+RF & 0.351 $\pm$ 0.036 & 0.480 $\pm$ 0.081 & 0.346 $\pm$ 0.039 & 0.324 $\pm$ 0.025 \\
+NN & 0.487 $\pm$ 0.051 & 0.520 $\pm$ 0.054 & 0.522 $\pm$ 0.050 & 0.519 $\pm$ 0.038 \\
+GB & 0.638 $\pm$ 0.058 & \textbf{0.658 $\pm$ 0.060} & 0.549 $\pm$ 0.047 & 0.542 $\pm$ 0.046 \\
+ET & 0.435 $\pm$ 0.060 & 0.453 $\pm$ 0.047 & 0.430 $\pm$ 0.050 & 0.407 $\pm$ 0.057 \\
+ENS & 0.544 $\pm$ 0.029 & 0.551 $\pm$ 0.035 & 0.534 $\pm$ 0.037 & 0.541 $\pm$ 0.031 \\
 \bottomrule
 \end{tabular}
 \end{table}
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=\textwidth,height=0.85\textheight,keepaspectratio]{assets/diagnostics__Fig_Classification_Heatmap.png}
+\caption{Pooled out-of-fold macro-F1 for every model and sampler (binary screen and $K=3$); the colour scale starts at each task's stratified-dummy score.}
+\label{fig:heatmap}
+\end{figure}
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=\textwidth,height=0.85\textheight,keepaspectratio]{assets/diagnostics__Fig_KMeans_Diagnostics.png}
+\caption{K-means diagnostics: inertia, silhouette and cluster sizes for $K=3$--6.}
+\label{fig:kdiag}
+\end{figure}
 \begin{figure}[!htbp]
 \centering
 \includegraphics[width=\textwidth,height=0.85\textheight,keepaspectratio]{assets/classification__model_sampler_binary90.png}
@@ -296,7 +349,7 @@ ET & 0.457 $\pm$ 0.047 & 0.444 $\pm$ 0.041 & 0.484 $\pm$ 0.026 & 0.478 $\pm$ 0.0
 \label{fig:fig10}
 \end{figure}
 \subsection{Learning curves}
-Training macro-F1 stays well above validation macro-F1 for every model and $K$ (Table~\ref{tab:learning}, Figure~\ref{fig:learning}), indicating variance-limited models. At $K=3$ the SVM validation curve is still rising at the largest training size and the other families fluctuate without a clear plateau, so additional publications are the most direct route to higher scores; for $K\geq4$ the curves are flat because the minority clusters do not grow with more records.
+Training macro-F1 exceeds validation macro-F1 for every model and $K$ (gaps of 0.18--0.69 at the full training size; Table~\ref{tab:learning}, Figure~\ref{fig:learning}), indicating variance-limited models. Validation macro-F1 rises by more than 0.1 between the smallest and largest training size for NN at $K=3$, SVM at $K=3$, DT at $K=4$, DT at $K=5$, SVM at $K=5$, so additional publications are the most direct route to higher scores; for the remaining model/$K$ combinations the curves are flat, so extra records of the same kind add little, and minority clusters do not grow with more records.
 \begin{table}[!htbp]
 \centering\small
 \caption{Learning-curve end points (full training fraction, publication-grouped 80/20 holdouts, 10 repeats).}
@@ -305,18 +358,18 @@ Training macro-F1 stays well above validation macro-F1 for every model and $K$ (
 \toprule
 $K$ & Model & Train macro-F1 & Validation macro-F1 & Gap \\
 \midrule
-3 & DT & 0.920 & 0.481 & 0.438 \\
-3 & NN & 0.959 & 0.537 & 0.421 \\
-3 & RF & 0.939 & 0.470 & 0.469 \\
-3 & SVM & 0.834 & 0.729 & 0.105 \\
-4 & DT & 0.556 & 0.286 & 0.269 \\
-4 & NN & 0.969 & 0.299 & 0.670 \\
-4 & RF & 0.959 & 0.228 & 0.731 \\
-4 & SVM & 0.909 & 0.223 & 0.685 \\
-5 & DT & 0.740 & 0.209 & 0.532 \\
-5 & NN & 0.774 & 0.315 & 0.458 \\
-5 & RF & 0.874 & 0.231 & 0.642 \\
-5 & SVM & 0.734 & 0.250 & 0.483 \\
+3 & DT & 0.941 & 0.302 & 0.639 \\
+3 & NN & 0.953 & 0.510 & 0.443 \\
+3 & RF & 0.948 & 0.317 & 0.630 \\
+3 & SVM & 0.806 & 0.539 & 0.267 \\
+4 & DT & 0.754 & 0.466 & 0.287 \\
+4 & NN & 0.913 & 0.330 & 0.583 \\
+4 & RF & 0.927 & 0.236 & 0.690 \\
+4 & SVM & 0.681 & 0.294 & 0.387 \\
+5 & DT & 0.621 & 0.437 & 0.185 \\
+5 & NN & 0.924 & 0.297 & 0.626 \\
+5 & RF & 0.930 & 0.250 & 0.679 \\
+5 & SVM & 0.720 & 0.226 & 0.495 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -329,11 +382,11 @@ $K$ & Model & Train macro-F1 & Validation macro-F1 & Gap \\
 \begin{figure}[!htbp]
 \centering
 \includegraphics[width=\textwidth,height=0.85\textheight,keepaspectratio]{learning_curves/Figure_11_Oversampled_NN_Learning_Curves_ROS_ADASYN_SMOTE.pdf}
-\caption{Neural-network learning curves with ROS, ADASYN and SMOTE applied to training folds only.}
+\caption{Neural-network learning curves with ROS, ADASYN and SMOTE applied to training folds only. For SMOTE, single-record training classes are duplicated first (noted in each panel), which is a descriptive fallback not used in the classification scores of Table~\ref{tab:beforeafter}. ADASYN is undefined for $K\geq4$ and for most $K=3$ subsets, so those panels are blank or partial.}
 \label{fig:fig11}
 \end{figure}
 \subsection{Model interpretation}
-Table~\ref{tab:shap} and Figures~\ref{fig:shapsel}--\ref{fig:fig13} list the descriptors with the largest SHAP contributions. Support type (conductive glass versus foam), copper and iron content, oxyhydroxide/hydroxide phases, counter-electrode material, potential and the temperature-not-reported indicator recur across models. These rankings describe what the models use to separate the literature records; they partly encode publication style and are not evidence of causal catalyst effects.
+Table~\ref{tab:shap} and Figures~\ref{fig:shapsel}--\ref{fig:fig13} list the descriptors with the largest SHAP contributions in the classifiers. These rankings describe what the models use to separate the literature records; they partly encode publication style and are not evidence of causal catalyst effects.
 \begin{table*}[!htbp]
 \centering\scriptsize
 \caption{Top-ranked descriptors by mean absolute SHAP value on held-out publications. Values are associational, not causal; \texttt{missingindicator\_*} columns flag unreported conditions.}
@@ -341,18 +394,18 @@ Table~\ref{tab:shap} and Figures~\ref{fig:shapsel}--\ref{fig:fig13} list the des
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{lrlrlr}
 \toprule
-\multicolumn{2}{c}{Binary screen (NN + SMOTE)} & \multicolumn{2}{c}{$K=3$ (GB + none)} & \multicolumn{2}{c}{$K=5$ (NN + ROS)} \\
+\multicolumn{2}{c}{$K=3$ clusters (GB + ROS)} & \multicolumn{2}{c}{$K=3$ (GB + ROS)} & \multicolumn{2}{c}{$K=5$ (GB + none)} \\
 \cmidrule(lr){1-2}\cmidrule(lr){3-4}\cmidrule(lr){5-6}
-\texttt{Catalyst\_Conductive\_Glass} & 0.104 & \texttt{Catalyst\_Conductive\_Glass} & 0.096 & \texttt{Catalyst\_Pd} & 0.019 \\
-\texttt{Catalyst\_Oxyhydroxide} & 0.053 & \texttt{Potential\_vs\_RHE\_V} & 0.023 & \texttt{Catalyst\_Conductive\_Glass} & 0.013 \\
-\texttt{Counter\_Electrode\_Carbon} & 0.045 & \texttt{HMF\_Concentration\_mM} & 0.010 & \texttt{Divided\_Cell} & 0.011 \\
-\texttt{Catalyst\_V} & 0.044 & \texttt{Catalyst\_Metal} & 0.006 & \texttt{Catalyst\_Fe} & 0.010 \\
-\texttt{Catalyst\_Cu} & 0.042 & \texttt{Catalyst\_Carbon} & 0.006 & \texttt{Catalyst\_N\_Elements} & 0.009 \\
-\texttt{Catalyst\_Fe} & 0.033 & \texttt{Catalyst\_Cu} & 0.005 & \texttt{Potential\_vs\_RHE\_V} & 0.009 \\
-\texttt{Catalyst\_Hydroxide} & 0.031 & \texttt{Catalyst\_Fe} & 0.004 & \texttt{Catalyst\_Hydroxide} & 0.008 \\
-\texttt{missingindicator\_Temperature\_C} & 0.021 & \texttt{Three\_Electrode} & 0.004 & \texttt{Temperature\_C} & 0.007 \\
-\texttt{Catalyst\_Carbon} & 0.020 & \texttt{Electrolyte\_Concentration\_M} & 0.003 & \texttt{Catalyst\_Sulfide} & 0.006 \\
-\texttt{Catalyst\_Bimetallic} & 0.019 & \texttt{Temperature\_C} & 0.002 & \texttt{Catalyst\_Phosphide} & 0.005 \\
+\texttt{Electrolyte\_Electrolyte\_Anion\_OH} & 0.170 & \texttt{Potential\_vs\_RHE\_V} & 0.055 & \texttt{Potential\_vs\_RHE\_V} & 0.035 \\
+\texttt{Alkaline\_Electrolyte} & 0.170 & \texttt{Electrolyte\_pH} & 0.043 & \texttt{Electrolyte\_Electrolyte\_Cation\_Na} & 0.021 \\
+\texttt{Electrolyte\_Electrolyte\_Anion\_SO4} & 0.096 & \texttt{Catalyst\_Conductive\_Glass} & 0.021 & \texttt{Catalyst\_Conductive\_Glass} & 0.018 \\
+\texttt{Electrolyte\_Electrolyte\_Anion\_nan} & 0.069 & \texttt{TEMPO\_binary} & 0.020 & \texttt{Catalyst\_Foam\_Substrate} & 0.013 \\
+\texttt{TEMPO\_binary} & 0.069 & \texttt{Alkaline\_Electrolyte} & 0.017 & \texttt{Catalyst\_Metal} & 0.007 \\
+\texttt{Electrolyte\_pH} & 0.064 & \texttt{Electrolyte\_Electrolyte\_Anion\_OH} & 0.014 & \texttt{Counter\_Electrode\_Ni} & 0.006 \\
+\texttt{Temperature\_C} & 0.032 & \texttt{Catalyst\_Pd} & 0.011 & \texttt{Electrolyte\_Concentration\_M} & 0.005 \\
+\texttt{Catalyst\_N\_Elements} & 0.032 & \texttt{Catalyst\_Oxyhydroxide} & 0.009 & \texttt{Catalyst\_LDH} & 0.003 \\
+\texttt{Catalyst\_Phosphide} & 0.000 & \texttt{Catalyst\_Ni} & 0.006 & \texttt{Electrolyte\_pH} & 0.003 \\
+\texttt{Catalyst\_Selenide} & 0.000 & \texttt{Counter\_Electrode\_Pt} & 0.003 & \texttt{Catalyst\_Ni} & 0.003 \\
 \bottomrule
 \end{tabular}}
 \end{table*}
@@ -374,8 +427,56 @@ Table~\ref{tab:shap} and Figures~\ref{fig:shapsel}--\ref{fig:fig13} list the des
 \caption{SHAP beeswarm plots for the majority class at $K=3$ and $K=5$, coloured by feature value.}
 \label{fig:fig13}
 \end{figure}
+\subsection{Regression SHAP and comparison with the literature}
+Tree SHAP of the validated yield and FE regressors (Figures~\ref{fig:regshap}--\ref{fig:regbeeswarm}) ranks anode: Conductive Glass (6.4), anode: Ni (2.0), potential (V vs RHE) (1.1) highest for yield and anode: Conductive Glass (4.5), potential (V vs RHE) (1.7), HMF concentration (mM) (0.8) for FE (mean $|$SHAP$|$ in percentage points). A nickel-containing anode is an important yield descriptor (rank 2) with a positive effect in every bootstrap resample, in line with the Ni(OH)$_2$/NiOOH literature~\cite{lit1}, but it is not distinguishable for FE (rank 20). Copper ranks 27 for yield and 32 for FE with an unstable sign, so the data neither confirm nor contradict the high activity reported for Cu(OH)$_2$/CuOOH anodes~\cite{lit2}: few records carry Cu anodes, and an absence of evidence in this corpus is not evidence against Cu. The largest single contribution is the conductive-glass (FTO/ITO) support, with a negative effect (mean $|$SHAP$|$ 6.4 points for yield). This is almost certainly a study-design confound---glass-supported films are typically thin, low-loading or photo-assisted systems---rather than a property of the catalyst. HMF concentration lowers predicted yield, consistent with humin formation in alkaline media~\cite{lit3}. Alkaline electrolyte and the hydroxide/oxyhydroxide phase are positive but not distinguishable because almost every record is alkaline and most Ni/Cu records are hydroxide-derived. All records use HMF, so the reactant cannot be assessed. Overall, 7 comparisons not distinguishable, 2 comparisons consistent (Table~\ref{tab:lit}). Nickel therefore emerges from the data as an important yield descriptor without any steering of the model, but the corpus cannot rank Ni against Cu.
+
+\begin{table*}[!htbp]
+\centering\scriptsize
+\caption{Regression-SHAP direction compared with directions reported in the experimental literature. Rank is the position among all descriptors by mean $|$SHAP$|$. A trend is called consistent or opposite only if the descriptor is among the ten most important and either recurs in the bootstrap top five or keeps a stable sign; otherwise it is \emph{not distinguishable}.}
+\label{tab:lit}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llcclcl}
+\toprule
+Factor & Target & Literature & Model & Rank & Verdict & Source \\
+\midrule
+Ni-containing anode (Ni(OH)2/NiOOH) & FDCA yield & $+$ & $+$ & 2/61 & consistent & \cite{lit1} \\
+Ni-containing anode (Ni(OH)2/NiOOH) & Faradaic efficiency & $+$ & $+$ & 20/61 & not distinguishable & \cite{lit1} \\
+Hydroxide / oxyhydroxide phase & FDCA yield & $+$ & $+$ & 29/61 & not distinguishable & \cite{lit1} \\
+Hydroxide / oxyhydroxide phase & Faradaic efficiency & $+$ & $-$ & 13/61 & not distinguishable & \cite{lit1} \\
+Cu-containing anode (Cu(OH)2/CuOOH) & FDCA yield & $+$ & $-$ & 27/61 & not distinguishable & \cite{lit2} \\
+Cu-containing anode (Cu(OH)2/CuOOH) & Faradaic efficiency & $+$ & $-$ & 32/61 & not distinguishable & \cite{lit2} \\
+Alkaline electrolyte & FDCA yield & $+$ & $+$ & 11/61 & not distinguishable & \cite{lit1} \\
+Alkaline electrolyte & Faradaic efficiency & $+$ & $+$ & 11/61 & not distinguishable & \cite{lit1} \\
+HMF concentration & FDCA yield & $-$ & $-$ & 8/61 & consistent & \cite{lit3} \\
+\bottomrule
+\end{tabular}}
+\end{table*}
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=\textwidth,height=0.85\textheight,keepaspectratio]{shap/Regression_SHAP_Bar.pdf}
+\caption{Regression SHAP importance for (a) FDCA yield and (b) faradaic efficiency; error bars show the 5--95\% range over publication bootstraps.}
+\label{fig:regshap}
+\end{figure}
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.75\textwidth,height=0.85\textheight,keepaspectratio]{assets/shap__Regression_SHAP_Beeswarm_Yield_pct.png}
+\caption{SHAP beeswarm for FDCA yield, coloured by descriptor value.}
+\label{fig:regbeeswarm}
+\end{figure}
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.7\textwidth,height=0.85\textheight,keepaspectratio]{assets/shap__Regression_SHAP_Groups.png}
+\caption{Share of total mean $|$SHAP$|$ by input group.}
+\label{fig:shapgroups}
+\end{figure}
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.8\textwidth,height=0.85\textheight,keepaspectratio]{assets/diagnostics__Fig_Literature_Check.png}
+\caption{Importance rank of each literature factor and the verdict of the comparison.}
+\label{fig:litcheck}
+\end{figure}
 \subsection{Regression}
-Per-target models reduce MAE relative to the median baseline for all four outcomes (Table~\ref{tab:reg}), but $R^2$ remains between -1.73 and 0.04: the outcome distributions are concentrated near 100\% with a few low outliers, so the models mainly learn to avoid large errors on the typical record rather than to explain variance. The validation gate passed. The joint model trained on the 60 complete records does not beat the baseline (Table~\ref{tab:regjoint}).
+Under publication-grouped validation the yield and FE regressors beat the median baseline in MAE (8.7 vs 11.1 and 7.4 vs 8.6 points) with pooled out-of-fold $R^2$ of 0.44 and 0.39 (Table~\ref{tab:reg}, Figures~\ref{fig:parity} and~\ref{fig:skill}). Selectivity ($R^2=0.30$) also improves on the baseline. Conversion does not (MAE 5.1 vs 4.6): most reported conversions are near 100\%, so a constant prediction is very hard to beat, and conversion is therefore not used as an optimisation objective. Fold-level $R^2$ values (not shown) are much lower than pooled values because individual test folds have little outcome variance, so pooled $R^2$ is used for the gate and fold $R^2$ is not interpreted. A nested check, in which the model is re-selected inside every training fold, gives $R^2$ of 0.01 (Conversion), 0.45 (FDCA yield), 0.39 (Faradaic efficiency), 0.30 (Selectivity), so selection on the same records explains only part of the skill. The gate passed. The joint four-output model on complete records is a secondary comparison (Table~\ref{tab:regjoint}). These $R^2$ values describe unseen papers, not unseen conditions of known papers.
 
 \begin{table}[!htbp]
 \centering\small
@@ -385,10 +486,10 @@ Per-target models reduce MAE relative to the median baseline for all four outcom
 \toprule
 Target & $R^2$ & MAE & Baseline MAE & RMSE & Beats baseline \\
 \midrule
-Conversion & -1.733 & 6.41 & 7.07 & 13.51 & yes \\
-Faradaic efficiency & -0.066 & 8.60 & 9.95 & 14.97 & yes \\
-Selectivity & 0.030 & 9.97 & 12.37 & 17.20 & yes \\
-FDCA yield & 0.044 & 11.86 & 13.19 & 19.50 & yes \\
+Conversion & 0.185 & 5.07 & 4.55 & 10.88 & no \\
+Faradaic efficiency & 0.389 & 7.38 & 8.57 & 11.73 & yes \\
+Selectivity & 0.301 & 8.65 & 9.48 & 14.34 & yes \\
+FDCA yield & 0.443 & 8.73 & 11.12 & 15.10 & yes \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -400,38 +501,136 @@ FDCA yield & 0.044 & 11.86 & 13.19 & 19.50 & yes \\
 \toprule
 Target & $R^2$ & MAE & Baseline MAE & RMSE & Beats baseline \\
 \midrule
-Conversion & -3.579 & 2.55 & 2.08 & 7.67 & no \\
-Faradaic efficiency & -0.376 & 7.28 & 6.89 & 12.43 & no \\
-Selectivity & -0.021 & 5.82 & 5.34 & 10.98 & no \\
-FDCA yield & -0.049 & 5.74 & 5.29 & 11.11 & no \\
+Conversion & -1.763 & 3.41 & 3.31 & 6.62 & no \\
+Faradaic efficiency & 0.096 & 6.44 & 7.89 & 9.44 & yes \\
+Selectivity & -0.058 & 5.82 & 6.26 & 8.98 & yes \\
+FDCA yield & 0.145 & 5.19 & 6.98 & 8.40 & yes \\
 \bottomrule
 \end{tabular}
 \end{table}
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.75\textwidth,height=0.85\textheight,keepaspectratio]{assets/diagnostics__Fig_Regression_Parity.png}
+\caption{Out-of-fold observed versus predicted values for the four outcomes (publication-grouped validation).}
+\label{fig:parity}
+\end{figure}
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=\textwidth,height=0.85\textheight,keepaspectratio]{assets/diagnostics__Fig_Regression_Skill.png}
+\caption{Regression skill: $R^2$ and MAE against the training-fold median baseline.}
+\label{fig:skill}
+\end{figure}
 \subsection{Multi-objective optimisation}
-NSGA-II (100 individuals, 1000 generations) returned 96 Pareto candidates. Entropy weights for the unconstrained search were: Conversion 0.10, FDCA yield 0.14, Faradaic efficiency 0.18, temperature 0.13, potential 0.45. In the constrained Ni(OH)$_2$/Cu(OH)$_2$ search, all ten top-ranked solutions are Ni(OH)$_2$ on foam, at 0.42--1.10\,M KOH, 1.41--1.42\,V vs RHE and 25--26\,$^\circ$C (Table~\ref{tab:nsga}, Figure~\ref{fig:nsga}). The top candidate's nearest literature record (Ni(OH)2/NF, 1.0 M KOH | 1.45 V vs. RHE) reported 88.3\% yield against 95.2\% predicted; that difference is smaller than the yield regression MAE of 11.9 percentage points. The best Cu(OH)$_2$ candidate is predicted at 91.0\% yield and 94.1\% FE. The spacing metric settles into a stable band after about 20 generations and fluctuates around it thereafter (Figure~\ref{fig:spacing}). Because the predicted gains lie within the regression error, the candidates should be read as experimental starting points, not predictions of record performance.
+NSGA-II (100 individuals, 1000 generations) returned 99 Pareto candidates in the unconstrained search (entropy weights: FDCA yield 0.27, Faradaic efficiency 0.14, temperature 0.34, potential 0.26). In the hydroxide-restricted search, all ten top-ranked solutions are Ni(OH)$_2$-based, on foam, at 1.07--2.98\,M KOH, 1.40--1.41\,V vs RHE and 25--25\,$^\circ$C (Table~\ref{tab:nsga}, Figure~\ref{fig:nsgapareto}). The candidates gather at the lower bounds of $E$ and $T$ because both are minimised and the surrogate predicts nearly flat yield there; the model spread reported in the table indicates how much the two ensemble members disagree. For the top ten, the nearest measured record lies at a z-scored Euclidean descriptor distance of 4.8--7.0; its yield is on average 9.4 points below the prediction, which is comparable to or larger than the yield MAE of 8.7 points, so the predicted gain over known electrodes is not established.  Across the three searches the median predicted yield of the Pareto front is Cu: 91.7\%, Ni: 97.4\%, Ni+Cu: 97.0\%; the Ni-containing fronts sit above the Cu(OH)$_2$ front, which is consistent with Ni carrying more weight in the training data and should not be read as proof that Cu is inferior. Table~\ref{tab:nsgabest} gives the best solution for each hydroxide anode; the top-ten lists for Cu(OH)$_2$ and Ni--Cu hydroxide are in Tables~\ref{tab:nsgacu} and~\ref{tab:nsganicu}. The Cu(OH)$_2$ solutions carry a much larger model spread (8.2 points on average versus 0.3 for the overall top ten), i.e. the two ensemble members disagree about Cu, and some Cu candidates use HMF concentrations far outside most training records. Restricting the ranking to $E\geq1.45$\,V gives candidates with predicted yields of 96.9--97.6\% (Table~\ref{tab:nsgarob}), a more conservative set that does not sit at the lower potential bound of the permitted range. The candidates are hypotheses for experimental testing: they are model predictions extrapolated from a small set of Ni/Cu hydroxide records, not measurements.
 
 \begin{table*}[!htbp]
 \centering\scriptsize
-\caption{NSGA-II top-10 candidates in the constrained Ni(OH)$_2$/Cu(OH)$_2$ search, ranked by entropy-weighted fitness. All performance values are model predictions, not measurements.}
+\caption{NSGA-II top-10 candidates in the hydroxide-restricted search, ranked by entropy-weighted fitness. Performance values are model predictions, not measurements; model spread is the absolute difference between the gradient-boosting and extra-trees members.}
 \label{tab:nsga}
 \resizebox{\textwidth}{!}{%
-\begin{tabular}{rllrrrrrrr}
+\begin{tabular}{rllrrrrrrrr}
 \toprule
-Rank & Catalyst & Electrolyte & HMF (mM) & $E$ (V vs RHE) & $T$ ($^\circ$C) & Conv. (\%) & Yield (\%) & FE (\%) & Fitness \\
+Rank & Catalyst & Electrolyte & HMF (mM) & $E$ (V vs RHE) & $T$ ($^\circ$C) & Yield (\%) & model spread & FE (\%) & nearest measured yield (\%) & Fitness \\
 \midrule
-1 & Ni(OH)2/foam & KOH 1.10\,M & 11.1 & 1.410 & 25.0 & 99.0 & 95.2 & 96.2 & 0.890 \\
-2 & Ni(OH)2/foam & KOH 0.80\,M & 12.1 & 1.410 & 25.4 & 99.0 & 95.2 & 96.2 & 0.874 \\
-3 & Ni(OH)2/foam & KOH 0.83\,M & 8.2 & 1.411 & 25.2 & 99.0 & 95.4 & 95.0 & 0.866 \\
-4 & Ni(OH)2/foam & KOH 0.84\,M & 11.9 & 1.412 & 26.1 & 99.2 & 95.4 & 95.1 & 0.855 \\
-5 & Ni(OH)2/foam & KOH 0.45\,M & 11.7 & 1.415 & 25.0 & 99.2 & 94.8 & 94.6 & 0.854 \\
-6 & Ni(OH)2/foam & KOH 0.65\,M & 8.8 & 1.412 & 25.7 & 99.2 & 94.9 & 94.7 & 0.851 \\
-7 & Ni(OH)2/foam & KOH 0.42\,M & 12.0 & 1.410 & 25.2 & 99.2 & 94.3 & 94.6 & 0.851 \\
-8 & Ni(OH)2/foam & KOH 0.69\,M & 11.0 & 1.416 & 25.0 & 99.2 & 94.9 & 94.7 & 0.850 \\
-9 & Ni(OH)2/foam & KOH 0.71\,M & 11.5 & 1.412 & 25.5 & 99.2 & 94.5 & 94.9 & 0.844 \\
-10 & Ni(OH)2/foam & KOH 0.43\,M & 11.8 & 1.412 & 25.4 & 99.2 & 94.8 & 93.2 & 0.837 \\
+1 & Ni(OH)2/foam & KOH 1.16\,M & 10.0 & 1.400 & 25.0 & 97.8 & 0.3 & 97.2 & 88.3 & 0.990 \\
+2 & Ni(OH)2/foam & KOH 1.97\,M & 10.3 & 1.402 & 25.0 & 97.7 & 0.5 & 97.4 & 88.3 & 0.979 \\
+3 & Ni(OH)2/carbon & KOH 1.27\,M & 10.0 & 1.400 & 25.0 & 97.8 & 0.3 & 96.3 & 88.3 & 0.972 \\
+4 & Ni(OH)2/carbon & KOH 1.07\,M & 10.0 & 1.400 & 25.0 & 97.8 & 0.2 & 96.3 & 88.3 & 0.972 \\
+5 & Ni(OH)2/foam & KOH 2.98\,M & 13.0 & 1.400 & 25.0 & 97.0 & 0.2 & 97.4 & 88.3 & 0.963 \\
+6 & Ni(OH)2/foam & KOH 1.49\,M & 10.1 & 1.406 & 25.0 & 97.7 & 0.4 & 97.4 & 88.3 & 0.935 \\
+7 & Ni(OH)2/foam & KOH 2.58\,M & 11.3 & 1.408 & 25.0 & 97.7 & 0.5 & 97.4 & 88.3 & 0.924 \\
+8 & Ni(OH)2/foam & KOH 2.32\,M & 11.4 & 1.400 & 25.1 & 97.8 & 0.4 & 97.4 & 88.3 & 0.917 \\
+9 & Ni(OH)2/foam & KOH 2.04\,M & 10.5 & 1.404 & 25.1 & 97.8 & 0.4 & 97.2 & 88.3 & 0.915 \\
+10 & Ni(OH)2/foam & KOH 2.65\,M & 10.1 & 1.409 & 25.0 & 97.8 & 0.3 & 97.2 & 88.3 & 0.914 \\
 \bottomrule
 \end{tabular}}
 \end{table*}
+\begin{table}[!htbp]
+\centering\small
+\caption{Best NSGA-II solution for each hydroxide anode (model predictions). Fitness is the entropy-weighted score of the pooled search, so values are comparable across rows.}
+\label{tab:nsgabest}
+\begin{tabular}{lrrrrl}
+\toprule
+Anode & Candidates & Yield (\%) & FE (\%) & Fitness & Status \\
+\midrule
+Ni(OH)$_2$ & 99 & 97.8 & 97.2 & 0.990 & on the Pareto front \\
+Cu(OH)$_2$ & 99 & 91.1 & 97.2 & 0.824 & dominated by another catalyst \\
+Ni--Cu hydroxide & 100 & 97.0 & 96.4 & 0.958 & dominated by another catalyst \\
+\bottomrule
+\end{tabular}
+\end{table}
+\begin{table*}[!htbp]
+\centering\scriptsize
+\caption{Top-10 NSGA-II solutions with a Cu(OH)$_2$ anode (model predictions).}
+\label{tab:nsgacu}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{rllrrrrrrrr}
+\toprule
+Rank & Catalyst & Electrolyte & HMF (mM) & $E$ (V vs RHE) & $T$ ($^\circ$C) & Yield (\%) & model spread & FE (\%) & nearest measured yield (\%) & Fitness \\
+\midrule
+1 & Cu(OH)2/foam & KOH 1.11\,M & 11.4 & 1.400 & 25.0 & 91.1 & 7.8 & 97.2 & 93.3 & 0.824 \\
+2 & Cu(OH)2/foam & KOH 1.37\,M & 11.6 & 1.401 & 25.0 & 90.6 & 8.2 & 97.1 & 93.3 & 0.816 \\
+3 & Cu(OH)2/foam & KOH 1.37\,M & 7.3 & 1.402 & 25.0 & 91.1 & 7.6 & 96.9 & 93.3 & 0.812 \\
+4 & Cu(OH)2/foam & KOH 1.44\,M & 138.8 & 1.404 & 25.0 & 89.7 & 9.2 & 97.1 & 93.3 & 0.786 \\
+5 & Cu(OH)2/foam & KOH 1.68\,M & 31.6 & 1.405 & 25.0 & 89.7 & 9.2 & 97.2 & 93.3 & 0.779 \\
+6 & Cu(OH)2/foam & KOH 1.45\,M & 7.2 & 1.404 & 25.1 & 91.2 & 7.5 & 96.7 & 93.3 & 0.765 \\
+7 & Cu(OH)2/foam & KOH 1.09\,M & 13.6 & 1.408 & 25.1 & 90.7 & 7.8 & 97.2 & 93.3 & 0.736 \\
+8 & Cu(OH)2/foam & KOH 1.73\,M & 12.3 & 1.410 & 25.0 & 91.0 & 9.1 & 97.3 & 93.3 & 0.727 \\
+9 & Cu(OH)2/foam & KOH 1.48\,M & 12.2 & 1.407 & 25.1 & 90.5 & 8.3 & 97.2 & 93.3 & 0.723 \\
+10 & Cu(OH)2/foam & KOH 1.38\,M & 11.0 & 1.402 & 25.2 & 91.1 & 7.8 & 97.2 & 93.3 & 0.713 \\
+\bottomrule
+\end{tabular}}
+\end{table*}
+\begin{table*}[!htbp]
+\centering\scriptsize
+\caption{Top-10 NSGA-II solutions with a Ni--Cu hydroxide anode (model predictions).}
+\label{tab:nsganicu}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{rllrrrrrrrr}
+\toprule
+Rank & Catalyst & Electrolyte & HMF (mM) & $E$ (V vs RHE) & $T$ ($^\circ$C) & Yield (\%) & model spread & FE (\%) & nearest measured yield (\%) & Fitness \\
+\midrule
+1 & Ni-Cu hydroxide/foam & KOH 0.95\,M & 10.1 & 1.400 & 25.0 & 97.0 & 1.2 & 96.4 & 93.3 & 0.958 \\
+2 & Ni-Cu hydroxide/foam & KOH 0.95\,M & 10.1 & 1.400 & 25.0 & 97.2 & 0.9 & 96.0 & 93.3 & 0.952 \\
+3 & Ni-Cu hydroxide/foam & KOH 2.55\,M & 15.1 & 1.400 & 25.0 & 96.3 & 0.5 & 96.7 & 93.3 & 0.948 \\
+4 & Ni-Cu hydroxide/foam & KOH 2.44\,M & 14.3 & 1.400 & 25.1 & 96.5 & 0.8 & 96.7 & 93.3 & 0.915 \\
+5 & Ni-Cu hydroxide/foam & KOH 0.95\,M & 10.1 & 1.401 & 25.1 & 96.9 & 1.4 & 96.7 & 93.3 & 0.907 \\
+6 & Ni-Cu hydroxide/foam & KOH 2.15\,M & 15.7 & 1.405 & 25.0 & 96.3 & 0.5 & 96.7 & 93.3 & 0.904 \\
+7 & Ni-Cu hydroxide/foam & KOH 0.92\,M & 10.1 & 1.406 & 25.0 & 97.0 & 1.3 & 96.4 & 93.3 & 0.903 \\
+8 & Ni-Cu hydroxide/foam & KOH 2.69\,M & 13.9 & 1.402 & 25.1 & 96.5 & 0.8 & 96.7 & 93.3 & 0.897 \\
+9 & Ni-Cu hydroxide/foam & KOH 0.94\,M & 10.1 & 1.407 & 25.0 & 97.0 & 1.3 & 96.5 & 93.3 & 0.895 \\
+10 & Ni-Cu hydroxide/foam & KOH 2.24\,M & 12.3 & 1.408 & 25.0 & 96.8 & 1.6 & 96.7 & 93.3 & 0.892 \\
+\bottomrule
+\end{tabular}}
+\end{table*}
+\begin{table*}[!htbp]
+\centering\scriptsize
+\caption{Top-10 candidates restricted to $E\geq1.45$\,V vs RHE.}
+\label{tab:nsgarob}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{rllrrrrrrrr}
+\toprule
+Rank & Catalyst & Electrolyte & HMF (mM) & $E$ (V vs RHE) & $T$ ($^\circ$C) & Yield (\%) & model spread & FE (\%) & nearest measured yield (\%) & Fitness \\
+\midrule
+1 & Ni(OH)2/foam & KOH 2.69\,M & 12.1 & 1.450 & 25.0 & 97.6 & 0.1 & 97.6 & 88.3 & 0.543 \\
+2 & Ni(OH)2/foam & KOH 2.97\,M & 12.4 & 1.451 & 25.0 & 97.2 & 0.3 & 97.6 & 88.3 & 0.540 \\
+3 & Ni(OH)2/foam & KOH 2.90\,M & 11.7 & 1.454 & 25.0 & 97.3 & 0.1 & 97.6 & 88.3 & 0.526 \\
+4 & Ni(OH)2/foam & KOH 2.97\,M & 11.2 & 1.454 & 25.0 & 97.3 & 0.1 & 97.6 & 88.3 & 0.522 \\
+5 & Ni(OH)2/foam & KOH 2.91\,M & 12.5 & 1.451 & 25.0 & 96.9 & 0.7 & 97.6 & 88.3 & 0.520 \\
+6 & Ni(OH)2/foam & KOH 2.75\,M & 11.9 & 1.452 & 25.1 & 97.3 & 0.1 & 97.6 & 88.3 & 0.505 \\
+7 & Ni(OH)2/foam & KOH 2.23\,M & 11.4 & 1.451 & 25.1 & 97.3 & 0.1 & 97.6 & 88.3 & 0.504 \\
+8 & Ni-Cu hydroxide/foam & KOH 2.52\,M & 10.2 & 1.450 & 25.0 & 96.9 & 1.4 & 96.9 & 93.3 & 0.531 \\
+9 & Ni-Cu hydroxide/foam & KOH 2.42\,M & 10.1 & 1.451 & 25.0 & 97.0 & 1.1 & 96.2 & 93.3 & 0.517 \\
+10 & Ni-Cu hydroxide/foam & KOH 1.43\,M & 10.1 & 1.451 & 25.0 & 97.1 & 0.9 & 96.1 & 93.3 & 0.496 \\
+\bottomrule
+\end{tabular}}
+\end{table*}
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=\textwidth,height=0.85\textheight,keepaspectratio]{assets/diagnostics__Fig_NSGA2_Pareto.png}
+\caption{Pareto solutions of the Ni, Cu and Ni--Cu hydroxide searches (model predictions); circles mark the top ten, stars the $E\geq1.45$\,V ranking.}
+\label{fig:nsgapareto}
+\end{figure}
 \begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.75\textwidth,height=0.85\textheight,keepaspectratio]{nsga2/NSGA2_top10_NiCu_hydroxide.pdf}
@@ -451,9 +650,8 @@ models chemically meaningful catalyst descriptors; the missing-value indicators 
 information about reporting practice; and disabling early stopping stopped the neural network from
 converging on the majority class. Tuning added smaller, family-specific gains.
 
-\textbf{Why 0.76 was not reached.} Several individual repeats of the best binary model exceed 0.76,
-but the 25-repeat mean does not. Three factors cap performance: (i) only 119 records from fewer than one hundred papers, many sharing catalysts; (ii) a positive
-class that is the majority, so macro-F1 depends heavily on the ~30 low-performance records;
+\textbf{Why 0.76 was not reached.} 7 of 25 repeats of the best binary model reach 0.76 (maximum 0.817), but the mean does not. Three factors cap performance: (i) only 128 records from fewer than one hundred papers, many sharing catalysts; (ii) a positive
+class that is the majority, so macro-F1 depends heavily on the 33 low-performance records;
 and (iii) between-paper differences in protocol that the descriptors cannot represent. Two
 routes would raise the reported number without improving the model: random (non-grouped)
 cross-validation, which lets near-duplicate records from one paper appear in training and test,
@@ -462,18 +660,17 @@ and redefining the threshold or clusters to suit the classifier. We deliberately
 \textbf{Evaluation lessons.} Silent exclusion of infeasible folds can make a model look several
 tenths better than it is; reporting feasibility explicitly is essential when oversampling tiny
 classes. Hyperparameters were selected on the same grouped protocol as the reported scores, which
-introduces a mild optimistic bias; a nested or external validation set would remove it.
+introduces a mild optimistic bias; a nested check is reported for the regressors, but the classifiers would need a nested or external validation set.
 
-\textbf{Limitations.} Outcomes were imputed for K-means only, so some cluster labels are
-pseudo-labels. Descriptors are parsed from free text and remain coarse (no loading, morphology or
-surface area). SHAP rankings and NSGA-II candidates are associational and model-dependent.
+\textbf{Limitations.} K-means was fitted only to the 111 records that report both conversion and yield, so classification scores refer to those records alone and rare clusters contain very few records. Descriptors are parsed from free text and remain coarse (no loading, morphology or
+surface area). Some yields are derived from conversion and selectivity. Only a small number of Ni and Cu hydroxide records inform the NSGA-II search, so its candidates extrapolate; SHAP rankings and NSGA-II candidates are associational and model-dependent.
 
 \section{Conclusions}
-A leakage-aware pipeline for literature-scale electrocatalysis data reaches a publication-grouped macro-F1 of 0.731 for a $\geq$90\% performance screen and 0.626 for three-cluster labels, well above chance but short of 0.76. Correct descriptor extraction and honest fold accounting mattered more than model choice. Expanding the corpus, reporting operating conditions completely and validating the NSGA-II candidates experimentally are the most promising next steps.
+A leakage-aware pipeline for literature-scale electrocatalysis data reaches a publication-grouped macro-F1 of 0.741 for a $\geq$90\% performance screen and 0.658 for three-cluster labels, well above chance but short of 0.76. Correct descriptor extraction and honest fold accounting mattered more than model choice. Yield and FE are predictable for unseen papers to a useful but modest degree, conversion is not, and a Ni-containing anode emerges as an important and stable catalyst descriptor for yield (behind a support-type confound), in agreement with the literature, while the corpus cannot rank Ni against Cu. Expanding the corpus, reporting operating conditions completely and validating the NSGA-II candidates experimentally are the most promising next steps.
 
 \section*{Data and code availability}
 All results, figures and this manuscript are regenerated by \texttt{python run\_all.py}; this
-document is produced by \texttt{scripts/10\_latex\_report.py} from the files in
+document is produced by \texttt{scripts/12\_latex\_report.py} from the files in
 \texttt{results/} and \texttt{figures/}.
 
 \begin{thebibliography}{9}
@@ -490,6 +687,12 @@ toolbox to tackle the curse of imbalanced datasets in machine learning, \textit{
 Res.} \textbf{2017}, 18, 1--5.
 \bibitem{lundberg2017} S.~M. Lundberg, S.-I. Lee, A unified approach to interpreting model
 predictions, in \textit{Adv.\ Neural Inf.\ Process.\ Syst.} \textbf{2017}, 30, 4765--4774.
+\bibitem{lit1} Ni(OH)$_2$/NiOOH electro-oxidation of HMF to FDCA (beta-Ni(OH)$_2$, 98.7\% yield),
+PubMed Central article PMC9401862. \textcolor{gray}{[Authors, title and journal to be completed from the full text.]}
+\bibitem{lit2} Cu-based anode for HMF electro-oxidation to FDCA, \textit{Green Chem.} \textbf{2023},
+DOI 10.1039/D3GC01420G. \textcolor{gray}{[Authors and title to be completed from the full text.]}
+\bibitem{lit3} HMF electro-oxidation to FDCA, \textit{Green Chem.} \textbf{2023},
+DOI 10.1039/D2GC04732B. \textcolor{gray}{[Authors and title to be completed from the full text.]}
 \bibitem{deb2002} K.~Deb, A.~Pratap, S.~Agarwal, T.~Meyarivan, A fast and elitist multiobjective
 genetic algorithm: NSGA-II, \textit{IEEE Trans.\ Evol.\ Comput.} \textbf{2002}, 6, 182--197.
 \end{thebibliography}

@@ -1,0 +1,4 @@
+catalyst,n_candidates,best_predicted_Yield_pct,best_predicted_FE_pct,best_fitness,best_pareto_rank
+Ni_hydroxide,99,97.809,97.162,0.99,0
+Cu_hydroxide,99,91.053,97.223,0.824,1
+NiCu_hydroxide,100,97.025,96.415,0.958,1

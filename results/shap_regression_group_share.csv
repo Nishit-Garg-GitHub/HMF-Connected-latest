@@ -1,0 +1,29 @@
+target,group,share
+Conversion_pct,Catalyst (anode),0.5105385230420261
+Conversion_pct,Cell / counter electrode,0.1435391831381058
+Conversion_pct,Electrolyte,0.07218069900687955
+Conversion_pct,HMF concentration,0.006815646329035221
+Conversion_pct,Potential,0.2654956623123438
+Conversion_pct,TEMPO mediator,0.0009982187111494266
+Conversion_pct,Temperature,0.0004320674604599639
+Yield_pct,Catalyst (anode),0.6957900191999479
+Yield_pct,Cell / counter electrode,0.0364712387147549
+Yield_pct,Electrolyte,0.15898360758251326
+Yield_pct,HMF concentration,0.02033341986606256
+Yield_pct,Potential,0.07714534061986715
+Yield_pct,TEMPO mediator,0.0029965051563241485
+Yield_pct,Temperature,0.008279868860530169
+FE_pct,Catalyst (anode),0.564389145116359
+FE_pct,Cell / counter electrode,0.06278955464360042
+FE_pct,Electrolyte,0.13800435481227855
+FE_pct,HMF concentration,0.06258850134806265
+FE_pct,Potential,0.13016643555221163
+FE_pct,TEMPO mediator,0.0033725115290242453
+FE_pct,Temperature,0.03868949699846338
+Selectivity_pct,Catalyst (anode),0.6677649587690133
+Selectivity_pct,Cell / counter electrode,0.021835562813548995
+Selectivity_pct,Electrolyte,0.08680203201105466
+Selectivity_pct,HMF concentration,0.012546957324582202
+Selectivity_pct,Potential,0.17118327600007416
+Selectivity_pct,TEMPO mediator,0.012536329072468625
+Selectivity_pct,Temperature,0.027330884009257966

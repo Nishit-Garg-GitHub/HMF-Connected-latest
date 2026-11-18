@@ -1,0 +1,22 @@
+Feature interpretation completed using permutation_importance.
+                          feature  importance_mean  importance_sd
+ Electrolyte_Electrolyte_Anion_OH         0.170191       0.081994
+             Alkaline_Electrolyte         0.170191       0.081994
+Electrolyte_Electrolyte_Anion_SO4         0.095623       0.000000
+Electrolyte_Electrolyte_Anion_nan         0.068889       0.040569
+                     TEMPO_binary         0.068889       0.040569
+                   Electrolyte_pH         0.063749       0.045077
+                    Temperature_C         0.031874       0.045077
+              Catalyst_N_Elements         0.031874       0.045077
+               Catalyst_Phosphide         0.000000       0.000000
+                Catalyst_Selenide         0.000000       0.000000
+                 Catalyst_Sulfide         0.000000       0.000000
+                 Catalyst_Nitride         0.000000       0.000000
+                   Catalyst_Oxide         0.000000       0.000000
+                     Catalyst_LDH         0.000000       0.000000
+            Catalyst_Oxyhydroxide         0.000000       0.000000
+  0%|          | 0/25 [00:00<?, ?it/s] 56%|█████▌    | 14/25 [00:00<00:00, 138.85it/s]100%|██████████| 25/25 [00:00<00:00, 140.97it/s]
+SHAP GradientBoosting+ROS K=3: train=86, held-out=25, explained=25
+  0%|          | 0/25 [00:00<?, ?it/s] 48%|████▊     | 12/25 [00:00<00:00, 114.31it/s] 96%|█████████▌| 24/25 [00:00<00:00, 115.41it/s]100%|██████████| 25/25 [00:00<00:00, 115.20it/s]
+SHAP GradientBoosting+none K=5: train=86, held-out=25, explained=25
+Generated Figure 12 and Figure 13 for the best Stage 04 model per K (K=3: GradientBoosting+ROS, K=5: GradientBoosting+none).

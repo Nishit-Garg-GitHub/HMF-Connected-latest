@@ -3,7 +3,6 @@
   "algorithm": "NSGA-II, mixed encoding, entropy-weighted decision (Li et al. 2025 design)",
   "objectives": {
     "maximise": [
-      "Conversion",
       "FDCA yield",
       "FE"
     ],
@@ -14,13 +13,12 @@
   },
   "generations": 1000,
   "population_size": 100,
-  "n_pareto_candidates": 96,
+  "n_pareto_candidates": 99,
   "general_entropy_weights": {
-    "Conversion_pct": 0.10310805310945038,
-    "Yield_pct": 0.13953202785313695,
-    "FE_pct": 0.17714121306209785,
-    "Temperature_C": 0.13415142266365201,
-    "Potential_vs_RHE_V": 0.4460672833116628
+    "Yield_pct": 0.26874398713903663,
+    "FE_pct": 0.137001275396922,
+    "Temperature_C": 0.33722945226847534,
+    "Potential_vs_RHE_V": 0.257025285195566
   },
   "hydroxide_scenario": {
     "condition_envelope": {
@@ -34,19 +32,24 @@
       ]
     },
     "entropy_weights": {
-      "Conversion_pct": 0.17190929784404732,
-      "Yield_pct": 0.2573305520004265,
-      "FE_pct": 0.13388342997193767,
-      "Temperature_C": 0.16855679834680679,
-      "Potential_vs_RHE_V": 0.2683199218367817
+      "Yield_pct": 0.17125543501629487,
+      "FE_pct": 0.06370805533936254,
+      "Temperature_C": 0.2988144596065745,
+      "Potential_vs_RHE_V": 0.46622205003776807
     },
     "top10_catalysts": {
       "Ni(OH)2": 10
     },
     "spacing_converged_generation": {
       "Ni": 20,
-      "Cu": 20
-    }
+      "Cu": 20,
+      "NiCu": 20
+    },
+    "scenarios": [
+      "Ni",
+      "Cu",
+      "NiCu"
+    ]
   },
   "warning": "Candidates require experimental confirmation; model predictions are not measurements."
 }

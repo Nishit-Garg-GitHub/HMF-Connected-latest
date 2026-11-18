@@ -26,9 +26,11 @@ STAGES = [
     ("05_learning_curves.py", "05 — learning curves and generalisation"),
     ("06_shap_analysis.py", "06 — SHAP / feature importance"),
     ("07_regression.py", "07 — joint four-output regression"),
-    ("08_nsga2.py", "08 — validation-gated NSGA-II"),
-    ("09_final_report.py", "09 — integrated final report"),
-    ("10_research_paper.py", "10 — research-paper style PDF manuscript"),
+    ("08_regression_shap.py", "08 — regression SHAP and literature check"),
+    ("09_nsga2.py", "09 — validation-gated NSGA-II"),
+    ("10_diagnostic_figures.py", "10 — schematic and diagnostic figures"),
+    ("11_final_report.py", "11 — integrated final report"),
+    ("12_latex_report.py", "12 — LaTeX research-paper report (tex + PDF)"),
 ]
 
 
@@ -46,7 +48,7 @@ def parse_args():
 
 def validate_inputs():
     """Fail early if the source workbook or expected scripts are missing."""
-    source = SCRIPTS / "Nishith_Summary Table of different cell types.xlsx"
+    source = ROOT / "data" / "raw" / "Nishith_Summary Table of different cell types.xlsx"
     if not source.exists():
         raise FileNotFoundError(f"Missing literature workbook: {source}")
     missing = [name for name, _ in STAGES if not (SCRIPTS / name).exists()]
@@ -113,6 +115,7 @@ def main():
                         "feature_importance_selected_model.csv", "multioutput_*.csv",
                         "per_target_*.csv", "regressor_*.joblib",
                         "regression_validation_gate.json", "nsga2_*.csv", "nsga2_status.json",
+                        "kmeans_results_K*.csv", "kmeans_audit.json",
                         "pipeline_manifest.json", "FINAL_RESEARCH_REPORT.md"):
             for path in RESULTS.glob(pattern):
                 if "_BEFORE" in path.name:

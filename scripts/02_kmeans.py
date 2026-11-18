@@ -1,24 +1,24 @@
 
 """
-STAGE 02 — K-MEANS CLUSTERING USING ALL 154 RECORDS
+STAGE 02 — K-MEANS CLUSTERING OF MEASURED CONVERSION AND YIELD
 
-Exploratory sensitivity experiment:
-- Uses Conversion_pct and Yield_pct.
-- Median-imputes missing values so all 154 records can be clustered.
-- Marks every record with an imputed outcome.
-- Preserves the existing downstream CSV contract:
-      source_row
-      cluster
+Default (HMF_CLUSTER_RECORDS=observed): clusters only the records that report
+BOTH Conversion and Yield (102 of 154). The cluster labels are the classes
+predicted by stages 03-06, so they must describe measured performance.
 
-Stages 03, 04 and 05 can consume these files without modification.
+Sensitivity mode (HMF_CLUSTER_RECORDS=all): median-imputes the missing outcome
+and clusters all 154 records. Imputed records then sit on the median point and
+form one large, artificial cluster, so classifiers partly learn "which papers
+did not report an outcome". Use it for exploration only.
 
-IMPORTANT:
-Clusters containing imputed outcomes are exploratory pseudo-labels,
-not experimentally observed performance categories.
+Downstream CSV contract (unchanged): kmeans_labels_K{k}.csv with
+    source_row  - row index in the 154-row preprocessed table
+    cluster     - K-means label
+Stages 03-06 read only the rows listed in source_row.
 """
 
+import os
 from pathlib import Path
-import shutil
 import warnings
 
 import numpy as np
@@ -44,8 +44,11 @@ from common import (
 RANDOM_STATE = 42
 K_VALUES = [3, 4, 5, 6]
 
-OUTPUT_DIR = FIGURES_DIR / "KMeans_All154"
-BACKUP_DIR = RESULTS_DIR / "observed_only_backup"
+CLUSTER_RECORDS = os.environ.get("HMF_CLUSTER_RECORDS", "observed").strip().lower()
+if CLUSTER_RECORDS not in {"observed", "all"}:
+    raise ValueError("HMF_CLUSTER_RECORDS must be 'observed' or 'all'.")
+
+OUTPUT_DIR = FIGURES_DIR / "KMeans"
 
 REQUIRED_COLUMNS = [
     "Conversion_pct",
@@ -98,39 +101,7 @@ def load_data():
 
 
 # ============================================================
-# 3. BACK UP EXISTING 102-RECORD LABEL FILES
-# ============================================================
-
-def backup_existing_labels():
-
-    BACKUP_DIR.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    for k in K_VALUES:
-
-        source = RESULTS_DIR / f"kmeans_labels_K{k}.csv"
-
-        if source.exists():
-
-            destination = (
-                BACKUP_DIR / f"kmeans_labels_K{k}_original.csv"
-            )
-
-            if not destination.exists():
-                shutil.copy2(
-                    source,
-                    destination,
-                )
-
-                print(
-                    f"Backed up previous labels: {destination}"
-                )
-
-
-# ============================================================
-# 4. IMPUTE MISSING OUTCOMES
+# 3. IMPUTE MISSING OUTCOMES (sensitivity mode only)
 # ============================================================
 
 def prepare_all_records(X):
@@ -176,7 +147,7 @@ def prepare_all_records(X):
 
 
 # ============================================================
-# 5. PLOT CLUSTERS
+# 4. PLOT CLUSTERS
 # ============================================================
 
 def plot_clusters(
@@ -250,7 +221,7 @@ def plot_clusters(
     ax.set_ylabel("FDCA Yield (%)")
 
     ax.set_title(
-        f"K-Means clustering using all records (K={k})"
+        f"K-Means clustering of {len(X_original)} records (K={k})"
     )
 
     ax.set_xlim(0, 105)
@@ -269,7 +240,7 @@ def plot_clusters(
     fig.tight_layout()
 
     output = (
-        OUTPUT_DIR / f"HMF_KMeans_All154_K{k}.png"
+        OUTPUT_DIR / f"HMF_KMeans_K{k}.png"
     )
 
     fig.savefig(
@@ -284,7 +255,7 @@ def plot_clusters(
 
 
 # ============================================================
-# 6. RUN K-MEANS FOR EACH K
+# 5. RUN K-MEANS FOR EACH K
 # ============================================================
 
 def run_kmeans(
@@ -325,7 +296,7 @@ def run_kmeans(
     # --------------------------------------------------------
 
     label_frame = pd.DataFrame({
-        "source_row": np.arange(len(df), dtype=int),
+        "source_row": df.index.to_numpy(dtype=int),
         "cluster": labels.astype(int),
 
         # Audit columns; downstream stages ignore these.
@@ -375,7 +346,7 @@ def run_kmeans(
     )
 
     result_path = (
-        RESULTS_DIR / f"kmeans_all154_results_K{k}.csv"
+        RESULTS_DIR / f"kmeans_results_K{k}.csv"
     )
 
     result.to_csv(
@@ -430,7 +401,7 @@ def run_kmeans(
 
 
 # ============================================================
-# 6b. PAPER-STYLE FIGURE 6 (CONVEX HULLS + SPOKES, 2x2 PANELS)
+# 5b. PAPER-STYLE FIGURE 6 (CONVEX HULLS + SPOKES, 2x2 PANELS)
 # ============================================================
 
 FIGURE6_COLORS = ["#f0545c", "#5fd35f", "#3fa0f0", "#e76fe0", "#f5a05a", "#4f7fc4"]
@@ -506,14 +477,14 @@ def plot_figure6_panels(X_imputed, labels_by_k):
 
 
 # ============================================================
-# 7. MAIN
+# 6. MAIN
 # ============================================================
 
 def main():
 
     print("=" * 75)
-    print("HMF ELECTROOXIDATION — ALL 154 RECORDS")
-    print("EXPLORATORY MEDIAN-IMPUTED K-MEANS")
+    print("HMF ELECTROOXIDATION — K-MEANS")
+    print(f"Record selection: {CLUSTER_RECORDS}")
     print("=" * 75)
 
     RESULTS_DIR.mkdir(
@@ -526,9 +497,12 @@ def main():
         exist_ok=True,
     )
 
-    backup_existing_labels()
-
     df, X_original = load_data()
+    n_total = len(df)
+    n_complete = int(X_original.notna().all(axis=1).sum())
+    if CLUSTER_RECORDS == "observed":
+        keep = X_original.notna().all(axis=1)
+        df, X_original = df.loc[keep], X_original.loc[keep]
 
     (
         X_imputed,
@@ -537,7 +511,7 @@ def main():
         medians,
     ) = prepare_all_records(X_original)
 
-    print(f"\nOriginal records: {len(df)}")
+    print(f"\nRecords in workbook: {n_total} | clustered: {len(df)}")
 
     print(
         "Records with both outcomes observed:",
@@ -582,8 +556,12 @@ def main():
     # --------------------------------------------------------
 
     audit = {
-        "experiment": "all_154_median_imputed_kmeans",
-        "total_records": int(len(df)),
+        "experiment": ("observed_only_kmeans" if CLUSTER_RECORDS == "observed"
+                       else "all_154_median_imputed_kmeans"),
+        "record_selection": CLUSTER_RECORDS,
+        "total_records": int(n_total),
+        "clustered_records": int(len(df)),
+        "complete_records_available": n_complete,
         "fully_observed_records": int((~imputed_rows).sum()),
         "records_with_imputed_outcomes": int(imputed_rows.sum()),
         "imputation_method": "median",
@@ -597,6 +575,8 @@ def main():
             for k in K_VALUES
         ],
         "warning": (
+            "Only records with measured Conversion and Yield are clustered."
+            if CLUSTER_RECORDS == "observed" else
             "Clusters for records with imputed outcomes are exploratory "
             "pseudo-labels, not measured performance classes."
         ),
@@ -605,7 +585,7 @@ def main():
     import json
 
     audit_path = (
-        RESULTS_DIR / "kmeans_all154_audit.json"
+        RESULTS_DIR / "kmeans_audit.json"
     )
 
     audit_path.write_text(
@@ -620,7 +600,7 @@ def main():
     )
 
     print("\n" + "=" * 75)
-    print("ALL-154 K-MEANS COMPLETED")
+    print("K-MEANS COMPLETED")
     print("=" * 75)
 
     print(

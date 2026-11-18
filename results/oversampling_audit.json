@@ -5,18 +5,18 @@
     "sampler": "ROS",
     "status": "ok",
     "train_before": {
-      "0": 92,
+      "0": 64,
       "1": 3,
-      "2": 8
+      "2": 5
     },
     "train_after": {
-      "0": 92,
-      "1": 92,
-      "2": 92
+      "0": 64,
+      "1": 64,
+      "2": 64
     },
-    "n_train_before": 103,
-    "n_train_after": 276,
-    "n_validation_untouched": 51,
+    "n_train_before": 72,
+    "n_train_after": 192,
+    "n_validation_untouched": 39,
     "note": "Resampling restricted to this training fold."
   },
   {
@@ -25,18 +25,18 @@
     "sampler": "SMOTE",
     "status": "ok",
     "train_before": {
-      "0": 92,
+      "0": 64,
       "1": 3,
-      "2": 8
+      "2": 5
     },
     "train_after": {
-      "0": 92,
-      "1": 92,
-      "2": 92
+      "0": 64,
+      "1": 64,
+      "2": 64
     },
-    "n_train_before": 103,
-    "n_train_after": 276,
-    "n_validation_untouched": 51,
+    "n_train_before": 72,
+    "n_train_after": 192,
+    "n_validation_untouched": 39,
     "note": "Resampling restricted to this training fold."
   },
   {
@@ -45,18 +45,18 @@
     "sampler": "ADASYN",
     "status": "ok",
     "train_before": {
-      "0": 92,
+      "0": 64,
       "1": 3,
-      "2": 8
+      "2": 5
     },
     "train_after": {
-      "0": 92,
-      "1": 91,
-      "2": 91
+      "0": 64,
+      "1": 63,
+      "2": 63
     },
-    "n_train_before": 103,
-    "n_train_after": 274,
-    "n_validation_untouched": 51,
+    "n_train_before": 72,
+    "n_train_after": 190,
+    "n_validation_untouched": 39,
     "note": "Resampling restricted to this training fold."
   },
   {
@@ -65,118 +65,118 @@
     "sampler": "ROS",
     "status": "ok",
     "train_before": {
-      "0": 91,
+      "0": 65,
+      "1": 3,
+      "2": 7
+    },
+    "train_after": {
+      "0": 65,
+      "1": 65,
+      "2": 65
+    },
+    "n_train_before": 75,
+    "n_train_after": 195,
+    "n_validation_untouched": 36,
+    "note": "Resampling restricted to this training fold."
+  },
+  {
+    "k": 3,
+    "fold": 2,
+    "sampler": "SMOTE",
+    "status": "ok",
+    "train_before": {
+      "0": 65,
+      "1": 3,
+      "2": 7
+    },
+    "train_after": {
+      "0": 65,
+      "1": 65,
+      "2": 65
+    },
+    "n_train_before": 75,
+    "n_train_after": 195,
+    "n_validation_untouched": 36,
+    "note": "Resampling restricted to this training fold."
+  },
+  {
+    "k": 3,
+    "fold": 2,
+    "sampler": "ADASYN",
+    "status": "ok",
+    "train_before": {
+      "0": 65,
+      "1": 3,
+      "2": 7
+    },
+    "train_after": {
+      "0": 65,
+      "1": 66,
+      "2": 65
+    },
+    "n_train_before": 75,
+    "n_train_after": 196,
+    "n_validation_untouched": 36,
+    "note": "Resampling restricted to this training fold."
+  },
+  {
+    "k": 3,
+    "fold": 3,
+    "sampler": "ROS",
+    "status": "ok",
+    "train_before": {
+      "0": 65,
       "1": 4,
       "2": 6
     },
     "train_after": {
-      "0": 91,
-      "1": 91,
-      "2": 91
+      "0": 65,
+      "1": 65,
+      "2": 65
     },
-    "n_train_before": 101,
-    "n_train_after": 273,
-    "n_validation_untouched": 53,
+    "n_train_before": 75,
+    "n_train_after": 195,
+    "n_validation_untouched": 36,
     "note": "Resampling restricted to this training fold."
   },
   {
     "k": 3,
-    "fold": 2,
+    "fold": 3,
     "sampler": "SMOTE",
     "status": "ok",
     "train_before": {
-      "0": 91,
+      "0": 65,
       "1": 4,
       "2": 6
     },
     "train_after": {
-      "0": 91,
-      "1": 91,
-      "2": 91
+      "0": 65,
+      "1": 65,
+      "2": 65
     },
-    "n_train_before": 101,
-    "n_train_after": 273,
-    "n_validation_untouched": 53,
+    "n_train_before": 75,
+    "n_train_after": 195,
+    "n_validation_untouched": 36,
     "note": "Resampling restricted to this training fold."
   },
   {
     "k": 3,
-    "fold": 2,
+    "fold": 3,
     "sampler": "ADASYN",
     "status": "ok",
     "train_before": {
-      "0": 91,
+      "0": 65,
       "1": 4,
       "2": 6
     },
     "train_after": {
-      "0": 91,
-      "1": 92,
-      "2": 90
+      "0": 65,
+      "1": 64,
+      "2": 66
     },
-    "n_train_before": 101,
-    "n_train_after": 273,
-    "n_validation_untouched": 53,
-    "note": "Resampling restricted to this training fold."
-  },
-  {
-    "k": 3,
-    "fold": 3,
-    "sampler": "ROS",
-    "status": "ok",
-    "train_before": {
-      "0": 93,
-      "1": 3,
-      "2": 8
-    },
-    "train_after": {
-      "0": 93,
-      "1": 93,
-      "2": 93
-    },
-    "n_train_before": 104,
-    "n_train_after": 279,
-    "n_validation_untouched": 50,
-    "note": "Resampling restricted to this training fold."
-  },
-  {
-    "k": 3,
-    "fold": 3,
-    "sampler": "SMOTE",
-    "status": "ok",
-    "train_before": {
-      "0": 93,
-      "1": 3,
-      "2": 8
-    },
-    "train_after": {
-      "0": 93,
-      "1": 93,
-      "2": 93
-    },
-    "n_train_before": 104,
-    "n_train_after": 279,
-    "n_validation_untouched": 50,
-    "note": "Resampling restricted to this training fold."
-  },
-  {
-    "k": 3,
-    "fold": 3,
-    "sampler": "ADASYN",
-    "status": "ok",
-    "train_before": {
-      "0": 93,
-      "1": 3,
-      "2": 8
-    },
-    "train_after": {
-      "0": 93,
-      "1": 92,
-      "2": 91
-    },
-    "n_train_before": 104,
-    "n_train_after": 276,
-    "n_validation_untouched": 50,
+    "n_train_before": 75,
+    "n_train_after": 195,
+    "n_validation_untouched": 36,
     "note": "Resampling restricted to this training fold."
   },
   {
@@ -185,70 +185,68 @@
     "sampler": "ROS",
     "status": "ok",
     "train_before": {
-      "0": 91,
-      "1": 2,
-      "2": 2,
-      "3": 7
-    },
-    "train_after": {
-      "0": 91,
-      "1": 91,
-      "2": 91,
-      "3": 91
-    },
-    "n_train_before": 102,
-    "n_train_after": 364,
-    "n_validation_untouched": 52,
-    "note": "Resampling restricted to this training fold."
-  },
-  {
-    "k": 4,
-    "fold": 1,
-    "sampler": "SMOTE",
-    "status": "infeasible",
-    "train_before": {
-      "0": 91,
-      "1": 2,
-      "2": 2,
-      "3": 7
-    },
-    "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2",
-    "n_validation_untouched": 52
-  },
-  {
-    "k": 4,
-    "fold": 1,
-    "sampler": "ADASYN",
-    "status": "infeasible",
-    "train_before": {
-      "0": 91,
-      "1": 2,
-      "2": 2,
-      "3": 7
-    },
-    "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2",
-    "n_validation_untouched": 52
-  },
-  {
-    "k": 4,
-    "fold": 2,
-    "sampler": "ROS",
-    "status": "ok",
-    "train_before": {
-      "0": 91,
-      "1": 2,
-      "2": 4,
+      "0": 64,
+      "1": 1,
+      "2": 3,
       "3": 6
     },
     "train_after": {
-      "0": 91,
-      "1": 91,
-      "2": 91,
-      "3": 91
+      "0": 64,
+      "1": 64,
+      "2": 64,
+      "3": 64
     },
-    "n_train_before": 103,
-    "n_train_after": 364,
-    "n_validation_untouched": 51,
+    "n_train_before": 74,
+    "n_train_after": 256,
+    "n_validation_untouched": 37,
+    "note": "Resampling restricted to this training fold."
+  },
+  {
+    "k": 4,
+    "fold": 1,
+    "sampler": "SMOTE",
+    "status": "infeasible",
+    "train_before": {
+      "0": 64,
+      "1": 1,
+      "2": 3,
+      "3": 6
+    },
+    "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 1, n_samples = 1",
+    "n_validation_untouched": 37
+  },
+  {
+    "k": 4,
+    "fold": 1,
+    "sampler": "ADASYN",
+    "status": "infeasible",
+    "train_before": {
+      "0": 64,
+      "1": 1,
+      "2": 3,
+      "3": 6
+    },
+    "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 1, n_samples = 1",
+    "n_validation_untouched": 37
+  },
+  {
+    "k": 4,
+    "fold": 2,
+    "sampler": "ROS",
+    "status": "ok",
+    "train_before": {
+      "0": 65,
+      "2": 2,
+      "3": 6
+    },
+    "train_after": {
+      "0": 65,
+      "2": 65,
+      "3": 65
+    },
+    "n_train_before": 73,
+    "n_train_after": 195,
+    "n_validation_untouched": 38,
     "note": "Resampling restricted to this training fold."
   },
   {
@@ -257,13 +255,12 @@
     "sampler": "SMOTE",
     "status": "infeasible",
     "train_before": {
-      "0": 91,
-      "1": 2,
-      "2": 4,
+      "0": 65,
+      "2": 2,
       "3": 6
     },
     "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2",
-    "n_validation_untouched": 51
+    "n_validation_untouched": 38
   },
   {
     "k": 4,
@@ -271,13 +268,12 @@
     "sampler": "ADASYN",
     "status": "infeasible",
     "train_before": {
-      "0": 91,
-      "1": 2,
-      "2": 4,
+      "0": 65,
+      "2": 2,
       "3": 6
     },
     "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2",
-    "n_validation_untouched": 51
+    "n_validation_untouched": 38
   },
   {
     "k": 4,
@@ -285,20 +281,20 @@
     "sampler": "ROS",
     "status": "ok",
     "train_before": {
-      "0": 92,
-      "1": 2,
-      "2": 2,
-      "3": 7
+      "0": 65,
+      "1": 1,
+      "2": 3,
+      "3": 6
     },
     "train_after": {
-      "0": 92,
-      "1": 92,
-      "2": 92,
-      "3": 92
+      "0": 65,
+      "1": 65,
+      "2": 65,
+      "3": 65
     },
-    "n_train_before": 103,
-    "n_train_after": 368,
-    "n_validation_untouched": 51,
+    "n_train_before": 75,
+    "n_train_after": 260,
+    "n_validation_untouched": 36,
     "note": "Resampling restricted to this training fold."
   },
   {
@@ -307,13 +303,13 @@
     "sampler": "SMOTE",
     "status": "infeasible",
     "train_before": {
-      "0": 92,
-      "1": 2,
-      "2": 2,
-      "3": 7
+      "0": 65,
+      "1": 1,
+      "2": 3,
+      "3": 6
     },
-    "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2",
-    "n_validation_untouched": 51
+    "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 1, n_samples = 1",
+    "n_validation_untouched": 36
   },
   {
     "k": 4,
@@ -321,200 +317,212 @@
     "sampler": "ADASYN",
     "status": "infeasible",
     "train_before": {
-      "0": 92,
+      "0": 65,
+      "1": 1,
+      "2": 3,
+      "3": 6
+    },
+    "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 1, n_samples = 1",
+    "n_validation_untouched": 36
+  },
+  {
+    "k": 5,
+    "fold": 1,
+    "sampler": "ROS",
+    "status": "ok",
+    "train_before": {
+      "0": 57,
+      "1": 2,
+      "2": 10,
+      "3": 4,
+      "4": 1
+    },
+    "train_after": {
+      "0": 57,
+      "1": 57,
+      "2": 57,
+      "3": 57,
+      "4": 57
+    },
+    "n_train_before": 74,
+    "n_train_after": 285,
+    "n_validation_untouched": 37,
+    "note": "Resampling restricted to this training fold."
+  },
+  {
+    "k": 5,
+    "fold": 1,
+    "sampler": "SMOTE",
+    "status": "infeasible",
+    "train_before": {
+      "0": 57,
+      "1": 2,
+      "2": 10,
+      "3": 4,
+      "4": 1
+    },
+    "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2",
+    "n_validation_untouched": 37
+  },
+  {
+    "k": 5,
+    "fold": 1,
+    "sampler": "ADASYN",
+    "status": "infeasible",
+    "train_before": {
+      "0": 57,
+      "1": 2,
+      "2": 10,
+      "3": 4,
+      "4": 1
+    },
+    "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2",
+    "n_validation_untouched": 37
+  },
+  {
+    "k": 5,
+    "fold": 2,
+    "sampler": "ROS",
+    "status": "ok",
+    "train_before": {
+      "0": 58,
+      "1": 3,
+      "2": 9,
+      "3": 4
+    },
+    "train_after": {
+      "0": 58,
+      "1": 58,
+      "2": 58,
+      "3": 58
+    },
+    "n_train_before": 74,
+    "n_train_after": 232,
+    "n_validation_untouched": 37,
+    "note": "Resampling restricted to this training fold."
+  },
+  {
+    "k": 5,
+    "fold": 2,
+    "sampler": "SMOTE",
+    "status": "ok",
+    "train_before": {
+      "0": 58,
+      "1": 3,
+      "2": 9,
+      "3": 4
+    },
+    "train_after": {
+      "0": 58,
+      "1": 58,
+      "2": 58,
+      "3": 58
+    },
+    "n_train_before": 74,
+    "n_train_after": 232,
+    "n_validation_untouched": 37,
+    "note": "Resampling restricted to this training fold."
+  },
+  {
+    "k": 5,
+    "fold": 2,
+    "sampler": "ADASYN",
+    "status": "ok",
+    "train_before": {
+      "0": 58,
+      "1": 3,
+      "2": 9,
+      "3": 4
+    },
+    "train_after": {
+      "0": 58,
+      "1": 59,
+      "2": 61,
+      "3": 60
+    },
+    "n_train_before": 74,
+    "n_train_after": 238,
+    "n_validation_untouched": 37,
+    "note": "Resampling restricted to this training fold."
+  },
+  {
+    "k": 5,
+    "fold": 3,
+    "sampler": "ROS",
+    "status": "ok",
+    "train_before": {
+      "0": 57,
+      "1": 3,
+      "2": 9,
+      "3": 4,
+      "4": 1
+    },
+    "train_after": {
+      "0": 57,
+      "1": 57,
+      "2": 57,
+      "3": 57,
+      "4": 57
+    },
+    "n_train_before": 74,
+    "n_train_after": 285,
+    "n_validation_untouched": 37,
+    "note": "Resampling restricted to this training fold."
+  },
+  {
+    "k": 5,
+    "fold": 3,
+    "sampler": "SMOTE",
+    "status": "infeasible",
+    "train_before": {
+      "0": 57,
+      "1": 3,
+      "2": 9,
+      "3": 4,
+      "4": 1
+    },
+    "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 1, n_samples = 1",
+    "n_validation_untouched": 37
+  },
+  {
+    "k": 5,
+    "fold": 3,
+    "sampler": "ADASYN",
+    "status": "infeasible",
+    "train_before": {
+      "0": 57,
+      "1": 3,
+      "2": 9,
+      "3": 4,
+      "4": 1
+    },
+    "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 1, n_samples = 1",
+    "n_validation_untouched": 37
+  },
+  {
+    "k": 6,
+    "fold": 1,
+    "sampler": "ROS",
+    "status": "ok",
+    "train_before": {
+      "0": 54,
       "1": 2,
       "2": 2,
-      "3": 7
-    },
-    "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2",
-    "n_validation_untouched": 51
-  },
-  {
-    "k": 5,
-    "fold": 1,
-    "sampler": "ROS",
-    "status": "ok",
-    "train_before": {
-      "0": 11,
-      "1": 5,
-      "2": 1,
-      "3": 2,
-      "4": 83
+      "3": 10,
+      "4": 1,
+      "5": 4
     },
     "train_after": {
-      "0": 83,
-      "1": 83,
-      "2": 83,
-      "3": 83,
-      "4": 83
+      "0": 54,
+      "1": 54,
+      "2": 54,
+      "3": 54,
+      "4": 54,
+      "5": 54
     },
-    "n_train_before": 102,
-    "n_train_after": 415,
-    "n_validation_untouched": 52,
-    "note": "Resampling restricted to this training fold."
-  },
-  {
-    "k": 5,
-    "fold": 1,
-    "sampler": "SMOTE",
-    "status": "infeasible",
-    "train_before": {
-      "0": 11,
-      "1": 5,
-      "2": 1,
-      "3": 2,
-      "4": 83
-    },
-    "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 1, n_samples = 1",
-    "n_validation_untouched": 52
-  },
-  {
-    "k": 5,
-    "fold": 1,
-    "sampler": "ADASYN",
-    "status": "infeasible",
-    "train_before": {
-      "0": 11,
-      "1": 5,
-      "2": 1,
-      "3": 2,
-      "4": 83
-    },
-    "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 1, n_samples = 1",
-    "n_validation_untouched": 52
-  },
-  {
-    "k": 5,
-    "fold": 2,
-    "sampler": "ROS",
-    "status": "ok",
-    "train_before": {
-      "0": 12,
-      "1": 5,
-      "2": 1,
-      "3": 2,
-      "4": 83
-    },
-    "train_after": {
-      "0": 83,
-      "1": 83,
-      "2": 83,
-      "3": 83,
-      "4": 83
-    },
-    "n_train_before": 103,
-    "n_train_after": 415,
-    "n_validation_untouched": 51,
-    "note": "Resampling restricted to this training fold."
-  },
-  {
-    "k": 5,
-    "fold": 2,
-    "sampler": "SMOTE",
-    "status": "infeasible",
-    "train_before": {
-      "0": 12,
-      "1": 5,
-      "2": 1,
-      "3": 2,
-      "4": 83
-    },
-    "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 1, n_samples = 1",
-    "n_validation_untouched": 51
-  },
-  {
-    "k": 5,
-    "fold": 2,
-    "sampler": "ADASYN",
-    "status": "infeasible",
-    "train_before": {
-      "0": 12,
-      "1": 5,
-      "2": 1,
-      "3": 2,
-      "4": 83
-    },
-    "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 1, n_samples = 1",
-    "n_validation_untouched": 51
-  },
-  {
-    "k": 5,
-    "fold": 3,
-    "sampler": "ROS",
-    "status": "ok",
-    "train_before": {
-      "0": 11,
-      "1": 4,
-      "2": 2,
-      "3": 4,
-      "4": 82
-    },
-    "train_after": {
-      "0": 82,
-      "1": 82,
-      "2": 82,
-      "3": 82,
-      "4": 82
-    },
-    "n_train_before": 103,
-    "n_train_after": 410,
-    "n_validation_untouched": 51,
-    "note": "Resampling restricted to this training fold."
-  },
-  {
-    "k": 5,
-    "fold": 3,
-    "sampler": "SMOTE",
-    "status": "infeasible",
-    "train_before": {
-      "0": 11,
-      "1": 4,
-      "2": 2,
-      "3": 4,
-      "4": 82
-    },
-    "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2",
-    "n_validation_untouched": 51
-  },
-  {
-    "k": 5,
-    "fold": 3,
-    "sampler": "ADASYN",
-    "status": "infeasible",
-    "train_before": {
-      "0": 11,
-      "1": 4,
-      "2": 2,
-      "3": 4,
-      "4": 82
-    },
-    "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2",
-    "n_validation_untouched": 51
-  },
-  {
-    "k": 6,
-    "fold": 1,
-    "sampler": "ROS",
-    "status": "ok",
-    "train_before": {
-      "0": 85,
-      "1": 1,
-      "2": 2,
-      "3": 4,
-      "4": 9,
-      "5": 1
-    },
-    "train_after": {
-      "0": 85,
-      "1": 85,
-      "2": 85,
-      "3": 85,
-      "4": 85,
-      "5": 85
-    },
-    "n_train_before": 102,
-    "n_train_after": 510,
-    "n_validation_untouched": 52,
+    "n_train_before": 73,
+    "n_train_after": 324,
+    "n_validation_untouched": 38,
     "note": "Resampling restricted to this training fold."
   },
   {
@@ -523,110 +531,112 @@
     "sampler": "SMOTE",
     "status": "infeasible",
     "train_before": {
-      "0": 85,
-      "1": 1,
-      "2": 2,
-      "3": 4,
-      "4": 9,
-      "5": 1
-    },
-    "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 1, n_samples = 1",
-    "n_validation_untouched": 52
-  },
-  {
-    "k": 6,
-    "fold": 1,
-    "sampler": "ADASYN",
-    "status": "infeasible",
-    "train_before": {
-      "0": 85,
-      "1": 1,
-      "2": 2,
-      "3": 4,
-      "4": 9,
-      "5": 1
-    },
-    "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 1, n_samples = 1",
-    "n_validation_untouched": 52
-  },
-  {
-    "k": 6,
-    "fold": 2,
-    "sampler": "ROS",
-    "status": "ok",
-    "train_before": {
-      "0": 85,
-      "1": 1,
-      "2": 2,
-      "3": 4,
-      "4": 10
-    },
-    "train_after": {
-      "0": 85,
-      "1": 85,
-      "2": 85,
-      "3": 85,
-      "4": 85
-    },
-    "n_train_before": 102,
-    "n_train_after": 425,
-    "n_validation_untouched": 52,
-    "note": "Resampling restricted to this training fold."
-  },
-  {
-    "k": 6,
-    "fold": 2,
-    "sampler": "SMOTE",
-    "status": "infeasible",
-    "train_before": {
-      "0": 85,
-      "1": 1,
-      "2": 2,
-      "3": 4,
-      "4": 10
-    },
-    "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 1, n_samples = 1",
-    "n_validation_untouched": 52
-  },
-  {
-    "k": 6,
-    "fold": 2,
-    "sampler": "ADASYN",
-    "status": "infeasible",
-    "train_before": {
-      "0": 85,
-      "1": 1,
-      "2": 2,
-      "3": 4,
-      "4": 10
-    },
-    "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 1, n_samples = 1",
-    "n_validation_untouched": 52
-  },
-  {
-    "k": 6,
-    "fold": 3,
-    "sampler": "ROS",
-    "status": "ok",
-    "train_before": {
-      "0": 84,
+      "0": 54,
       "1": 2,
-      "2": 4,
-      "3": 4,
-      "4": 9,
-      "5": 1
+      "2": 2,
+      "3": 10,
+      "4": 1,
+      "5": 4
+    },
+    "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2",
+    "n_validation_untouched": 38
+  },
+  {
+    "k": 6,
+    "fold": 1,
+    "sampler": "ADASYN",
+    "status": "infeasible",
+    "train_before": {
+      "0": 54,
+      "1": 2,
+      "2": 2,
+      "3": 10,
+      "4": 1,
+      "5": 4
+    },
+    "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2",
+    "n_validation_untouched": 38
+  },
+  {
+    "k": 6,
+    "fold": 2,
+    "sampler": "ROS",
+    "status": "ok",
+    "train_before": {
+      "0": 54,
+      "1": 2,
+      "2": 3,
+      "3": 11,
+      "4": 1,
+      "5": 4
     },
     "train_after": {
-      "0": 84,
-      "1": 84,
-      "2": 84,
-      "3": 84,
-      "4": 84,
-      "5": 84
+      "0": 54,
+      "1": 54,
+      "2": 54,
+      "3": 54,
+      "4": 54,
+      "5": 54
     },
-    "n_train_before": 104,
-    "n_train_after": 504,
-    "n_validation_untouched": 50,
+    "n_train_before": 75,
+    "n_train_after": 324,
+    "n_validation_untouched": 36,
+    "note": "Resampling restricted to this training fold."
+  },
+  {
+    "k": 6,
+    "fold": 2,
+    "sampler": "SMOTE",
+    "status": "infeasible",
+    "train_before": {
+      "0": 54,
+      "1": 2,
+      "2": 3,
+      "3": 11,
+      "4": 1,
+      "5": 4
+    },
+    "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2",
+    "n_validation_untouched": 36
+  },
+  {
+    "k": 6,
+    "fold": 2,
+    "sampler": "ADASYN",
+    "status": "infeasible",
+    "train_before": {
+      "0": 54,
+      "1": 2,
+      "2": 3,
+      "3": 11,
+      "4": 1,
+      "5": 4
+    },
+    "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2",
+    "n_validation_untouched": 36
+  },
+  {
+    "k": 6,
+    "fold": 3,
+    "sampler": "ROS",
+    "status": "ok",
+    "train_before": {
+      "0": 54,
+      "1": 2,
+      "2": 3,
+      "3": 11,
+      "5": 4
+    },
+    "train_after": {
+      "0": 54,
+      "1": 54,
+      "2": 54,
+      "3": 54,
+      "5": 54
+    },
+    "n_train_before": 74,
+    "n_train_after": 270,
+    "n_validation_untouched": 37,
     "note": "Resampling restricted to this training fold."
   },
   {
@@ -635,15 +645,14 @@
     "sampler": "SMOTE",
     "status": "infeasible",
     "train_before": {
-      "0": 84,
+      "0": 54,
       "1": 2,
-      "2": 4,
-      "3": 4,
-      "4": 9,
-      "5": 1
+      "2": 3,
+      "3": 11,
+      "5": 4
     },
     "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2",
-    "n_validation_untouched": 50
+    "n_validation_untouched": 37
   },
   {
     "k": 6,
@@ -651,14 +660,13 @@
     "sampler": "ADASYN",
     "status": "infeasible",
     "train_before": {
-      "0": 84,
+      "0": 54,
       "1": 2,
-      "2": 4,
-      "3": 4,
-      "4": 9,
-      "5": 1
+      "2": 3,
+      "3": 11,
+      "5": 4
     },
     "reason": "Expected n_neighbors <= n_samples_fit, but n_neighbors = 3, n_samples_fit = 2, n_samples = 2",
-    "n_validation_untouched": 50
+    "n_validation_untouched": 37
   }
 ]

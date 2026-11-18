@@ -1,0 +1,52 @@
+SHAP for Conversion_pct (30 paper bootstraps) ...
+                        label  mean_abs_shap  direction  top5_freq
+      anode: Conductive Glass          1.818     -0.947      0.800
+         potential (V vs RHE)          1.799     -0.497      1.000
+         three-electrode cell          0.529     -0.974      0.500
+                    anode: Ni          0.336      0.840      0.400
+                anode: Carbon          0.335     -0.538      0.100
+electrolyte concentration (M)          0.328      0.447      0.200
+                 divided cell          0.269      0.866      0.400
+             anode: Hydroxide          0.172     -0.901      0.367
+SHAP for Yield_pct (30 paper bootstraps) ...
+                        label  mean_abs_shap  direction  top5_freq
+      anode: Conductive Glass          6.423     -0.997      0.967
+                    anode: Ni          1.962      0.953      0.800
+         potential (V vs RHE)          1.054     -0.408      0.700
+electrolyte concentration (M)          0.696      0.671      0.333
+                 anode: Metal          0.599     -1.000      0.167
+                anode: Carbon          0.508      0.979      0.200
+                  anion: ClO4          0.353     -0.965      0.167
+       HMF concentration (mM)          0.327     -0.425      0.267
+SHAP for FE_pct (30 paper bootstraps) ...
+                  label  mean_abs_shap  direction  top5_freq
+anode: Conductive Glass          4.521     -0.999      0.733
+   potential (V vs RHE)          1.657     -0.664      1.000
+ HMF concentration (mM)          0.803      0.111      0.500
+  anode: Foam Substrate          0.737      0.846      0.500
+             cation: Na          0.542     -0.951      0.300
+        temperature (C)          0.496     -0.718      0.467
+  counter electrode: Pt          0.480     -0.914      0.267
+          anode: Carbon          0.383      0.955      0.167
+SHAP for Selectivity_pct (30 paper bootstraps) ...
+                        label  mean_abs_shap  direction  top5_freq
+      anode: Conductive Glass          4.192     -0.996      0.867
+         potential (V vs RHE)          2.394     -0.649      0.933
+                    anode: Ni          2.054      0.965      0.767
+           anode: Noble Metal          1.146     -0.989      0.400
+electrolyte concentration (M)          0.645      0.842      0.400
+        anode: Foam Substrate          0.441      0.874      0.200
+              temperature (C)          0.385     -0.930      0.267
+                anode: Carbon          0.352      0.887      0.133
+
+Literature comparison:
+                             factor    target expected data_direction  importance_rank  top5_freq  sign_stability             verdict
+Ni-containing anode (Ni(OH)2/NiOOH) Yield_pct        +              +                2       0.80            1.00          consistent
+Ni-containing anode (Ni(OH)2/NiOOH)    FE_pct        +              +               20       0.07            0.13 not distinguishable
+     Hydroxide / oxyhydroxide phase Yield_pct        +              +               29       0.00            0.30 not distinguishable
+     Hydroxide / oxyhydroxide phase    FE_pct        +              -               13       0.13            0.13 not distinguishable
+Cu-containing anode (Cu(OH)2/CuOOH) Yield_pct        +              -               27       0.03            0.47 not distinguishable
+Cu-containing anode (Cu(OH)2/CuOOH)    FE_pct        +              -               32       0.00            0.20 not distinguishable
+               Alkaline electrolyte Yield_pct        +              +               11       0.17            1.00 not distinguishable
+               Alkaline electrolyte    FE_pct        +              +               11       0.07            0.80 not distinguishable
+                  HMF concentration Yield_pct        -              -                8       0.27            0.87          consistent

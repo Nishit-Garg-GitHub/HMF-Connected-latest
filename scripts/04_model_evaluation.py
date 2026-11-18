@@ -45,12 +45,12 @@ from common import (
     RESULTS_DIR, FIGURES_DIR, build_feature_matrix, grouped_splits,
     load_cluster_labels, make_classifier, paper_groups, read_cleaned, read_processed,
     save_figure, stage_status, write_json, confidence_interval_95,
-    classification_preprocessing_steps,
+    classification_preprocessing_steps, binary_high_performance_labels,
 )
 
 K_VALUES = (3, 4, 5, 6)
 MODEL_NAMES = ("DecisionTree", "SVM", "RandomForest", "NeuralNetwork",
-               "GradientBoosting", "ExtraTrees")
+               "GradientBoosting", "ExtraTrees", "Ensemble")
 SAMPLERS = ("none", "ROS", "SMOTE", "ADASYN")
 REPEATS = 25
 FOLDS = 5
@@ -128,17 +128,46 @@ def dummy_baseline_repeat(y, groups, seed, n_splits):
     return float(f1_score(all_true, all_pred, average="macro", zero_division=0))
 
 
+def task_dummy_baselines(X, groups) -> dict:
+    """Mean stratified-dummy macro-F1 for every task (key: K, binary screen = 0).
+
+    The chance level differs per task (about 0.5 for the binary screen, about
+    0.33 or lower for K clusters), so raw macro-F1 cannot be compared across
+    tasks. Candidates are ranked by their lift over this baseline instead.
+    """
+    baselines = {}
+    tasks = {k: load_cluster_labels(k) for k in K_VALUES}
+    for k, frame in tasks.items():
+        rows = frame["source_row"].astype(int).to_numpy()
+        y = frame["cluster"].astype(int).to_numpy()
+        vals = [dummy_baseline_repeat(y, groups[rows], seed, FOLDS) for seed in SEED_LIST]
+        baselines[k] = float(np.nanmean(vals))
+    rows, y = binary_high_performance_labels()
+    vals = [dummy_baseline_repeat(y, groups[rows], seed, FOLDS) for seed in SEED_LIST]
+    baselines[0] = float(np.nanmean(vals))
+    return baselines
+
+
 # ---------------------------------------------------------------------------
 # Permutation test (shuffle labels within papers)
 # ---------------------------------------------------------------------------
 
-def _permuted_repeat_f1(X, y, groups, model_name, sampler_name, perm_i):
-    """One label-permuted repeat (labels shuffled within each paper)."""
+def _permuted_repeat_f1(X, y, groups, model_name, sampler_name, perm_i, within_paper=True):
+    """One label-permuted repeat.
+
+    ``within_paper=True`` shuffles labels inside each paper, which only tests
+    whether the model captures WITHIN-paper variation. ``within_paper=False``
+    shuffles labels across all records, which tests for any signal at all
+    (including between-paper signal, the one that matters for screening).
+    """
     rng = np.random.default_rng(42 + perm_i)
     y_perm = y.copy()
-    for paper in np.unique(groups):
-        mask = groups == paper
-        y_perm[mask] = rng.permutation(y_perm[mask])
+    if within_paper:
+        for paper in np.unique(groups):
+            mask = groups == paper
+            y_perm[mask] = rng.permutation(y_perm[mask])
+    else:
+        y_perm = rng.permutation(y_perm)
     try:
         folds = grouped_splits(y_perm, groups, 42 + perm_i, n_splits=FOLDS)
     except ValueError:
@@ -159,10 +188,10 @@ def _permuted_repeat_f1(X, y, groups, model_name, sampler_name, perm_i):
 
 
 def permutation_test_by_paper(X, y, groups, model_name, sampler_name,
-                               observed_f1, n_permutations=100):
-    """Shuffle labels within paper groups; compute p-value."""
+                               observed_f1, n_permutations=100, within_paper=True):
+    """Permutation p-value (within-paper or global label shuffle)."""
     scores = Parallel(n_jobs=N_JOBS)(
-        delayed(_permuted_repeat_f1)(X, y, groups, model_name, sampler_name, i)
+        delayed(_permuted_repeat_f1)(X, y, groups, model_name, sampler_name, i, within_paper)
         for i in range(n_permutations)
     )
     scores = np.asarray(scores, dtype=float)
@@ -176,10 +205,9 @@ def permutation_test_by_paper(X, y, groups, model_name, sampler_name,
 
 def leakage_check(mean_f1, model_name, sampler_name, k):
     if mean_f1 > 0.8:
-        warnings.warn(
-            f"LEAKAGE CHECK TRIGGERED: {model_name}+{sampler_name} K={k} "
-            f"macro-F1={mean_f1:.3f} > 0.8. Manually verify no data leakage."
-        )
+        # print, not warnings.warn: UserWarnings are filtered out in this module.
+        print(f"WARNING: LEAKAGE CHECK TRIGGERED: {model_name}+{sampler_name} K={k} "
+              f"macro-F1={mean_f1:.3f} > 0.8. Manually verify no data leakage.", flush=True)
         return True
     return False
 
@@ -231,7 +259,6 @@ def _fold_record_to_metrics(record: dict) -> dict:
                 "precision_macro": float(precision_score(y_true, y_pred, average="macro", zero_division=0)),
                 "recall_macro": float(recall_score(y_true, y_pred, average="macro", zero_division=0)),
                 "balanced_accuracy": float(balanced_accuracy_score(y_true, y_pred)),
-                "classes_train": int(len(np.unique(y_true))),  # approximate
                 "classes_test": int(len(np.unique(y_true))),
             })
     else:
@@ -346,21 +373,7 @@ def run_binary_high_performance(X_all: pd.DataFrame, groups_all: np.ndarray) -> 
     secondary classification screen only. The primary scientific model remains
     the four-output numerical regression in stage 07.
     """
-    raw = read_cleaned()
-    if "Major_Product_Clean" in raw.columns:
-        fdca = raw["Major_Product_Clean"].astype(str).str.contains(
-            r"FDCA|FURANDICARBOXYLIC", case=False, regex=True, na=False
-        )
-    else:
-        fdca = pd.Series(True, index=raw.index)
-    yield_values = pd.to_numeric(raw["Yield_pct"], errors="coerce")
-    conversion = pd.to_numeric(raw["Conversion_pct"], errors="coerce")
-    keep = fdca & yield_values.notna()
-    row_ids = np.flatnonzero(keep.to_numpy())
-    yld = yield_values.iloc[row_ids].clip(0, 100).to_numpy()
-    conv = conversion.iloc[row_ids].clip(0, 100).to_numpy()
-    performance = np.where(np.isfinite(conv), np.minimum(conv, yld), yld)
-    y = (performance >= 90.0).astype(int)
+    row_ids, y = binary_high_performance_labels()
     X = X_all.iloc[row_ids].reset_index(drop=True)
     groups = groups_all[row_ids]
     repeat_output: list[dict] = []
@@ -385,7 +398,12 @@ def run_binary_high_performance(X_all: pd.DataFrame, groups_all: np.ndarray) -> 
 
 def choose_best_candidate(cluster_summary: pd.DataFrame,
                           binary_summary: pd.DataFrame) -> dict:
-    """Choose by mean paper-grouped macro-F1, preserving the target identity."""
+    """Choose by macro-F1 LIFT over the task's stratified-dummy baseline.
+
+    Raw macro-F1 is not comparable between a binary task and a K-class task,
+    so ranking by it always favours the binary screen. The target identity is
+    preserved so later stages explain the right model.
+    """
     candidates = []
     if not cluster_summary.empty:
         for _, row in cluster_summary.iterrows():
@@ -398,6 +416,8 @@ def choose_best_candidate(cluster_summary: pd.DataFrame,
                 "macro_f1_ci95_lo": None if pd.isna(row.get("macro_f1_ci95_lo", np.nan)) else float(row["macro_f1_ci95_lo"]),
                 "macro_f1_ci95_hi": None if pd.isna(row.get("macro_f1_ci95_hi", np.nan)) else float(row["macro_f1_ci95_hi"]),
                 "n_valid_repeats": int(row["n_valid_repeats"]),
+                "dummy_macro_f1_mean": float(row["dummy_macro_f1_mean"]),
+                "f1_lift_over_dummy": float(row["f1_lift_over_dummy"]),
             })
     if not binary_summary.empty:
         for _, row in binary_summary.iterrows():
@@ -410,15 +430,17 @@ def choose_best_candidate(cluster_summary: pd.DataFrame,
                 "macro_f1_ci95_lo": None if pd.isna(row.get("macro_f1_ci95_lo", np.nan)) else float(row["macro_f1_ci95_lo"]),
                 "macro_f1_ci95_hi": None if pd.isna(row.get("macro_f1_ci95_hi", np.nan)) else float(row["macro_f1_ci95_hi"]),
                 "n_valid_repeats": int(row["n_valid_repeats"]),
+                "dummy_macro_f1_mean": float(row["dummy_macro_f1_mean"]),
+                "f1_lift_over_dummy": float(row["f1_lift_over_dummy"]),
             })
     if not candidates:
         return {"status": "no_valid_candidate"}
-    best = max(candidates, key=lambda item: item["macro_f1_mean"])
+    best = max(candidates, key=lambda item: item["f1_lift_over_dummy"])
     best["status"] = "screening_candidate"
     return best
 
 
-def summarise(results: list[dict] | pd.DataFrame) -> pd.DataFrame:
+def summarise(results: list[dict] | pd.DataFrame, dummy: dict | None = None) -> pd.DataFrame:
     """Summarise pooled repeat scores with mean, SD, 95% CI and dummy baseline."""
     if isinstance(results, list):
         df = pd.DataFrame(results)
@@ -448,6 +470,8 @@ def summarise(results: list[dict] | pd.DataFrame) -> pd.DataFrame:
             "n_valid_repeats": len(f1_values),
             "macro_f1_mean": mean, "macro_f1_sd": sd,
             "macro_f1_ci95_lo": ci_lo, "macro_f1_ci95_hi": ci_hi,
+            "dummy_macro_f1_mean": (dummy or {}).get(k, np.nan),
+            "f1_lift_over_dummy": mean - (dummy or {}).get(k, np.nan),
             "weighted_f1_mean": float(group["pooled_weighted_f1"].mean()),
             "accuracy_mean": float(group["pooled_accuracy"].mean()),
             "precision_macro_mean": float(group["pooled_precision_macro"].mean()),
@@ -892,8 +916,11 @@ def main() -> None:
     generate_paper_style_outputs(cluster_fold_df)
 
     # Official summaries use repeat-level (pooled OOF) data
-    cluster_summary = summarise(cluster_repeat_rows)
-    binary_summary = summarise(binary_repeat_rows)
+    dummy = task_dummy_baselines(X, groups)
+    print("Stratified-dummy macro-F1 per task (0 = binary screen):",
+          {k: round(v, 3) for k, v in dummy.items()}, flush=True)
+    cluster_summary = summarise(cluster_repeat_rows, dummy)
+    binary_summary = summarise(binary_repeat_rows, dummy)
     coverage = pd.concat([cluster_repeat_df, binary_repeat_df], ignore_index=True)
     coverage = (coverage.assign(complete=coverage["status"].eq("ok"))
                 .groupby(["k", "model", "sampler"], as_index=False)
@@ -910,30 +937,17 @@ def main() -> None:
     combined.to_csv(RESULTS_DIR / "classification_summary.csv", index=False)
 
     # Figures use the same pooled-OOF summaries as the reported tables.
-    plot_model_comparison(summarise(cluster_repeat_rows), summarise(binary_repeat_rows))
+    plot_model_comparison(cluster_summary.drop(columns="target_kind"),
+                          binary_summary.drop(columns="target_kind"))
 
-    best = choose_best_candidate(summarise(cluster_repeat_rows), summarise(binary_repeat_rows))
+    best = choose_best_candidate(cluster_summary, binary_summary)
     write_json(RESULTS_DIR / "best_classification_candidate.json", best)
 
     # ---- Extract best target data for dummy + permutation tests ----
     X_best, y_best, groups_best = None, None, None
     if best.get("status") == "screening_candidate":
         if best.get("target_kind") == "binary_high_performance_90":
-            raw = read_cleaned()
-            if "Major_Product_Clean" in raw.columns:
-                fdca = raw["Major_Product_Clean"].astype(str).str.contains(
-                    r"FDCA|FURANDICARBOXYLIC", case=False, regex=True, na=False
-                )
-            else:
-                fdca = pd.Series(True, index=raw.index)
-            yield_values = pd.to_numeric(raw["Yield_pct"], errors="coerce")
-            conversion = pd.to_numeric(raw["Conversion_pct"], errors="coerce")
-            keep = fdca & yield_values.notna()
-            row_ids = np.flatnonzero(keep.to_numpy())
-            yld = yield_values.iloc[row_ids].clip(0, 100).to_numpy()
-            conv = conversion.iloc[row_ids].clip(0, 100).to_numpy()
-            perf = np.where(np.isfinite(conv), np.minimum(conv, yld), yld)
-            y_best = (perf >= 90.0).astype(int)
+            row_ids, y_best = binary_high_performance_labels()
             X_best = X.iloc[row_ids].reset_index(drop=True)
             groups_best = groups[row_ids]
         elif best.get("k") is not None:
@@ -966,10 +980,16 @@ def main() -> None:
             print(f"\nRunning permutation test for {best['model']}+{best['sampler']} (target: {best['target_kind']}) ...")
             p_value = permutation_test_by_paper(
                 X_best, y_best, groups_best, best["model"], best["sampler"],
-                observed_f1, n_permutations=100,
+                observed_f1, n_permutations=100, within_paper=True,
+            )
+            p_global = permutation_test_by_paper(
+                X_best, y_best, groups_best, best["model"], best["sampler"],
+                observed_f1, n_permutations=100, within_paper=False,
             )
             best["permutation_p_value"] = float(p_value)
-            print(f"Permutation test p-value: {p_value:.4f}")
+            best["permutation_p_value_global"] = float(p_global)
+            print(f"Permutation p-value, within-paper shuffle: {p_value:.4f}")
+            print(f"Permutation p-value, global shuffle:       {p_global:.4f}")
         except Exception as exc:
             print(f"Permutation test failed: {exc}")
 
@@ -989,10 +1009,10 @@ def main() -> None:
         "feature_selection": "Fold-local median imputation with missing-value indicators and zero-variance filtering only; no univariate outcome-driven feature ranking.",
     })
     print("\nTop K-means classification candidates (pooled OOF, 95% CI):")
-    top = summarise(cluster_repeat_rows).head(8)
+    top = cluster_summary.head(8)
     print(top.to_string(index=False))
     print("\nTop >=90% binary screening candidates (pooled OOF, 95% CI):")
-    top_bin = summarise(binary_repeat_rows).head(8)
+    top_bin = binary_summary.head(8)
     print(top_bin.to_string(index=False))
     print(f"\nSelected candidate: {best}")
     print(f"Classification stage finished in {elapsed:.1f} seconds.")
